@@ -8,6 +8,7 @@
 
 class LlamaInterface
 {
+  private:
     llama_model_params params;
     llama_model *model;
     llama_context_params ctx_params;
@@ -16,7 +17,8 @@ class LlamaInterface
     llama_batch batch;
 
     std::string promptify(Chat &chat);
-public:
+
+  public:
     LlamaInterface(std::string modelPath);
     ~LlamaInterface();
 

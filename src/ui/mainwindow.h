@@ -4,10 +4,11 @@
 #include <QMainWindow>
 
 #include "../chat/chat.h"
-#include "../llm/llamainterface.h"
+#include "../llm/llamathread.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 QT_END_NAMESPACE
@@ -15,19 +16,22 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    Chat chat;
-    LlamaInterface *llama;
-    bool generating = false;
-
-public:
+  public:
+    void updateChat(std::string text);
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+  private slots:
     void on_submitButton_clicked();
 
-private:
+      void on_refreshButton_clicked();
+
+  private:
     Ui::MainWindow *ui;
+
+    Chat chat;
+    LlamaThread *llamaThread;
+    bool generating = false;
 
     void startGenerating();
     void stopGenerating();

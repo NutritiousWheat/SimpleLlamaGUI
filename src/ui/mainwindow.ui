@@ -30,7 +30,7 @@
       <x>710</x>
       <y>470</y>
       <width>80</width>
-      <height>71</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -45,6 +45,19 @@
       <width>781</width>
       <height>451</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="refreshButton">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>490</y>
+      <width>80</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>refresh</string>
     </property>
    </widget>
   </widget>

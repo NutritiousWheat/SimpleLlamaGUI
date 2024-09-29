@@ -1,13 +1,14 @@
 #ifndef CHAT_H
 #define CHAT_H
 
+#include <llama.h>
 #include <mutex>
 #include <string>
 #include <vector>
-#include <llama.h>
 
 class Chat
 {
+  private:
     typedef enum
     {
         USER,
@@ -24,7 +25,7 @@ class Chat
     std::vector<messageT> messages;
     std::mutex mutex;
 
-public:
+  public:
     Chat() = default;
     ~Chat() = default;
 

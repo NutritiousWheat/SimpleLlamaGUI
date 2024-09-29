@@ -27,11 +27,11 @@ void Chat::continueMessage(std::string text)
 llama_chat_message Chat::getLlamaMessage(size_t index)
 {
     llama_chat_message message;
-    const std::lock_guard<std::mutex> lock(this->mutex);
 
     message.content = this->messages[index].text.c_str();
 
-    switch (this->messages[index].type) {
+    switch (this->messages[index].type)
+    {
     case USER:
         message.role = "user";
         break;
@@ -52,11 +52,11 @@ llama_chat_message Chat::getLlamaMessage(size_t index)
 const std::string Chat::getString()
 {
     std::string output;
-    const std::lock_guard<std::mutex> lock(this->mutex);
 
     for (messageT &message : this->messages)
     {
-        switch (message.type) {
+        switch (message.type)
+        {
         case USER:
             output += "USER: ";
             break;
@@ -78,7 +78,5 @@ const std::string Chat::getString()
 
 size_t Chat::size()
 {
-    const std::lock_guard<std::mutex> lock(this->mutex);
     return messages.size();
 }
-

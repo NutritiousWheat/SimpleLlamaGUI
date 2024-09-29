@@ -1,34 +1,40 @@
 #include "llamathread.h"
 #include "llamainterface.h"
 
-void llamaThread::run(std::string &modelPath, bool &running, Chat *&chatPtr)
+void LlamaThread::run(LlamaThread *llamaThread)
 {
-    LlamaInterface llama(modelPath);
+    LlamaInterface llama(llamaThread->modelPath);
 
-    while (running == true)
+    while (llamaThread->running == true)
     {
-        if (chatPtr)
+        if (llamaThread->chatPtr)
         {
-            llama.reply(*chatPtr);
-            chatPtr = nullptr;
+            llama.reply(*llamaThread->chatPtr);
+            llamaThread->chatPtr = nullptr;
         }
     }
 }
 
-llamaThread::llamaThread(std::string modelPath)
+LlamaThread::LlamaThread(std::string modelPath)
 {
     this->running = true;
     this->chatPtr = nullptr;
-    this->mainThread = new std::jthread(llamaThread::run, std::ref(modelPath), std::ref(this->chatPtr), std::ref(this->chatPtr));
+    this->modelPath = modelPath;
+    this->mainThread = new std::jthread(LlamaThread::run, this);
 }
 
-llamaThread::~llamaThread()
+LlamaThread::~LlamaThread()
 {
     this->running = false;
     delete this->mainThread;
 }
 
-void llamaThread::startReply(Chat &chat)
+void LlamaThread::startReply(Chat &chat)
 {
     this->chatPtr = &chat;
+}
+
+bool LlamaThread::isGenerating()
+{
+    return this->chatPtr != nullptr;
 }

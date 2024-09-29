@@ -5,19 +5,22 @@
 
 #include "../chat/chat.h"
 
-class llamaThread
+class LlamaThread
 {
+  private:
     std::jthread *mainThread;
+    std::string modelPath;
     bool running;
     Chat *chatPtr;
 
-    static void run(std::string &modelPath, bool &running, Chat *&chatPtr);
+    static void run(LlamaThread *llamaThread);
 
-public:
-    llamaThread(std::string modelPath);
-    ~llamaThread();
+  public:
+    LlamaThread(std::string modelPath);
+    ~LlamaThread();
 
     void startReply(Chat &chat);
+    bool isGenerating();
 };
 
 #endif // LLAMATHREAD_H
