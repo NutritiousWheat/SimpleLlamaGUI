@@ -24,8 +24,6 @@ class MainWindow : public QMainWindow
   private slots:
     void on_submitButton_clicked();
 
-    void on_refreshButton_clicked();
-
     void on_tempSlider_valueChanged(int value);
 
     void on_topKSlider_valueChanged(int value);
@@ -34,16 +32,26 @@ class MainWindow : public QMainWindow
 
     void on_minPSlider_valueChanged(int value);
 
+    void on_loadButton_clicked();
+
+    void on_refresh();
+
+    void on_clearButton_pressed();
+
+signals:
+    void refresh();
+
 private:
     Ui::MainWindow *ui;
 
     Chat chat;
-    LlamaThread *llamaThread;
+    LlamaThread *llamaThread = NULL;
     bool generating = false;
 
     float decimalMultiplier = 100.f;
 
     void startGenerating();
     void stopGenerating();
+    void refreshChat();
 };
 #endif // MAINWINDOW_H

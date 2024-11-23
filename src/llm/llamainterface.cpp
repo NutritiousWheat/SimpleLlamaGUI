@@ -1,5 +1,4 @@
 #include <stdexcept>
-
 #include "llamainterface.h"
 
 #define N_PREDICT 250
@@ -9,8 +8,10 @@
 
 #define THREADS 16
 
-LlamaInterface::LlamaInterface(std::string modelPath)
+LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> refreshChat)
 {
+    this->refreshChat = refreshChat;
+
     llama_backend_init();
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
 
@@ -61,7 +62,7 @@ LlamaInterface::LlamaInterface(std::string modelPath)
     ctx_params.flash_attn = false;  // whether to use flash attention [EXPERIMENTAL]
     ctx_params.abort_callback = nullptr;
     ctx_params.abort_callback_data = nullptr;
-
+#warning context doesn't get cleared
     ctx = llama_new_context_with_model(model, ctx_params);
 
     if (ctx == nullptr)
@@ -204,7 +205,7 @@ void LlamaInterface::reply(Chat &chat)
         if (llama_decode(ctx, batch)) {
             throw std::runtime_error("decode failed");
         }
-#warning send signal to update chat here
+        this->refreshChat();
     }
 }
 
@@ -224,11 +225,17 @@ void LlamaInterface::updateSamplers(Sampler samplers[SAMPLER_COUNT])
         throw std::runtime_error("unable to init sampler chain");
     }
 
+    fprintf(stderr, "temp: %f, top p: %f, min p: %f, top k: %u\n",
+            samplers[TEMP].value.floatValue,
+            samplers[TOP_P].value.floatValue,
+            samplers[MIN_P].value.floatValue,
+            samplers[TOP_K].value.intValue
+    );
+
     llama_sampler_chain_add(sampler, llama_sampler_init_temp(samplers[TEMP].value.floatValue));
     llama_sampler_chain_add(sampler, llama_sampler_init_top_p(samplers[TOP_P].value.floatValue, 1));
     llama_sampler_chain_add(sampler, llama_sampler_init_min_p(samplers[MIN_P].value.floatValue, 1));
     llama_sampler_chain_add(sampler, llama_sampler_init_top_k(samplers[TOP_K].value.intValue));
 
-    llama_sampler_chain_add(sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
-#warning randomize seed
+    llama_sampler_chain_add(sampler, llama_sampler_init_dist(rng.getRand()));
 }

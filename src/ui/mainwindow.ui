@@ -30,7 +30,7 @@
       <x>710</x>
       <y>470</y>
       <width>80</width>
-      <height>21</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -45,19 +45,6 @@
       <width>781</width>
       <height>451</height>
      </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="refreshButton">
-    <property name="geometry">
-     <rect>
-      <x>710</x>
-      <y>490</y>
-      <width>80</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>refresh</string>
     </property>
    </widget>
    <widget class="QWidget" name="gridLayoutWidget">
@@ -189,7 +176,7 @@
        <item>
         <widget class="QLabel" name="pathLabel">
          <property name="text">
-          <string>Path</string>
+          <string>Model path</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -199,7 +186,11 @@
        <item>
         <layout class="QHBoxLayout" name="pathSelectLayout">
          <item>
-          <widget class="QLineEdit" name="pathLine"/>
+          <widget class="QLineEdit" name="pathLine">
+           <property name="text">
+            <string>/home/potato/code_projects/diplom/build/Desktop-Debug/Phi-3.5-mini-instruct-Q4_K_L.gguf</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QToolButton" name="pathButton">
@@ -249,7 +240,27 @@
        </item>
       </layout>
      </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="loadButton">
+       <property name="text">
+        <string>Load model</string>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </widget>
+   <widget class="QPushButton" name="clearButton">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>520</y>
+      <width>80</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>clear</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

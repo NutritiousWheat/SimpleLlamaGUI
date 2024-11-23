@@ -1,15 +1,19 @@
+#include <chrono>
+
 #include "llamathread.h"
 #include "llamainterface.h"
 
+static constexpr std::chrono::duration tick = std::chrono::milliseconds(10);
+
 void LlamaThread::run(LlamaThread *llamaThread)
 {
-    llamaThread->llama = new LlamaInterface(llamaThread->modelPath);
+    llamaThread->llama = new LlamaInterface(llamaThread->modelPath, llamaThread->refreshChat);
 
     while (llamaThread->running == true)
     {
-        if (llamaThread->samplersChanged)
+        if (llamaThread->samplersChanged )
         {
-#warning NOT THREAD SAFE!!!!
+#warning not thread safe
             llamaThread->llama->updateSamplers(llamaThread->samplers);
             llamaThread->samplersChanged = false;
         }
@@ -17,17 +21,20 @@ void LlamaThread::run(LlamaThread *llamaThread)
         {
             llamaThread->llama->reply(*llamaThread->chatPtr);
             llamaThread->chatPtr = nullptr;
+            llamaThread->refreshChat();
         }
+        std::this_thread::sleep_for(tick);
     }
 
     delete llamaThread->llama;
 }
 
-LlamaThread::LlamaThread(std::string modelPath)
+LlamaThread::LlamaThread(std::string modelPath, std::function<void(void)> refreshChat)
 {
     this->running = true;
     this->chatPtr = nullptr;
     this->modelPath = modelPath;
+    this->refreshChat = refreshChat;
     this->mainThread = new std::jthread(LlamaThread::run, this);
 }
 
@@ -54,7 +61,6 @@ bool LlamaThread::isGenerating()
 
 void LlamaThread::updateSampler(Sampler sampler)
 {
-#warning add change delta time to prevent recreating sampler chain on every minor change
     this->samplers[sampler.type].value = sampler.value;
     this->samplersChanged = true;
 }

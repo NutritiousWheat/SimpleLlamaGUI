@@ -11,6 +11,7 @@ class LlamaThread
   private:
     LlamaInterface *llama;
     std::string modelPath;
+    std::function<void(void)> refreshChat;
 
     std::jthread *mainThread;
     bool running;
@@ -23,7 +24,7 @@ class LlamaThread
     static void run(LlamaThread *llamaThread);
 
   public:
-    LlamaThread(std::string modelPath);
+    LlamaThread(std::string modelPath, std::function<void(void)> refreshChat);
     ~LlamaThread();
 
     void startReply(Chat &chat);

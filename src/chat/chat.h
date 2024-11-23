@@ -22,11 +22,13 @@ class Chat
         messageTypeE type;
     } messageT;
 
+    std::string systemPrompt;
     std::vector<messageT> messages;
     std::mutex mutex;
 
   public:
-    Chat() = default;
+    Chat();
+    Chat(std::string systemPrompt);
     ~Chat() = default;
 
     void appendUserMessage(std::string message);
@@ -36,6 +38,7 @@ class Chat
     llama_chat_message getLlamaMessage(size_t index);
     const std::string getString();
     size_t size();
+    void clear();
 };
 
 #endif // CHAT_H

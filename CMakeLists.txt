@@ -26,6 +26,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/llm/llamainterface.h src/llm/llamainterface.cpp
         src/chat/chat.h src/chat/chat.cpp
         src/llm/llamathread.h src/llm/llamathread.cpp
+        src/llm/rng.h src/llm/rng.cpp
 
     )
 # Define target properties for Android with Qt 6 as:

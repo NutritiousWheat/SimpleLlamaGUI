@@ -1,5 +1,17 @@
 #include "chat.h"
 
+Chat::Chat()
+{
+    this->systemPrompt = "You are a helpful assistant. Assist with whatever user requires.";
+    this->appendSystemMessage(this->systemPrompt);
+}
+
+Chat::Chat(std::string systemPrompt)
+{
+    this->systemPrompt = systemPrompt;
+    this->appendSystemMessage(this->systemPrompt);
+}
+
 void Chat::appendUserMessage(std::string message)
 {
     const std::lock_guard<std::mutex> lock(this->mutex);
@@ -79,4 +91,13 @@ const std::string Chat::getString()
 size_t Chat::size()
 {
     return messages.size();
+}
+
+void Chat::clear()
+{
+    this->mutex.lock();
+    this->messages.clear();
+    this->mutex.unlock();
+
+    this->appendSystemMessage(this->systemPrompt);
 }
