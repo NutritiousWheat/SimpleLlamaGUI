@@ -6,6 +6,12 @@
 #include "../chat/chat.h"
 #include "../llm/llamathread.h"
 
+#warning TODO
+#warning use QThread for llamathread
+#warning use QObject for the rest of the classes
+#warning do signals and slots
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui
 {
