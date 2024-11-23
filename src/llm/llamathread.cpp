@@ -3,16 +3,24 @@
 
 void LlamaThread::run(LlamaThread *llamaThread)
 {
-    LlamaInterface llama(llamaThread->modelPath);
+    llamaThread->llama = new LlamaInterface(llamaThread->modelPath);
 
     while (llamaThread->running == true)
     {
+        if (llamaThread->samplersChanged)
+        {
+#warning NOT THREAD SAFE!!!!
+            llamaThread->llama->updateSamplers(llamaThread->samplers);
+            llamaThread->samplersChanged = false;
+        }
         if (llamaThread->chatPtr)
         {
-            llama.reply(*llamaThread->chatPtr);
+            llamaThread->llama->reply(*llamaThread->chatPtr);
             llamaThread->chatPtr = nullptr;
         }
     }
+
+    delete llamaThread->llama;
 }
 
 LlamaThread::LlamaThread(std::string modelPath)
@@ -34,7 +42,19 @@ void LlamaThread::startReply(Chat &chat)
     this->chatPtr = &chat;
 }
 
+void LlamaThread::stopReply()
+{
+    this->llama->stop();
+}
+
 bool LlamaThread::isGenerating()
 {
     return this->chatPtr != nullptr;
+}
+
+void LlamaThread::updateSampler(Sampler sampler)
+{
+#warning add change delta time to prevent recreating sampler chain on every minor change
+    this->samplers[sampler.type].value = sampler.value;
+    this->samplersChanged = true;
 }

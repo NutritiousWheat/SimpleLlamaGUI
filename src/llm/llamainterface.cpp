@@ -71,7 +71,7 @@ LlamaInterface::LlamaInterface(std::string modelPath)
 
     sampler = llama_sampler_chain_init({true}); // no_perf = true
 
-    if (ctx == nullptr)
+    if (sampler == nullptr)
     {
         throw std::runtime_error("unable to init sampler chain");
     }
@@ -173,9 +173,10 @@ void LlamaInterface::reply(Chat &chat)
         {
             const llama_token new_token_id = llama_sampler_sample(sampler, ctx, batch.n_tokens - 1);
 
-            // is it an end of generation?
-            if (llama_token_is_eog(model, new_token_id) || n_cur == N_PREDICT) {
+            // is it the end?
+            if (llama_token_is_eog(model, new_token_id) || n_cur == N_PREDICT || this->forceStop) {
                 chat.continueMessage("\n");
+                this->forceStop = false;
                 break;
             }
 
@@ -203,7 +204,31 @@ void LlamaInterface::reply(Chat &chat)
         if (llama_decode(ctx, batch)) {
             throw std::runtime_error("decode failed");
         }
+#warning send signal to update chat here
     }
 }
 
+void LlamaInterface::stop()
+{
+    this->forceStop = true;
+}
 
+void LlamaInterface::updateSamplers(Sampler samplers[SAMPLER_COUNT])
+{
+    if (sampler) free(sampler);
+
+    sampler = llama_sampler_chain_init({true}); // no_perf = true
+
+    if (sampler == nullptr)
+    {
+        throw std::runtime_error("unable to init sampler chain");
+    }
+
+    llama_sampler_chain_add(sampler, llama_sampler_init_temp(samplers[TEMP].value.floatValue));
+    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(samplers[TOP_P].value.floatValue, 1));
+    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(samplers[MIN_P].value.floatValue, 1));
+    llama_sampler_chain_add(sampler, llama_sampler_init_top_k(samplers[TOP_K].value.intValue));
+
+    llama_sampler_chain_add(sampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+#warning randomize seed
+}

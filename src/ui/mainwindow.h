@@ -24,14 +24,24 @@ class MainWindow : public QMainWindow
   private slots:
     void on_submitButton_clicked();
 
-      void on_refreshButton_clicked();
+    void on_refreshButton_clicked();
 
-  private:
+    void on_tempSlider_valueChanged(int value);
+
+    void on_topKSlider_valueChanged(int value);
+
+    void on_topPSlider_valueChanged(int value);
+
+    void on_minPSlider_valueChanged(int value);
+
+private:
     Ui::MainWindow *ui;
 
     Chat chat;
     LlamaThread *llamaThread;
     bool generating = false;
+
+    float decimalMultiplier = 100.f;
 
     void startGenerating();
     void stopGenerating();

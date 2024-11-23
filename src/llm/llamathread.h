@@ -3,15 +3,22 @@
 
 #include <thread>
 
+#include "llamainterface.h"
 #include "../chat/chat.h"
 
 class LlamaThread
 {
   private:
-    std::jthread *mainThread;
+    LlamaInterface *llama;
     std::string modelPath;
+
+    std::jthread *mainThread;
     bool running;
+
     Chat *chatPtr;
+
+    Sampler samplers[SAMPLER_COUNT];
+    bool samplersChanged;
 
     static void run(LlamaThread *llamaThread);
 
@@ -20,7 +27,9 @@ class LlamaThread
     ~LlamaThread();
 
     void startReply(Chat &chat);
+    void stopReply();
     bool isGenerating();
+    void updateSampler(Sampler sampler);
 };
 
 #endif // LLAMATHREAD_H
