@@ -80,6 +80,9 @@ LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> 
     llama_sampler_chain_add(sampler, llama_sampler_init_greedy());
 
     batch = llama_batch_init(N_UBATCH, 0, 1);
+
+#warning get actual name from metadata
+    this->name = modelPath;
 }
 
 LlamaInterface::~LlamaInterface()
@@ -238,4 +241,9 @@ void LlamaInterface::updateSamplers(Sampler samplers[SAMPLER_COUNT])
     llama_sampler_chain_add(sampler, llama_sampler_init_top_k(samplers[TOP_K].value.intValue));
 
     llama_sampler_chain_add(sampler, llama_sampler_init_dist(rng.getRand()));
+}
+
+std::string LlamaInterface::getName()
+{
+    return this->name;
 }

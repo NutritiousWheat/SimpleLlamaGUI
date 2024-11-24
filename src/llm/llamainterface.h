@@ -43,6 +43,8 @@ class LlamaInterface
 
     bool forceStop = false;
 
+    std::string name;
+
     std::string promptify(Chat &chat);
 
   public:
@@ -52,6 +54,7 @@ class LlamaInterface
     void reply(Chat &chat);
     void stop();
     void updateSamplers(Sampler samplers[SAMPLER_COUNT]);
+    std::string getName();
 };
 
 #endif // LLAMAINTERFACE_H

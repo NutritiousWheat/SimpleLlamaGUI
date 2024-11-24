@@ -5,6 +5,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->updateSliderValues();
+    this->ui->statusbar->showMessage("Loaded model: None");
 }
 
 MainWindow::~MainWindow()
@@ -43,9 +45,12 @@ void MainWindow::on_submitButton_clicked()
 void MainWindow::on_topKSlider_valueChanged(int value)
 {
     QString stringValue = QString::number(value);
+    Sampler sampler;
+    sampler.value.intValue = value;
+    sampler.type = TOP_K;
 
     this->ui->topKValueLabel->setText(stringValue);
-    if (this->llamaThread) this->llamaThread->updateSampler({static_cast<float>(value), TOP_K});
+    if (this->llamaThread) this->llamaThread->updateSampler(sampler);
 #warning maybe no static casts?
 }
 
@@ -108,28 +113,8 @@ void MainWindow::on_loadButton_clicked()
     if (llamaThread) delete llamaThread;
     llamaThread = new LlamaThread(path.toStdString(), refreshFunc);
 
-    for (int i = 0; i < SAMPLER_COUNT; i++)
-    {
-#warning make this prettier
-        switch (i)
-        {
-        case TOP_K:
-            this->ui->topKSlider->valueChanged(this->ui->tempSlider->value());
-            break;
-        case TEMP:
-            this->ui->tempSlider->valueChanged(this->ui->tempSlider->value());
-            break;
-        case TOP_P:
-            this->ui->topPSlider->valueChanged(this->ui->tempSlider->value());
-            break;
-        case MIN_P:
-            this->ui->minPSlider->valueChanged(this->ui->tempSlider->value());
-            break;
-        default:
-            fprintf(stderr, "you forgot about the %d sampler", i);
-            break;
-        }
-    }
+    this->updateSliderValues();
+    this->ui->statusbar->showMessage("Loaded model: " + path);
 }
 
 
@@ -141,3 +126,49 @@ void MainWindow::on_clearButton_pressed()
     emit refresh();
 }
 
+
+void MainWindow::on_contextSlider_valueChanged(int value)
+{
+#warning not implemented
+    QString stringValue = QString::number(value);
+
+    this->ui->contextValueLabel->setText(stringValue);
+}
+
+
+void MainWindow::on_responseSlider_valueChanged(int value)
+{
+#warning not implemented
+    QString stringValue = QString::number(value);
+
+    this->ui->responseValueLabel->setText(stringValue);
+}
+
+void MainWindow::updateSliderValues()
+{
+    this->ui->contextSlider->valueChanged(this->ui->contextSlider->value());
+    this->ui->responseSlider->valueChanged(this->ui->responseSlider->value());
+
+    for (int i = 0; i < SAMPLER_COUNT; i++)
+    {
+#warning make this prettier
+        switch (i)
+        {
+        case TOP_K:
+            this->ui->topKSlider->valueChanged(this->ui->topKSlider->value());
+            break;
+        case TEMP:
+            this->ui->tempSlider->valueChanged(this->ui->tempSlider->value());
+            break;
+        case TOP_P:
+            this->ui->topPSlider->valueChanged(this->ui->topPSlider->value());
+            break;
+        case MIN_P:
+            this->ui->minPSlider->valueChanged(this->ui->minPSlider->value());
+            break;
+        default:
+            fprintf(stderr, "you forgot about the %d sampler", i);
+            break;
+        }
+    }
+}

@@ -21,6 +21,8 @@ class LlamaThread
     Sampler samplers[SAMPLER_COUNT];
     bool samplersChanged;
 
+    std::string name;
+
     static void run(LlamaThread *llamaThread);
 
   public:
@@ -31,6 +33,7 @@ class LlamaThread
     void stopReply();
     bool isGenerating();
     void updateSampler(Sampler sampler);
+    std::string getName();
 };
 
 #endif // LLAMATHREAD_H

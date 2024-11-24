@@ -8,6 +8,7 @@ static constexpr std::chrono::duration tick = std::chrono::milliseconds(10);
 void LlamaThread::run(LlamaThread *llamaThread)
 {
     llamaThread->llama = new LlamaInterface(llamaThread->modelPath, llamaThread->refreshChat);
+    llamaThread->name = llamaThread->llama->getName();
 
     while (llamaThread->running == true)
     {
@@ -63,4 +64,9 @@ void LlamaThread::updateSampler(Sampler sampler)
 {
     this->samplers[sampler.type].value = sampler.value;
     this->samplersChanged = true;
+}
+
+std::string LlamaThread::getName()
+{
+    return this->name;
 }

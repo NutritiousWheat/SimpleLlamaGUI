@@ -44,6 +44,10 @@ class MainWindow : public QMainWindow
 
     void on_clearButton_pressed();
 
+    void on_contextSlider_valueChanged(int value);
+
+    void on_responseSlider_valueChanged(int value);
+
 signals:
     void refresh();
 
@@ -59,5 +63,6 @@ private:
     void startGenerating();
     void stopGenerating();
     void refreshChat();
+    void updateSliderValues();
 };
 #endif // MAINWINDOW_H
