@@ -61,8 +61,8 @@ LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> 
     ctx_params.flash_attn = false;  // whether to use flash attention [EXPERIMENTAL]
     ctx_params.abort_callback = nullptr;
     ctx_params.abort_callback_data = nullptr;
-#warning context doesn't get cleared
-    ctx = llama_new_context_with_model(model, ctx_params);
+#warning context doesnt get cleared
+    ctx = llama_init_from_model(model, ctx_params);
 
     if (ctx == nullptr)
     {
@@ -86,11 +86,10 @@ LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> 
 
 LlamaInterface::~LlamaInterface()
 {
-#warning double free happens when you exit the program idkf why
     llama_batch_free(batch);
     llama_sampler_free(sampler);
     llama_free(ctx);
-    llama_free_model(model);
+    llama_model_free(model);
     llama_backend_free();
 }
 
