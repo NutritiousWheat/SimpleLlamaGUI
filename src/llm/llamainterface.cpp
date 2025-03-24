@@ -1,5 +1,5 @@
-#include <stdexcept>
 #include "llamainterface.h"
+#include <stdexcept>
 
 #define N_PREDICT 250
 #define N_CTX 8192
@@ -29,33 +29,37 @@ LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> 
 
     model = llama_model_load_from_file(modelPath.c_str(), params);
 
-    if (model == nullptr)
-    {
+    if (model == nullptr) {
         throw std::runtime_error("unable to load model");
     }
 
-    ctx_params.n_ctx = N_CTX; // text context, 0 = from model
+    ctx_params.n_ctx = N_CTX;     // text context, 0 = from model
     ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
     ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
-    ctx_params.n_seq_max = 1;         // max number of sequences (i.e. distinct states for recurrent models)
-    ctx_params.n_threads = THREADS;         // number of threads to use for generation
-    ctx_params.n_threads_batch = THREADS;   // number of threads to use for batch processing
-    ctx_params.rope_scaling_type = LLAMA_ROPE_SCALING_TYPE_UNSPECIFIED; // RoPE scaling type, from `enum llama_rope_scaling_type`
-    ctx_params.pooling_type = LLAMA_POOLING_TYPE_UNSPECIFIED;      // whether to pool (sum) embedding results by sequence id
-    ctx_params.attention_type = LLAMA_ATTENTION_TYPE_UNSPECIFIED;    // attention type to use for embeddings
-    ctx_params.rope_freq_base = 0;   // RoPE base frequency, 0 = from model
-    ctx_params.rope_freq_scale = 0;  // RoPE frequency scaling factor, 0 = from model
-    ctx_params.yarn_ext_factor = -1;  // YaRN extrapolation mix factor, negative = from model
-    ctx_params.yarn_attn_factor = -1; // YaRN magnitude scaling factor
-    ctx_params.yarn_beta_fast = -1;   // YaRN low correction dim
-    ctx_params.yarn_beta_slow = -1;   // YaRN high correction dim
-    ctx_params.yarn_orig_ctx = -1;    // YaRN original context size
-    ctx_params.defrag_thold = -1;     // defragment the KV cache if holes/size > thold, < 0 disabled (default)
+    ctx_params.n_seq_max = 1; // max number of sequences (i.e. distinct states for recurrent models)
+    ctx_params.n_threads = THREADS;       // number of threads to use for generation
+    ctx_params.n_threads_batch = THREADS; // number of threads to use for batch processing
+    ctx_params.rope_scaling_type
+        = LLAMA_ROPE_SCALING_TYPE_UNSPECIFIED; // RoPE scaling type, from `enum llama_rope_scaling_type`
+    ctx_params.pooling_type
+        = LLAMA_POOLING_TYPE_UNSPECIFIED; // whether to pool (sum) embedding results by sequence id
+    ctx_params.attention_type
+        = LLAMA_ATTENTION_TYPE_UNSPECIFIED; // attention type to use for embeddings
+    ctx_params.rope_freq_base = 0;          // RoPE base frequency, 0 = from model
+    ctx_params.rope_freq_scale = 0;         // RoPE frequency scaling factor, 0 = from model
+    ctx_params.yarn_ext_factor = -1;        // YaRN extrapolation mix factor, negative = from model
+    ctx_params.yarn_attn_factor = -1;       // YaRN magnitude scaling factor
+    ctx_params.yarn_beta_fast = -1;         // YaRN low correction dim
+    ctx_params.yarn_beta_slow = -1;         // YaRN high correction dim
+    ctx_params.yarn_orig_ctx = -1;          // YaRN original context size
+    ctx_params.defrag_thold
+        = -1; // defragment the KV cache if holes/size > thold, < 0 disabled (default)
     ctx_params.cb_eval = nullptr;
     ctx_params.cb_eval_user_data = nullptr;
     ctx_params.type_k = GGML_TYPE_F16; // data type for K cache [EXPERIMENTAL]
     ctx_params.type_v = GGML_TYPE_F16; // data type for V cache [EXPERIMENTAL]
-    ctx_params.logits_all = false;  // the llama_decode() call computes all logits, not just the last one (DEPRECATED - set llama_batch.logits instead)
+    ctx_params.logits_all
+        = false; // the llama_decode() call computes all logits, not just the last one (DEPRECATED - set llama_batch.logits instead)
     ctx_params.embeddings = false;  // if true, extract embeddings (together with logits)
     ctx_params.offload_kqv = false; // whether to offload the KQV ops (including the KV cache) to GPU
     ctx_params.flash_attn = false;  // whether to use flash attention [EXPERIMENTAL]
@@ -64,15 +68,13 @@ LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> 
 #warning context doesnt get cleared
     ctx = llama_init_from_model(model, ctx_params);
 
-    if (ctx == nullptr)
-    {
+    if (ctx == nullptr) {
         throw std::runtime_error("unable to create context");
     }
 
     sampler = llama_sampler_chain_init({true}); // no_perf = true
 
-    if (sampler == nullptr)
-    {
+    if (sampler == nullptr) {
         throw std::runtime_error("unable to init sampler chain");
     }
 
@@ -95,17 +97,12 @@ LlamaInterface::~LlamaInterface()
 
 std::string LlamaInterface::promptify(Chat &chat)
 {
-    struct llama_chat_message *llama_chat;
+    llama_chat_message *llama_chat;
     std::string prompt;
     char buffer[N_CTX];
     const char *tmpl = llama_model_chat_template(model, nullptr);
 
-    llama_chat = new llama_chat_message[chat.size()];
-
-    for (int i = 0; i < chat.size(); i++)
-    {
-        llama_chat[i] = chat.getLlamaMessage(i);
-    }
+    chat.getAllMessages(&llama_chat);
 
     llama_chat_apply_template(tmpl, llama_chat, chat.size(), false, buffer, N_CTX);
 
@@ -141,7 +138,8 @@ void LlamaInterface::reply(Chat &chat)
 
     vocab = llama_model_get_vocab(model);
 
-    n_tokens = llama_tokenize(vocab, prompt.c_str(), prompt.size(), tokens, prompt.size(), true, true);
+    n_tokens
+        = llama_tokenize(vocab, prompt.c_str(), prompt.size(), tokens, prompt.size(), true, true);
     n_ctx = llama_n_ctx(ctx);
     n_kv_req = N_CTX + (N_PREDICT - N_CTX);
 
@@ -150,13 +148,13 @@ void LlamaInterface::reply(Chat &chat)
     }
 
     for (size_t i = 0; i < n_tokens; i++) {
-        batch.token   [batch.n_tokens] = tokens[i];
-        batch.pos     [batch.n_tokens] = i;
+        batch.token[batch.n_tokens] = tokens[i];
+        batch.pos[batch.n_tokens] = i;
 
         batch.n_seq_id[batch.n_tokens] = 1;
         batch.seq_id[batch.n_tokens][0] = 0;
 
-        batch.logits  [batch.n_tokens] = false;
+        batch.logits[batch.n_tokens] = false;
 
         batch.n_tokens++;
     }
@@ -169,7 +167,7 @@ void LlamaInterface::reply(Chat &chat)
         throw std::runtime_error("first decode failed");
     }
 
-    n_cur    = batch.n_tokens;
+    n_cur = batch.n_tokens;
     n_decode = 0;
 
     chat.appendLLMMessage("");
@@ -194,11 +192,11 @@ void LlamaInterface::reply(Chat &chat)
             batch.n_tokens = 0;
 
             // push this new token for next evaluation
-            batch.token   [batch.n_tokens] = new_token_id;
-            batch.pos     [batch.n_tokens] = n_cur;
+            batch.token[batch.n_tokens] = new_token_id;
+            batch.pos[batch.n_tokens] = n_cur;
             batch.n_seq_id[batch.n_tokens] = 1;
             batch.seq_id[batch.n_tokens][0] = 0;
-            batch.logits  [batch.n_tokens] = true;
+            batch.logits[batch.n_tokens] = true;
             batch.n_tokens++;
 
             n_decode += 1;
@@ -221,21 +219,22 @@ void LlamaInterface::stop()
 
 void LlamaInterface::updateSamplers(Sampler samplers[SAMPLER_COUNT])
 {
-    if (sampler) free(sampler);
+    if (sampler)
+        free(sampler);
 
     sampler = llama_sampler_chain_init({true}); // no_perf = true
 
-    if (sampler == nullptr)
-    {
+    if (sampler == nullptr) {
         throw std::runtime_error("unable to init sampler chain");
     }
 
-    fprintf(stderr, "temp: %f, top p: %f, min p: %f, top k: %u\n",
-            samplers[TEMP].value.floatValue,
-            samplers[TOP_P].value.floatValue,
-            samplers[MIN_P].value.floatValue,
-            samplers[TOP_K].value.intValue
-    );
+    fprintf(
+        stderr,
+        "temp: %f, top p: %f, min p: %f, top k: %u\n",
+        samplers[TEMP].value.floatValue,
+        samplers[TOP_P].value.floatValue,
+        samplers[MIN_P].value.floatValue,
+        samplers[TOP_K].value.intValue);
 
     llama_sampler_chain_add(sampler, llama_sampler_init_temp(samplers[TEMP].value.floatValue));
     llama_sampler_chain_add(sampler, llama_sampler_init_top_p(samplers[TOP_P].value.floatValue, 1));

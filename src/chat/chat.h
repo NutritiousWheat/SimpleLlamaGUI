@@ -14,30 +14,37 @@ class Chat
         USER,
         LLM,
         SYSTEM
-    } messageTypeE;
+    } messageRoleE;
 
     typedef struct
     {
-        std::string text;
-        messageTypeE type;
-    } messageT;
+        std::string content;
+        messageRoleE role;
+    } message_t;
 
     std::string systemPrompt;
-    std::vector<messageT> messages;
+    std::vector<message_t> chat_messages;
+    std::vector<llama_chat_message> llama_messages;
     std::mutex mutex;
+
+    void appendMessage(const std::string& message, messageRoleE role);
+    static const char *getRoleStringUI(messageRoleE role);
+    static const char *getRoleStringPrompt(messageRoleE role);
+
 
   public:
     Chat();
     Chat(std::string systemPrompt);
     ~Chat() = default;
 
-    void appendUserMessage(std::string message);
-    void appendLLMMessage(std::string message);
-    void appendSystemMessage(std::string message);
-    void continueMessage(std::string text);
-    llama_chat_message getLlamaMessage(size_t index);
-    const std::string getString();
-    size_t size();
+    void appendUserMessage(const std::string& message);
+    void appendLLMMessage(const std::string& message);
+    void appendSystemMessage(const std::string& message);
+    void continueMessage(const std::string& text);
+    llama_chat_message getMessage(size_t index) const;
+    size_t getAllMessages(llama_chat_message **message_ptr);
+    std::string getString();
+    size_t size() const;
     void clear();
 };
 
