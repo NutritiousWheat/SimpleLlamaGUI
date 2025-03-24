@@ -175,7 +175,7 @@
        <item>
         <widget class="QLabel" name="responseLabel">
          <property name="text">
-          <string>Reponse tokens</string>
+          <string>Response tokens</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>

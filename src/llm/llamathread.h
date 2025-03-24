@@ -18,7 +18,7 @@ private:
 
     Chat *chatPtr;
 
-    Sampler samplers[SAMPLER_COUNT];
+    Sampler samplers[SAMPLER_COUNT]{};
     bool samplersChanged;
 
     std::string name;
@@ -26,7 +26,7 @@ private:
     static void run(LlamaThread *llamaThread);
 
 public:
-    LlamaThread(std::string modelPath, std::function<void(void)> refreshChat);
+    LlamaThread(const std::string &modelPath, const std::function<void(void)> &refreshChat);
     ~LlamaThread();
 
     void startReply(Chat &chat);

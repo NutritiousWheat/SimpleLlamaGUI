@@ -27,8 +27,10 @@ void LlamaThread::run(LlamaThread *llamaThread)
     delete llamaThread->llama;
 }
 
-LlamaThread::LlamaThread(std::string modelPath, std::function<void(void)> refreshChat)
+LlamaThread::LlamaThread(const std::string &modelPath, const std::function<void(void)> &refreshChat)
 {
+    this->llama = nullptr;
+    this->samplersChanged = false;
     this->running = true;
     this->chatPtr = nullptr;
     this->modelPath = modelPath;

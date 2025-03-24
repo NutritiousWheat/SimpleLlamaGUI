@@ -28,17 +28,17 @@ private:
 
 public:
     Chat();
-    Chat(std::string systemPrompt);
+    explicit Chat(std::string systemPrompt);
     ~Chat() = default;
 
     void appendUserMessage(const std::string &message);
     void appendLLMMessage(const std::string &message);
     void appendSystemMessage(const std::string &message);
     void continueMessage(const std::string &text);
-    llama_chat_message getMessage(size_t index) const;
+    [[nodiscard]] llama_chat_message getMessage(size_t index) const;
     size_t getAllMessages(llama_chat_message **message_ptr);
     std::string getString();
-    size_t size() const;
+    [[nodiscard]] size_t size() const;
     void clear();
 };
 

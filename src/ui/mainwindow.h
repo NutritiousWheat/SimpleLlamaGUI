@@ -21,9 +21,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    void updateChat(std::string text);
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow() override;
 
 private slots:
     void on_submitButton_clicked();
@@ -53,7 +52,7 @@ private:
     Ui::MainWindow *ui;
 
     Chat chat;
-    LlamaThread *llamaThread = NULL;
+    LlamaThread *llamaThread = nullptr;
     bool generating = false;
 
     float decimalMultiplier = 100.f;

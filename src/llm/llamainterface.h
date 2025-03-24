@@ -33,12 +33,12 @@ private:
 
     std::function<void(void)> refreshChat;
 
-    llama_model_params params;
+    llama_model_params params{};
     llama_model *model;
-    llama_context_params ctx_params;
+    llama_context_params ctx_params{};
     llama_context *ctx;
     llama_sampler *sampler;
-    llama_batch batch;
+    llama_batch batch{};
 
     bool forceStop = false;
 
@@ -47,7 +47,7 @@ private:
     std::string promptify(Chat &chat);
 
 public:
-    LlamaInterface(std::string modelPath, std::function<void(void)> refreshChat);
+    LlamaInterface(const std::string& modelPath, std::function<void(void)> refreshChat);
     ~LlamaInterface();
 
     void reply(Chat &chat);

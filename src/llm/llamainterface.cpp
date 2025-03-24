@@ -1,5 +1,6 @@
 #include "llamainterface.h"
 #include <stdexcept>
+#include <utility>
 
 #define N_PREDICT 250
 #define N_CTX 8192
@@ -8,9 +9,9 @@
 
 #define THREADS 16
 
-LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> refreshChat)
+LlamaInterface::LlamaInterface(const std::string& modelPath, std::function<void(void)> refreshChat)
 {
-    this->refreshChat = refreshChat;
+    this->refreshChat = std::move(refreshChat);
 
     llama_backend_init();
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
@@ -175,7 +176,7 @@ void LlamaInterface::reply(Chat &chat)
     while (n_cur <= N_PREDICT) {
         // sample the next token
         {
-            const llama_token new_token_id = llama_sampler_sample(sampler, ctx, batch.n_tokens - 1);
+            new_token_id = llama_sampler_sample(sampler, ctx, batch.n_tokens - 1);
 
             // is it the end?
             if (llama_vocab_is_eog(vocab, new_token_id) || n_cur == N_PREDICT || this->forceStop) {
