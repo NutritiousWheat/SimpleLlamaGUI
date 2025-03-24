@@ -16,10 +16,9 @@ LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> 
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
 
     params.n_gpu_layers = 256;
-    params.split_mode = LLAMA_SPLIT_MODE_NONE;
+    params.split_mode = LLAMA_SPLIT_MODE_LAYER;
     params.main_gpu = 0;
     params.tensor_split = nullptr;
-    params.rpc_servers = nullptr;
     params.progress_callback = nullptr;
     params.progress_callback_user_data = nullptr;
     params.kv_overrides = nullptr;
@@ -28,7 +27,7 @@ LlamaInterface::LlamaInterface(std::string modelPath, std::function<void(void)> 
     params.use_mlock = false;
     params.check_tensors = false;
 
-    model = llama_load_model_from_file(modelPath.c_str(), params);
+    model = llama_model_load_from_file(modelPath.c_str(), params);
 
     if (model == nullptr)
     {
@@ -100,6 +99,7 @@ std::string LlamaInterface::promptify(Chat &chat)
     struct llama_chat_message *llama_chat;
     std::string prompt;
     char buffer[N_CTX];
+    const char *tmpl = llama_model_chat_template(model, nullptr);
 
     llama_chat = new llama_chat_message[chat.size()];
 
@@ -108,7 +108,7 @@ std::string LlamaInterface::promptify(Chat &chat)
         llama_chat[i] = chat.getLlamaMessage(i);
     }
 
-    llama_chat_apply_template(model, nullptr, llama_chat, chat.size(), false, buffer, N_CTX);
+    llama_chat_apply_template(tmpl, llama_chat, chat.size(), false, buffer, N_CTX);
 
     prompt = std::string(buffer);
 
@@ -123,6 +123,7 @@ void LlamaInterface::reply(Chat &chat)
 {
     std::string prompt;
     llama_token *tokens;
+    const llama_vocab *vocab;
 
     int n_tokens;
     int n_ctx;
@@ -139,7 +140,9 @@ void LlamaInterface::reply(Chat &chat)
 
     tokens = new llama_token[prompt.size()];
 
-    n_tokens = llama_tokenize(model, prompt.c_str(), prompt.size(), tokens, prompt.size(), true, true);
+    vocab = llama_model_get_vocab(model);
+
+    n_tokens = llama_tokenize(vocab, prompt.c_str(), prompt.size(), tokens, prompt.size(), true, true);
     n_ctx = llama_n_ctx(ctx);
     n_kv_req = N_CTX + (N_PREDICT - N_CTX);
 
@@ -178,13 +181,13 @@ void LlamaInterface::reply(Chat &chat)
             const llama_token new_token_id = llama_sampler_sample(sampler, ctx, batch.n_tokens - 1);
 
             // is it the end?
-            if (llama_token_is_eog(model, new_token_id) || n_cur == N_PREDICT || this->forceStop) {
+            if (llama_vocab_is_eog(vocab, new_token_id) || n_cur == N_PREDICT || this->forceStop) {
                 chat.continueMessage("\n");
                 this->forceStop = false;
                 break;
             }
 
-            n_chars = llama_token_to_piece(model, new_token_id, buffer, sizeof(buffer), 0, false);
+            n_chars = llama_token_to_piece(vocab, new_token_id, buffer, sizeof(buffer), 0, false);
             buffer[n_chars] = '\0'; // llama_token_to_piece does not null-terminate
             chat.continueMessage(buffer);
 

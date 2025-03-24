@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(diplom VERSION 0.1 LANGUAGES CXX)
+project(qtllama VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -14,51 +14,41 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
         src/main.cpp
-        src/ui/mainwindow.cpp
-        src/ui/mainwindow.h
-        src/ui/mainwindow.ui
-)
-
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(diplom
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
+        src/ui/mainwindow.h src/ui/mainwindow.cpp src/ui/mainwindow.ui
         src/llm/llamainterface.h src/llm/llamainterface.cpp
         src/chat/chat.h src/chat/chat.cpp
         src/llm/llamathread.h src/llm/llamathread.cpp
         src/llm/rng.h src/llm/rng.cpp
+)
 
+set(LLAMA_CPP_DIR submodules/llama.cpp)
+set(LLAMA_CPP_HEADERS ${LLAMA_CPP_DIR}/include/llama.h)
+
+include_directories(${LLAMA_CPP_DIR}/include)
+add_subdirectory(${LLAMA_CPP_DIR})
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_executable(qtllama
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+        ${LLAMA_CPP_HEADERS}
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET diplom APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
-    if(ANDROID)
-        add_library(diplom SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(diplom
-            ${PROJECT_SOURCES}
-        )
-    endif()
+    add_executable(qtllama
+        ${PROJECT_SOURCES}
+    )
 endif()
 
-target_link_libraries(diplom PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-target_link_libraries(diplom PRIVATE gomp)
-target_link_libraries(diplom PRIVATE llama)
-target_link_libraries(diplom PRIVATE ggml)
+target_link_libraries(qtllama PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(qtllama PRIVATE llama)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.diplom)
+  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.qtllama)
 endif()
-set_target_properties(diplom PROPERTIES
+set_target_properties(qtllama PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -67,12 +57,12 @@ set_target_properties(diplom PROPERTIES
 )
 
 include(GNUInstallDirs)
-install(TARGETS diplom
+install(TARGETS qtllama
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(diplom)
+    qt_finalize_executable(qtllama)
 endif()
