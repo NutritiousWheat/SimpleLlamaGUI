@@ -1,7 +1,7 @@
 #include <chrono>
 
-#include "llamathread.h"
 #include "llamainterface.h"
+#include "llamathread.h"
 
 static constexpr std::chrono::duration tick = std::chrono::milliseconds(10);
 
@@ -10,16 +10,13 @@ void LlamaThread::run(LlamaThread *llamaThread)
     llamaThread->llama = new LlamaInterface(llamaThread->modelPath, llamaThread->refreshChat);
     llamaThread->name = llamaThread->llama->getName();
 
-    while (llamaThread->running == true)
-    {
-        if (llamaThread->samplersChanged )
-        {
+    while (llamaThread->running == true) {
+        if (llamaThread->samplersChanged) {
 #warning not thread safe
             llamaThread->llama->updateSamplers(llamaThread->samplers);
             llamaThread->samplersChanged = false;
         }
-        if (llamaThread->chatPtr)
-        {
+        if (llamaThread->chatPtr) {
             llamaThread->llama->reply(*llamaThread->chatPtr);
             llamaThread->chatPtr = nullptr;
             llamaThread->refreshChat();

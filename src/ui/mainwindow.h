@@ -11,10 +11,8 @@
 #warning use QObject for the rest of the classes
 #warning do signals and slots
 
-
 QT_BEGIN_NAMESPACE
-namespace Ui
-{
+namespace Ui {
 class MainWindow;
 }
 QT_END_NAMESPACE
@@ -22,12 +20,12 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-  public:
+public:
     void updateChat(std::string text);
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-  private slots:
+private slots:
     void on_submitButton_clicked();
 
     void on_tempSlider_valueChanged(int value);

@@ -3,12 +3,12 @@
 
 #include <thread>
 
-#include "llamainterface.h"
 #include "../chat/chat.h"
+#include "llamainterface.h"
 
 class LlamaThread
 {
-  private:
+private:
     LlamaInterface *llama;
     std::string modelPath;
     std::function<void(void)> refreshChat;
@@ -25,7 +25,7 @@ class LlamaThread
 
     static void run(LlamaThread *llamaThread);
 
-  public:
+public:
     LlamaThread(std::string modelPath, std::function<void(void)> refreshChat);
     ~LlamaThread();
 

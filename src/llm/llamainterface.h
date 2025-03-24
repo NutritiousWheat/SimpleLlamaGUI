@@ -1,15 +1,14 @@
 #ifndef LLAMAINTERFACE_H
 #define LLAMAINTERFACE_H
 
+#include <functional>
 #include <llama.h>
 #include <string>
-#include <functional>
 
 #include "../chat/chat.h"
 #include "rng.h"
 
-typedef enum
-{
+typedef enum {
     TEMP,
     TOP_K,
     TOP_P,
@@ -29,7 +28,7 @@ typedef struct
 
 class LlamaInterface
 {
-  private:
+private:
     RNG rng;
 
     std::function<void(void)> refreshChat;
@@ -47,7 +46,7 @@ class LlamaInterface
 
     std::string promptify(Chat &chat);
 
-  public:
+public:
     LlamaInterface(std::string modelPath, std::function<void(void)> refreshChat);
     ~LlamaInterface();
 

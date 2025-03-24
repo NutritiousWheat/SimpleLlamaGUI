@@ -2,7 +2,9 @@
 #include "./ui_mainwindow.h"
 #include <qobject.h>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     this->updateSliderValues();
@@ -28,14 +30,11 @@ void MainWindow::stopGenerating()
 
 void MainWindow::on_submitButton_clicked()
 {
-    if (llamaThread->isGenerating())
-    {
+    if (llamaThread->isGenerating()) {
         generating = false;
         stopGenerating();
         this->ui->submitButton->setText("submit");
-    }
-    else
-    {
+    } else {
         generating = true;
         startGenerating();
         this->ui->submitButton->setText("stop");
@@ -50,7 +49,8 @@ void MainWindow::on_topKSlider_valueChanged(int value)
     sampler.type = TOP_K;
 
     this->ui->topKValueLabel->setText(stringValue);
-    if (this->llamaThread) this->llamaThread->updateSampler(sampler);
+    if (this->llamaThread)
+        this->llamaThread->updateSampler(sampler);
 #warning maybe no static casts?
 }
 
@@ -60,9 +60,9 @@ void MainWindow::on_tempSlider_valueChanged(int value)
     QString stringValue = QString::number(floatValue, 'f', 2);
 
     this->ui->tempValueLabel->setText(stringValue);
-    if (this->llamaThread) this->llamaThread->updateSampler({floatValue, TEMP});
+    if (this->llamaThread)
+        this->llamaThread->updateSampler({floatValue, TEMP});
 }
-
 
 void MainWindow::on_topPSlider_valueChanged(int value)
 {
@@ -70,9 +70,9 @@ void MainWindow::on_topPSlider_valueChanged(int value)
     QString stringValue = QString::number(floatValue, 'f', 2);
 
     this->ui->topPValueLabel->setText(stringValue);
-    if (this->llamaThread) this->llamaThread->updateSampler({floatValue, TOP_P});
+    if (this->llamaThread)
+        this->llamaThread->updateSampler({floatValue, TOP_P});
 }
-
 
 void MainWindow::on_minPSlider_valueChanged(int value)
 {
@@ -80,7 +80,8 @@ void MainWindow::on_minPSlider_valueChanged(int value)
     QString stringValue = QString::number(floatValue, 'f', 2);
 
     this->ui->minPValueLabel->setText(stringValue);
-    if (this->llamaThread) this->llamaThread->updateSampler({floatValue, MIN_P});
+    if (this->llamaThread)
+        this->llamaThread->updateSampler({floatValue, MIN_P});
 }
 
 #warning THIS IS FUCKING GARBAGE!!!!!
@@ -91,12 +92,9 @@ void MainWindow::refreshChat(void)
 
 void MainWindow::on_refresh()
 {
-    if (this->llamaThread->isGenerating())
-    {
+    if (this->llamaThread->isGenerating()) {
         this->ui->submitButton->setText("stop");
-    }
-    else
-    {
+    } else {
         this->ui->submitButton->setText("submit");
     }
     this->ui->chatBox->setText(QString::fromStdString(chat.getString()));
@@ -104,28 +102,28 @@ void MainWindow::on_refresh()
 
 #warning mind the edge cases
 void MainWindow::on_loadButton_clicked()
-{    QString path = this->ui->pathLine->text();
+{
+    QString path = this->ui->pathLine->text();
     std::function<void(void)> refreshFunc = std::bind(&MainWindow::refreshChat, this);
 
-    QObject::connect(this, &MainWindow::refresh,
-                     this, &MainWindow::on_refresh);
+    QObject::connect(this, &MainWindow::refresh, this, &MainWindow::on_refresh);
 
-    if (llamaThread) delete llamaThread;
+    if (llamaThread)
+        delete llamaThread;
     llamaThread = new LlamaThread(path.toStdString(), refreshFunc);
 
     this->updateSliderValues();
     this->ui->statusbar->showMessage("Loaded model: " + path);
 }
 
-
 void MainWindow::on_clearButton_pressed()
 {
 #warning just disable the button
-    if (this->llamaThread && this->llamaThread->isGenerating()) return;
+    if (this->llamaThread && this->llamaThread->isGenerating())
+        return;
     this->chat.clear();
     emit refresh();
 }
-
 
 void MainWindow::on_contextSlider_valueChanged(int value)
 {
@@ -134,7 +132,6 @@ void MainWindow::on_contextSlider_valueChanged(int value)
 
     this->ui->contextValueLabel->setText(stringValue);
 }
-
 
 void MainWindow::on_responseSlider_valueChanged(int value)
 {
@@ -149,11 +146,9 @@ void MainWindow::updateSliderValues()
     this->ui->contextSlider->valueChanged(this->ui->contextSlider->value());
     this->ui->responseSlider->valueChanged(this->ui->responseSlider->value());
 
-    for (int i = 0; i < SAMPLER_COUNT; i++)
-    {
+    for (int i = 0; i < SAMPLER_COUNT; i++) {
 #warning make this prettier
-        switch (i)
-        {
+        switch (i) {
         case TOP_K:
             this->ui->topKSlider->valueChanged(this->ui->topKSlider->value());
             break;
