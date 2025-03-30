@@ -24,7 +24,7 @@ LlamaInterface::LlamaInterface(const std::string& modelPath, std::function<void(
     params.progress_callback_user_data = nullptr;
     params.kv_overrides = nullptr;
     params.vocab_only = false;
-    params.use_mmap = true;
+    params.use_mmap = false;
     params.use_mlock = false;
     params.check_tensors = false;
 
