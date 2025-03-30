@@ -38,8 +38,8 @@ LlamaInterface::LlamaInterface(const std::string& modelPath, std::function<void(
     ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
     ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
     ctx_params.n_seq_max = 1; // max number of sequences (i.e. distinct states for recurrent models)
-    ctx_params.n_threads = THREADS;       // number of threads to use for generation
-    ctx_params.n_threads_batch = THREADS; // number of threads to use for batch processing
+    ctx_params.n_threads = params.n_gpu_layers ? 1: THREADS;       // number of threads to use for generation
+    ctx_params.n_threads_batch = params.n_gpu_layers ? 1: THREADS; // number of threads to use for batch processing
     ctx_params.rope_scaling_type
         = LLAMA_ROPE_SCALING_TYPE_UNSPECIFIED; // RoPE scaling type, from `enum llama_rope_scaling_type`
     ctx_params.pooling_type
