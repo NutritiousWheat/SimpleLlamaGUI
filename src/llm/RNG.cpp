@@ -1,4 +1,4 @@
-#include "rng.h"
+#include "RNG.h"
 
 RNG::RNG()
 {

@@ -5,8 +5,8 @@
 #include <llama.h>
 #include <string>
 
-#include "../chat/chat.h"
-#include "rng.h"
+#include "../chat/Chat.h"
+#include "RNG.h"
 
 typedef enum {
     TEMP,

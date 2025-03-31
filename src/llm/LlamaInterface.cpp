@@ -1,4 +1,4 @@
-#include "llamainterface.h"
+#include "LlamaInterface.h"
 #include <stdexcept>
 #include <utility>
 

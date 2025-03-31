@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 
-#include "../chat/chat.h"
-#include "../llm/llamathread.h"
+#include "../chat/Chat.h"
+#include "../llm/LlamaThread.h"
 
 #warning TODO
 #warning use QThread for llamathread

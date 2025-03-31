@@ -3,8 +3,8 @@
 
 #include <thread>
 
-#include "../chat/chat.h"
-#include "llamainterface.h"
+#include "../chat/Chat.h"
+#include "LlamaInterface.h"
 
 class LlamaThread
 {

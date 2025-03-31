@@ -15,12 +15,14 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
         src/main.cpp
         src/ui/mainwindow.h src/ui/mainwindow.cpp src/ui/mainwindow.ui
-        src/llm/llamainterface.h src/llm/llamainterface.cpp
-        src/chat/chat.h src/chat/chat.cpp
-        src/llm/llamathread.h src/llm/llamathread.cpp
-        src/llm/rng.h src/llm/rng.cpp
-        src/config/config.cpp
-        src/config/config.h
+        src/llm/LlamaInterface.h src/llm/LlamaInterface.cpp
+        src/chat/Chat.h src/chat/Chat.cpp
+        src/llm/LlamaThread.h src/llm/LlamaThread.cpp
+        src/llm/RNG.h src/llm/RNG.cpp
+        src/config/ConfigBase.cpp
+        src/config/ConfigBase.h
+        src/config/ConfigApp.cpp
+        src/config/ConfigApp.h
 )
 
 set(LLAMA_CPP_DIR submodules/llama.cpp)

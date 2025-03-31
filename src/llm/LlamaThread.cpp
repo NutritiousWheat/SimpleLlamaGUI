@@ -1,7 +1,7 @@
 #include <chrono>
 
-#include "llamainterface.h"
-#include "llamathread.h"
+#include "LlamaInterface.h"
+#include "LlamaThread.h"
 
 static constexpr std::chrono::duration tick = std::chrono::milliseconds(10);
 

@@ -9,16 +9,16 @@
 class Chat
 {
 private:
-    typedef enum { USER, LLM, SYSTEM } messageRoleE;
+    enum messageRoleE { USER, LLM, SYSTEM };
 
-    typedef struct
+    struct messageT
     {
         std::string content;
         messageRoleE role;
-    } message_t;
+    };
 
     std::string systemPrompt;
-    std::vector<message_t> chat_messages;
+    std::vector<messageT> chat_messages;
     std::vector<llama_chat_message> llama_messages;
     std::mutex mutex;
 
@@ -36,7 +36,7 @@ public:
     void appendSystemMessage(const std::string &message);
     void continueMessage(const std::string &text);
     [[nodiscard]] llama_chat_message getMessage(size_t index) const;
-    size_t getAllMessages(llama_chat_message **message_ptr);
+    size_t getAllMessages(llama_chat_message **messagePtr);
     std::string getString();
     [[nodiscard]] size_t size() const;
     void clear();

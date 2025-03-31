@@ -1,4 +1,4 @@
-#include "chat.h"
+#include "Chat.h"
 
 #include <utility>
 
@@ -16,7 +16,7 @@ Chat::Chat(std::string systemPrompt)
 
 void Chat::appendMessage(const std::string &message, const messageRoleE role)
 {
-    message_t chat_message;
+    messageT chat_message;
     llama_chat_message llama_message;
 
     const std::lock_guard<std::mutex> lock(this->mutex);
@@ -97,7 +97,7 @@ std::string Chat::getString()
 {
     std::string output;
 
-    for (message_t &message : this->chat_messages) {
+    for (messageT &message : this->chat_messages) {
         if (message.role != SYSTEM)
             output += std::string(getRoleStringUI(message.role)) + ": " + message.content + "\n";
     }
