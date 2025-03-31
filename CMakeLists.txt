@@ -19,10 +19,10 @@ set(PROJECT_SOURCES
         src/chat/Chat.h src/chat/Chat.cpp
         src/llm/LlamaThread.h src/llm/LlamaThread.cpp
         src/llm/RNG.h src/llm/RNG.cpp
-        src/config/ConfigBase.cpp
-        src/config/ConfigBase.h
         src/config/ConfigApp.cpp
         src/config/ConfigApp.h
+        src/config/ConfigModel.cpp
+        src/config/ConfigModel.h
 )
 
 set(LLAMA_CPP_DIR submodules/llama.cpp)

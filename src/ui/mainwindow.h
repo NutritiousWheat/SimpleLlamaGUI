@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+#include "../config/ConfigApp.h"
 #include "../chat/Chat.h"
 #include "../llm/LlamaThread.h"
 
@@ -50,6 +51,8 @@ signals:
 
 private:
     Ui::MainWindow *ui;
+
+    ConfigApp config = ConfigApp("config.json");
 
     Chat chat;
     LlamaThread *llamaThread = nullptr;

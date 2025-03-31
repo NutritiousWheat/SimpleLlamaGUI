@@ -1,18 +1,74 @@
-#ifndef CONFIG_APP_H
-#define CONFIG_APP_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include "ConfigBase.h"
+#include <QJsonObject>
 
-class ConfigApp : public ConfigBase {
+class ConfigApp {
+    /*
+     * per model:
+     * sampler params + last used preset
+     * loading params
+     * prompt
+     * prompt preset (from llama.cpp presets)
+     *
+     */
+private:
+    const QString defaultModelDir = "models";
+    const QString defaultModelConfigDir = "modelConfig";
+    const QString defaultSamplerPresetDir = "samplerPreset";
+    const QString defaultLastUsedModel= "";
+    const bool defaulAutoLoadLastOnStart= false;
+
+
+    QString configPath;
+    QJsonObject configObject;
+    void initFile();
+    void readFile();
+    void writeFile();
+
 public:
+    enum KeyIntE
+    {
 
+    };
+    enum KeyDoubleE
+    {
 
-    QString keyToString(key_int_e key);
-    QString keyToString(key_float_e key);
-    QString keyToString(key_string_e key);
-    QString keyToString(key_bool_e key);
+    };
+    enum KeyStringE
+    {
+        ModelDir,
+        ModelConfigDir,
+        SamplerPresetDir,
+        LastUsedModel
+    };
+    enum KeyBoolE
+    {
+        AutoLoadLastOnStart
+    };
+
+    explicit ConfigApp(const QString &config_path);
+    ~ConfigApp() = default;
+
+    QString keyToString(KeyIntE key);
+    QString keyToString(KeyDoubleE key);
+    QString keyToString(KeyStringE key);
+    QString keyToString(KeyBoolE key);
+
+    void setValue(KeyIntE key, int value);
+    int getValue(KeyIntE key);
+
+    void setValue(KeyDoubleE key, double value);
+    float getValue(KeyDoubleE key);
+
+    void setValue(KeyStringE key, const QString &value);
+    QString getValue(KeyStringE key);
+
+    void setValue(KeyBoolE key, bool value);
+    bool getValue(KeyBoolE key);
+
 };
 
 
 
-#endif //CONFIG_APP_H
+#endif //CONFIG_H

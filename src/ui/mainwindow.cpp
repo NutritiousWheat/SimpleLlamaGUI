@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->updateSliderValues();
     this->ui->statusbar->showMessage("Loaded model: None");
+    this->ui->pathLine->setText(config.getValue(ConfigApp::LastUsedModel));
 }
 
 MainWindow::~MainWindow()
@@ -114,6 +115,8 @@ void MainWindow::on_loadButton_clicked()
 
     this->updateSliderValues();
     this->ui->statusbar->showMessage("Loaded model: " + path);
+
+    config.setValue(ConfigApp::LastUsedModel, path);
 }
 
 void MainWindow::on_clearButton_pressed()

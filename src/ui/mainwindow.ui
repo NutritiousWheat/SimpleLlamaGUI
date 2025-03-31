@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tabChat">
      <attribute name="title">
@@ -360,7 +360,7 @@
      <attribute name="title">
       <string>Model</string>
      </attribute>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -385,7 +385,7 @@
          <item>
           <widget class="QLineEdit" name="pathLine">
            <property name="text">
-            <string>/home/potato/code_projects/diplom/build/Desktop-Debug/Phi-3.5-mini-instruct-Q4_K_L.gguf</string>
+            <string/>
            </property>
           </widget>
          </item>
