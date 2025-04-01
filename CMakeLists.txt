@@ -14,7 +14,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
         src/main.cpp
-        src/ui/mainwindow.h src/ui/mainwindow.cpp src/ui/mainwindow.ui
+        src/ui/MainWindow.h src/ui/MainWindow.cpp src/ui/MainWindow.ui
         src/llm/LlamaInterface.h src/llm/LlamaInterface.cpp
         src/chat/Chat.h src/chat/Chat.cpp
         src/llm/LlamaThread.h src/llm/LlamaThread.cpp
