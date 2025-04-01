@@ -62,7 +62,7 @@ IncludeCategories:
   - Regex: '^<Q.*'
     Priority: 200
 IncludeIsMainRegex: '(Test)?$'
-IndentCaseLabels: true
+IndentCaseLabels: false
 IndentWidth: 4
 IndentWrappedFunctionNames: false
 InsertBraces: false
