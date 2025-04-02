@@ -104,7 +104,7 @@ QString LlamaInterface::promptify(const QVector <llama_chat_message> &messages)
     char buffer[N_CTX];
     const char *tmpl = llama_model_chat_template(model, nullptr);
 #warning what the fuck is this buffer length
-    llama_chat_apply_template(tmpl, messages.begin(), messages.size(), false, buffer, N_CTX);
+    llama_chat_apply_template(tmpl, &messages[0], messages.size(), false, buffer, N_CTX);
 
     prompt = QString(buffer);
 
