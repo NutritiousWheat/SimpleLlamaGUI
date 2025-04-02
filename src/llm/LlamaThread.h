@@ -1,39 +1,55 @@
 #ifndef LLAMATHREAD_H
 #define LLAMATHREAD_H
 
-#include <thread>
+#include <QThread>
+#include <QWaitCondition>
+#include <QMutex>
 
-#include "../chat/Chat.h"
 #include "LlamaInterface.h"
 
-class LlamaThread
+QT_BEGIN_NAMESPACE
+namespace LLM {
+class LlamaThread;
+}
+QT_END_NAMESPACE
+
+class LlamaThread : public QThread
 {
+    Q_OBJECT
+
+    public slots:
+    void on_replyStart(const QVector <llama_chat_message> &messages,
+            const SamplersArrayT &samplers); // comes from Chat
+    void on_replyStop(); // comes from Chat
+    void on_tokenGenerated(QString token); // comes from LlamaInterface
+    void on_generationEnd(); // comes from LlamaInterface
+
+    signals:
+    void replyStart(const QVector <llama_chat_message> &messages, SamplersArrayT samplers); // proxied from Chat to LlamaInterface
+    void replyStop(); // proxied from Chat to LlamaInterface
+    void tokenGenerated(QString token); // proxied from LlamaInterface to Chat
+    void generationEnd(); // proxied from LlamaInterface to Chat
+
 private:
+
     LlamaInterface *llama;
-    std::string modelPath;
-    std::function<void(void)> refreshChat;
+    QString modelPath;
+    QString name;
+    QMutex generationMutex;
+    QWaitCondition generationCondition;
+    bool loaded;
 
-    std::jthread *mainThread;
-    bool running;
+    QVector <llama_chat_message> messages;
+    SamplersArrayT samplers;
 
-    Chat *chatPtr;
-
-    Sampler samplers[SAMPLER_COUNT]{};
-    bool samplersChanged;
-
-    std::string name;
-
-    static void run(LlamaThread *llamaThread);
+    void run() override;
 
 public:
-    LlamaThread(const std::string &modelPath, const std::function<void(void)> &refreshChat);
+    LlamaThread(const QString &modelPath);
     ~LlamaThread();
 
-    void startReply(Chat &chat);
-    void stopReply();
     bool isGenerating();
-    void updateSampler(Sampler sampler);
-    std::string getName();
+    QString getName();
 };
 
 #endif // LLAMATHREAD_H

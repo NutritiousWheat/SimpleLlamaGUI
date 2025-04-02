@@ -1,6 +1,5 @@
 #include "LlamaInterface.h"
 #include <stdexcept>
-#include <utility>
 
 #define N_PREDICT 250
 #define N_CTX 8192
@@ -9,10 +8,8 @@
 
 #define THREADS 16
 
-LlamaInterface::LlamaInterface(const std::string& modelPath, std::function<void(void)> refreshChat)
+LlamaInterface::LlamaInterface(const QString &modelPath)
 {
-    this->refreshChat = std::move(refreshChat);
-
     llama_backend_init();
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
 
@@ -28,7 +25,7 @@ LlamaInterface::LlamaInterface(const std::string& modelPath, std::function<void(
     params.use_mlock = false;
     params.check_tensors = false;
 
-    model = llama_model_load_from_file(modelPath.c_str(), params);
+    model = llama_model_load_from_file(modelPath.toUtf8(), params);
 
     if (model == nullptr) {
         throw std::runtime_error("unable to load model");
@@ -96,29 +93,29 @@ LlamaInterface::~LlamaInterface()
     llama_backend_free();
 }
 
-std::string LlamaInterface::promptify(Chat &chat)
+bool LlamaInterface::isGenerating()
 {
-    llama_chat_message *llama_chat;
-    std::string prompt;
+    return generating;
+}
+
+QString LlamaInterface::promptify(const QVector <llama_chat_message> &messages)
+{
+    QString prompt;
     char buffer[N_CTX];
     const char *tmpl = llama_model_chat_template(model, nullptr);
+#warning what the fuck is this buffer length
+    llama_chat_apply_template(tmpl, messages.begin(), messages.size(), false, buffer, N_CTX);
 
-    chat.getAllMessages(&llama_chat);
+    prompt = QString(buffer);
 
-    llama_chat_apply_template(tmpl, llama_chat, chat.size(), false, buffer, N_CTX);
-
-    prompt = std::string(buffer);
-
-    delete[] llama_chat;
-
-    fprintf(stderr, "Prompt: %s\n", prompt.c_str());
+    fprintf(stderr, "Prompt: %s\n", buffer);
 
     return prompt;
 }
 
-void LlamaInterface::reply(Chat &chat)
+void LlamaInterface::on_replyStart(const QVector <llama_chat_message> &messages, const SamplersArrayT &samplers)
 {
-    std::string prompt;
+    QString prompt;
     llama_token *tokens;
     const llama_vocab *vocab;
 
@@ -133,20 +130,24 @@ void LlamaInterface::reply(Chat &chat)
     llama_token new_token_id;
     char buffer[16] = {0};
 
-    prompt = promptify(chat);
+    generating = true;
+
+    prompt = promptify(messages);
 
     tokens = new llama_token[prompt.size()];
 
     vocab = llama_model_get_vocab(model);
-
+#warning context breaks after second message
     n_tokens
-        = llama_tokenize(vocab, prompt.c_str(), prompt.size(), tokens, prompt.size(), true, true);
+        = llama_tokenize(vocab, prompt.toUtf8(), prompt.size(), tokens, prompt.size(), true, true);
     n_ctx = llama_n_ctx(ctx);
     n_kv_req = N_CTX + (N_PREDICT - N_CTX);
 
     if (n_kv_req > n_ctx) {
         throw std::runtime_error("kv cache size is not big enough");
     }
+
+    setSamplers(samplers);
 
     for (size_t i = 0; i < n_tokens; i++) {
         batch.token[batch.n_tokens] = tokens[i];
@@ -171,8 +172,6 @@ void LlamaInterface::reply(Chat &chat)
     n_cur = batch.n_tokens;
     n_decode = 0;
 
-    chat.appendLLMMessage("");
-
     while (n_cur <= N_PREDICT) {
         // sample the next token
         {
@@ -180,14 +179,12 @@ void LlamaInterface::reply(Chat &chat)
 
             // is it the end?
             if (llama_vocab_is_eog(vocab, new_token_id) || n_cur == N_PREDICT || this->forceStop) {
-                chat.continueMessage("\n");
                 this->forceStop = false;
                 break;
             }
 
             n_chars = llama_token_to_piece(vocab, new_token_id, buffer, sizeof(buffer), 0, false);
             buffer[n_chars] = '\0'; // llama_token_to_piece does not null-terminate
-            chat.continueMessage(buffer);
 
             // prepare the next batch
             batch.n_tokens = 0;
@@ -201,6 +198,8 @@ void LlamaInterface::reply(Chat &chat)
             batch.n_tokens++;
 
             n_decode += 1;
+
+            emit tokenGenerated(QString(buffer));
         }
 
         n_cur += 1;
@@ -209,16 +208,18 @@ void LlamaInterface::reply(Chat &chat)
         if (llama_decode(ctx, batch)) {
             throw std::runtime_error("decode failed");
         }
-        this->refreshChat();
     }
+    generating = false;
+    emit generationEnd();
 }
 
-void LlamaInterface::stop()
+void LlamaInterface::on_replyStop()
 {
     this->forceStop = true;
 }
 
-void LlamaInterface::updateSamplers(Sampler samplers[SAMPLER_COUNT])
+#warning rewrite that
+void LlamaInterface::setSamplers(const SamplersArrayT &samplers)
 {
     if (sampler)
         free(sampler);
@@ -232,20 +233,20 @@ void LlamaInterface::updateSamplers(Sampler samplers[SAMPLER_COUNT])
     fprintf(
         stderr,
         "temp: %f, top p: %f, min p: %f, top k: %u\n",
-        samplers[TEMP].value.floatValue,
-        samplers[TOP_P].value.floatValue,
-        samplers[MIN_P].value.floatValue,
-        samplers[TOP_K].value.intValue);
+        samplers.array[TEMP].value.floatValue,
+        samplers.array[TOP_P].value.floatValue,
+        samplers.array[MIN_P].value.floatValue,
+        samplers.array[TOP_K].value.intValue);
 
-    llama_sampler_chain_add(sampler, llama_sampler_init_temp(samplers[TEMP].value.floatValue));
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(samplers[TOP_P].value.floatValue, 1));
-    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(samplers[MIN_P].value.floatValue, 1));
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_k(samplers[TOP_K].value.intValue));
+    llama_sampler_chain_add(sampler, llama_sampler_init_temp(samplers.array[TEMP].value.floatValue));
+    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(samplers.array[TOP_P].value.floatValue, 1));
+    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(samplers.array[MIN_P].value.floatValue, 1));
+    llama_sampler_chain_add(sampler, llama_sampler_init_top_k(samplers.array[TOP_K].value.intValue));
 
     llama_sampler_chain_add(sampler, llama_sampler_init_dist(rng.getRand()));
 }
 
-std::string LlamaInterface::getName()
+QString LlamaInterface::getName()
 {
     return this->name;
 }

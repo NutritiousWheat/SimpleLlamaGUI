@@ -1,43 +1,57 @@
 #ifndef CHAT_H
 #define CHAT_H
 
-#include <llama.h>
-#include <mutex>
-#include <string>
-#include <vector>
+#include "../llm/LlamaThread.h"
 
-class Chat
+class Chat : public QObject
 {
+    Q_OBJECT
+
+    public slots:
+    void on_messageReceived(QString message, SamplersArrayT samplers); // comes from MainWindow
+    void on_interruptReceived(); // comes from MainWindow
+    void on_tokenGenerated(QString token); // comes from LlamaThread
+    void on_generationEnd(); // comes from LlamaThread
+
+    signals:
+    void replyStart(const QVector <llama_chat_message> &messages, const SamplersArrayT &samplers); // sent to LlamaThread
+    void replyStop(); // sent to LlamaThread
+    void appendText(); // sent to MainWindow
+    void updateGUI();
 private:
     enum messageRoleE { USER, LLM, SYSTEM };
 
     struct messageT
     {
-        std::string content;
+#warning try figuring out a better way to store llama messages
+        std::string content; // needs to be std::string to have easy access to it as a C-string
         messageRoleE role;
     };
 
-    std::string systemPrompt;
-    std::vector<messageT> chat_messages;
-    std::vector<llama_chat_message> llama_messages;
-    std::mutex mutex;
+    LlamaThread *llamaThread = nullptr;
 
-    void appendMessage(const std::string &message, messageRoleE role);
+    QString systemPrompt;
+    QVector<messageT> chat_messages;
+    QVector<llama_chat_message> llama_messages;
+    QMutex mutex;
+
+    void appendMessage(const QString &message, messageRoleE role);
     static const char *getRoleStringUI(messageRoleE role);
     static const char *getRoleStringPrompt(messageRoleE role);
 
 public:
     Chat();
-    explicit Chat(std::string systemPrompt);
+    explicit Chat(const QString &systemPrompt);
     ~Chat() = default;
 
-    void appendUserMessage(const std::string &message);
-    void appendLLMMessage(const std::string &message);
-    void appendSystemMessage(const std::string &message);
-    void continueMessage(const std::string &text);
-    [[nodiscard]] llama_chat_message getMessage(size_t index) const;
-    size_t getAllMessages(llama_chat_message **messagePtr);
-    std::string getString();
+    void loadModel(const QString &ggufPath);
+    void unloadModel();
+
+    void appendUserMessage(const QString &message);
+    void appendLLMMessage(const QString &message);
+    void appendSystemMessage(const QString &message);
+    void continueMessage(const QString &text);
+    QString getString();
     [[nodiscard]] size_t size() const;
     void clear();
 };

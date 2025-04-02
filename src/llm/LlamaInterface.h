@@ -1,37 +1,56 @@
 #ifndef LLAMAINTERFACE_H
 #define LLAMAINTERFACE_H
 
-#include <functional>
-#include <llama.h>
-#include <string>
-
-#include "../chat/Chat.h"
 #include "RNG.h"
+#include <llama-sampling.h>
+#include <llama.h>
+#include <QObject>
 
-typedef enum {
+QT_BEGIN_NAMESPACE
+namespace LLM {
+class LlamaInterface;
+}
+QT_END_NAMESPACE
+
+
+enum SamplerTypeE {
     TEMP,
     TOP_K,
     TOP_P,
     MIN_P,
 
     SAMPLER_COUNT
-} SamplerType;
+};
 
-typedef struct
+struct SamplerT
 {
+#warning use different types for int and float samplers
     union {
         float floatValue;
         int32_t intValue;
     } value;
-    SamplerType type;
-} Sampler;
+    SamplerTypeE type;
+};
 
-class LlamaInterface
+struct SamplersArrayT
 {
+    SamplerT array[SAMPLER_COUNT];
+};
+
+class LlamaInterface : public QObject
+{
+    Q_OBJECT
+
+public slots:
+    void on_replyStart(const QVector <llama_chat_message> &messages, const SamplersArrayT &samplers);
+    void on_replyStop();
+
+    signals:
+    void generationEnd();
+    void tokenGenerated(QString token);
+
 private:
     RNG rng;
-
-    std::function<void(void)> refreshChat;
 
     llama_model_params params{};
     llama_model *model;
@@ -41,19 +60,19 @@ private:
     llama_batch batch{};
 
     bool forceStop = false;
+    bool generating = false;
 
-    std::string name;
+    QString name;
 
-    std::string promptify(Chat &chat);
+    QString promptify(const QVector <llama_chat_message> &messages);
+    void setSamplers(const SamplersArrayT &samplers);
 
 public:
-    LlamaInterface(const std::string& modelPath, std::function<void(void)> refreshChat);
+    LlamaInterface(const QString &modelPath);
     ~LlamaInterface();
 
-    void reply(Chat &chat);
-    void stop();
-    void updateSamplers(Sampler samplers[SAMPLER_COUNT]);
-    std::string getName();
+    bool isGenerating();
+    QString getName();
 };
 
 #endif // LLAMAINTERFACE_H

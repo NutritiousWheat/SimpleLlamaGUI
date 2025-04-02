@@ -1,58 +1,61 @@
 #include "MainWindow.h"
 #include "./ui_MainWindow.h"
-#include <qobject.h>
+#include <QObject>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->updateSliderValues();
-    this->ui->statusbar->showMessage("Loaded model: None");
-    this->ui->pathLine->setText(config.getValue(ConfigApp::LastUsedModel));
+    ui->statusbar->showMessage("Loaded model: None");
+    ui->pathLine->setText(config.getValue(ConfigApp::LastUsedModel));
+
+    connect(this, &MainWindow::sendMessage, &chat, &Chat::on_messageReceived);
+    connect(this, &MainWindow::interruptGeneration, &chat, &Chat::on_interruptReceived);
+
+    connect(&chat, &Chat::appendText, this, &MainWindow::on_appendText);
+    connect(&chat, &Chat::updateGUI, this, &MainWindow::on_updateGUI);
+
+    initSliderValues();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete llamaThread;
 }
 
 void MainWindow::startGenerating()
 {
-    chat.appendUserMessage(ui->promptBox->toPlainText().toStdString());
-    llamaThread->startReply(chat);
+    const QString message = ui->promptBox->toPlainText();
+    const SamplersArrayT samplers = fetchSamplers();
+#warning do not store slider values, fetch them here
+    emit sendMessage(message, samplers);
 }
 
 void MainWindow::stopGenerating()
 {
-    llamaThread->stopReply();
+    emit interruptGeneration();
 }
 
 void MainWindow::on_submitButton_clicked()
 {
-    if (llamaThread->isGenerating()) {
-        generating = false;
-        stopGenerating();
-        this->ui->submitButton->setText("submit");
-    } else {
-        generating = true;
-        startGenerating();
-        this->ui->submitButton->setText("stop");
-    }
+    startGenerating();
+    // if (llamaThread->isGenerating()) {
+    //     generating = false;
+    //     stopGenerating();
+    //     this->ui->submitButton->setText("submit");
+    // } else {
+    //     generating = true;
+    //     startGenerating();
+    //     this->ui->submitButton->setText("stop");
+    // }
 }
 
 void MainWindow::on_topKSlider_valueChanged(int value)
 {
     QString stringValue = QString::number(value);
-    Sampler sampler;
-    sampler.value.intValue = value;
-    sampler.type = TOP_K;
 
     this->ui->topKValueLabel->setText(stringValue);
-    if (this->llamaThread)
-        this->llamaThread->updateSampler(sampler);
-#warning maybe no static casts?
 }
 
 void MainWindow::on_tempSlider_valueChanged(int value)
@@ -61,8 +64,6 @@ void MainWindow::on_tempSlider_valueChanged(int value)
     QString stringValue = QString::number(floatValue, 'f', 2);
 
     this->ui->tempValueLabel->setText(stringValue);
-    if (this->llamaThread)
-        this->llamaThread->updateSampler({floatValue, TEMP});
 }
 
 void MainWindow::on_topPSlider_valueChanged(int value)
@@ -71,8 +72,6 @@ void MainWindow::on_topPSlider_valueChanged(int value)
     QString stringValue = QString::number(floatValue, 'f', 2);
 
     this->ui->topPValueLabel->setText(stringValue);
-    if (this->llamaThread)
-        this->llamaThread->updateSampler({floatValue, TOP_P});
 }
 
 void MainWindow::on_minPSlider_valueChanged(int value)
@@ -81,39 +80,36 @@ void MainWindow::on_minPSlider_valueChanged(int value)
     QString stringValue = QString::number(floatValue, 'f', 2);
 
     this->ui->minPValueLabel->setText(stringValue);
-    if (this->llamaThread)
-        this->llamaThread->updateSampler({floatValue, MIN_P});
 }
 
-#warning THIS IS FUCKING GARBAGE!!!!!
-void MainWindow::refreshChat(void)
+void MainWindow::on_appendText()
 {
-    emit refresh();
+    // if (this->llamaThread->isGenerating()) {
+    //     this->ui->submitButton->setText("stop");
+    // } else {
+    //     this->ui->submitButton->setText("submit");
+    // }
+    this->ui->chatBox->setText(chat.getString());
 }
 
-void MainWindow::on_refresh()
+void MainWindow::on_updateGUI()
 {
-    if (this->llamaThread->isGenerating()) {
-        this->ui->submitButton->setText("stop");
-    } else {
-        this->ui->submitButton->setText("submit");
-    }
-    this->ui->chatBox->setText(QString::fromStdString(chat.getString()));
+    // if (this->llamaThread->isGenerating()) {
+    //     this->ui->submitButton->setText("stop");
+    // } else {
+    //     this->ui->submitButton->setText("submit");
+    // }
+    this->ui->chatBox->setText(chat.getString());
 }
 
 #warning mind the edge cases
 void MainWindow::on_loadButton_clicked()
 {
     QString path = this->ui->pathLine->text();
-    std::function<void(void)> refreshFunc = std::bind(&MainWindow::refreshChat, this);
 
-    QObject::connect(this, &MainWindow::refresh, this, &MainWindow::on_refresh);
+    chat.loadModel(path);
 
-    if (llamaThread)
-        delete llamaThread;
-    llamaThread = new LlamaThread(path.toStdString(), refreshFunc);
-
-    this->updateSliderValues();
+#warning do this with a signal
     this->ui->statusbar->showMessage("Loaded model: " + path);
 
     config.setValue(ConfigApp::LastUsedModel, path);
@@ -122,10 +118,7 @@ void MainWindow::on_loadButton_clicked()
 void MainWindow::on_clearButton_pressed()
 {
 #warning just disable the button
-    if (this->llamaThread && this->llamaThread->isGenerating())
-        return;
     this->chat.clear();
-    emit refresh();
 }
 
 void MainWindow::on_contextSlider_valueChanged(int value)
@@ -144,7 +137,7 @@ void MainWindow::on_responseSlider_valueChanged(int value)
     this->ui->responseValueLabel->setText(stringValue);
 }
 
-void MainWindow::updateSliderValues()
+void MainWindow::initSliderValues() const
 {
     this->ui->contextSlider->valueChanged(this->ui->contextSlider->value());
     this->ui->responseSlider->valueChanged(this->ui->responseSlider->value());
@@ -169,4 +162,34 @@ void MainWindow::updateSliderValues()
             break;
         }
     }
+}
+
+SamplersArrayT MainWindow::fetchSamplers() const
+{
+    SamplersArrayT samplers;
+    for (int i = 0; i < SAMPLER_COUNT; i++) {
+#warning make this prettier
+        switch (i) {
+        case TOP_K:
+            samplers.array[i].type = TOP_K;
+            samplers.array[i].value.intValue = this->ui->topKSlider->value();
+            break;
+        case TEMP:
+            samplers.array[i].type = TEMP;
+            samplers.array[i].value.floatValue = this->ui->tempSlider->value() / decimalMultiplier;
+            break;
+        case TOP_P:
+            samplers.array[i].type = TOP_P;
+            samplers.array[i].value.floatValue = this->ui->topPSlider->value() / decimalMultiplier;
+            break;
+        case MIN_P:
+            samplers.array[i].type = MIN_P;
+            samplers.array[i].value.floatValue = this->ui->minPSlider->value() / decimalMultiplier;
+            break;
+        default:
+            fprintf(stderr, "you forgot about the %d sampler", i);
+            break;
+        }
+    }
+    return samplers;
 }

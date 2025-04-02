@@ -39,7 +39,8 @@ private slots:
 
     void on_loadButton_clicked();
 
-    void on_refresh();
+    void on_appendText();
+    void on_updateGUI();
 
     void on_clearButton_pressed();
 
@@ -48,22 +49,23 @@ private slots:
     void on_responseSlider_valueChanged(int value);
 
 signals:
-    void refresh();
-
+    void sendMessage(const QString &message, SamplersArrayT samplers);
+    void interruptGeneration();
 private:
     Ui::MainWindow *ui;
 
     ConfigApp config = ConfigApp("config.json");
 
     Chat chat;
-    LlamaThread *llamaThread = nullptr;
     bool generating = false;
 
     float decimalMultiplier = 100.f;
 
+
     void startGenerating();
     void stopGenerating();
     void refreshChat();
-    void updateSliderValues();
+    void initSliderValues() const;
+    SamplersArrayT fetchSamplers() const;
 };
 #endif // MAINWINDOW_H

@@ -5,77 +5,78 @@
 
 #include <iostream>
 
-static constexpr std::chrono::duration tick = std::chrono::milliseconds(10);
-
-void LlamaThread::run(LlamaThread *llamaThread)
+void LlamaThread::run()
 {
     try {
-        llamaThread->llama = new LlamaInterface(llamaThread->modelPath, llamaThread->refreshChat);
-        llamaThread->name = llamaThread->llama->getName();
+        this->llama = new LlamaInterface(this->modelPath);
+        this->name = this->llama->getName();
+        this->loaded = true;
 
-        while (llamaThread->running == true) {
-            if (llamaThread->samplersChanged) {
-#warning not thread safe
-                llamaThread->llama->updateSamplers(llamaThread->samplers);
-                llamaThread->samplersChanged = false;
-            }
-            if (llamaThread->chatPtr) {
-                llamaThread->llama->reply(*llamaThread->chatPtr);
-                llamaThread->chatPtr = nullptr;
-                llamaThread->refreshChat();
-            }
+        connect(this, &LlamaThread::replyStart, this->llama, &LlamaInterface::on_replyStart);
+        connect(this, &LlamaThread::replyStop, this->llama, &LlamaInterface::on_replyStop);
+
+        connect(this->llama, &LlamaInterface::tokenGenerated, this, &LlamaThread::on_tokenGenerated);
+        connect(this->llama, &LlamaInterface::generationEnd, this, &LlamaThread::on_generationEnd);
+
+        while (this->loaded) {
+            generationMutex.lock();
+            generationCondition.wait(&generationMutex);
+            emit replyStart(messages, samplers);
+            generationMutex.unlock();
         }
 
-        std::this_thread::sleep_for(tick);
     } catch (std::exception &e) {
         std::cerr << "llama.cpp error: " << e.what() << std::endl;
 #warning add error window
-        llamaThread->running = false;
     }
 
-    if (llamaThread->llama)
-        delete llamaThread->llama;
+    if (this->llama)
+        delete this->llama;
 }
 
-LlamaThread::LlamaThread(const std::string &modelPath, const std::function<void(void)> &refreshChat)
+LlamaThread::LlamaThread(const QString &modelPath)
 {
     this->llama = nullptr;
-    this->samplersChanged = false;
-    this->running = true;
-    this->chatPtr = nullptr;
+    this->loaded = false;
     this->modelPath = modelPath;
-    this->refreshChat = refreshChat;
-    this->mainThread = new std::jthread(LlamaThread::run, this);
 }
 
 LlamaThread::~LlamaThread()
 {
-    this->running = false;
-    delete this->mainThread;
+    if (this->llama)
+        delete this->llama;
+
+    this->loaded = false;
 }
 
-void LlamaThread::startReply(Chat &chat)
+void LlamaThread::on_replyStart(const QVector <llama_chat_message> &messages, const SamplersArrayT &samplers)
 {
-    this->chatPtr = &chat;
+    this->messages = messages;
+    this->samplers = samplers;
+    generationCondition.wakeOne();
 }
 
-void LlamaThread::stopReply()
+void LlamaThread::on_replyStop()
 {
-    this->llama->stop();
+    emit replyStop();
+}
+
+void LlamaThread::on_tokenGenerated(QString token)
+{
+    emit tokenGenerated(token);
+}
+
+void LlamaThread::on_generationEnd()
+{
+    emit generationEnd();
 }
 
 bool LlamaThread::isGenerating()
 {
-    return this->chatPtr != nullptr;
+    return this->llama->isGenerating();
 }
 
-void LlamaThread::updateSampler(Sampler sampler)
-{
-    this->samplers[sampler.type].value = sampler.value;
-    this->samplersChanged = true;
-}
-
-std::string LlamaThread::getName()
+QString LlamaThread::getName()
 {
     return this->name;
 }

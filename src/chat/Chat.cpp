@@ -1,34 +1,61 @@
 #include "Chat.h"
 
-#include <utility>
+#include "../ui/MainWindow.h"
 
 Chat::Chat()
 {
-    this->systemPrompt = "You are a helpful assistant. Assist with whatever user requires.";
+    this->systemPrompt = QString("You are a helpful assistant. Assist with whatever user requires.");
     this->appendSystemMessage(this->systemPrompt);
 }
 
-Chat::Chat(std::string systemPrompt)
+Chat::Chat(const QString &systemPrompt)
 {
-    this->systemPrompt = std::move(systemPrompt);
+    this->systemPrompt = systemPrompt;
     this->appendSystemMessage(this->systemPrompt);
 }
 
-void Chat::appendMessage(const std::string &message, const messageRoleE role)
+void Chat::on_messageReceived(QString message, SamplersArrayT samplers)
 {
+    this->appendMessage(message, USER);
+    this->appendMessage("", LLM);
+#warning send required state here
+    emit updateGUI();
+    emit replyStart(this->llama_messages, samplers);
+}
+
+void Chat::on_interruptReceived()
+{
+    emit replyStop();
+}
+
+void Chat::on_tokenGenerated(QString token)
+{
+    this->chat_messages.last().content += token.toStdString();
+    emit appendText();
+}
+
+void Chat::on_generationEnd()
+{
+#warning send required state here
+    emit updateGUI();
+}
+
+void Chat::appendMessage(const QString &message, const messageRoleE role)
+{
+    std::string test = message.toStdString();
     messageT chat_message;
     llama_chat_message llama_message;
 
-    const std::lock_guard<std::mutex> lock(this->mutex);
+    const std::lock_guard lock(this->mutex);
 
-    chat_message.content = message;
+    chat_message.content = message.toStdString();
     chat_message.role = role;
-    chat_messages.emplace_back(chat_message);
+    chat_messages.append(chat_message);
 
     llama_message.role = getRoleStringPrompt(role);
     llama_message.content = (chat_messages.end() - 1)->content.c_str();
     llama_messages.push_back(llama_message);
-}
+    }
 
 const char *Chat::getRoleStringUI(const messageRoleE role)
 {
@@ -58,48 +85,57 @@ const char *Chat::getRoleStringPrompt(const messageRoleE role)
     }
 }
 
-void Chat::appendUserMessage(const std::string &message)
+void Chat::loadModel(const QString &modelPath)
+{
+    unloadModel();
+    llamaThread = new LlamaThread(modelPath);
+    llamaThread->start();
+    connect(this, &Chat::replyStart, llamaThread, &LlamaThread::on_replyStart);
+    connect(this, &Chat::replyStop, llamaThread, &LlamaThread::on_replyStop);
+    connect(llamaThread, &LlamaThread::tokenGenerated, this, &Chat::on_tokenGenerated);
+    connect(llamaThread, &LlamaThread::generationEnd, this, &Chat::on_generationEnd);
+
+
+}
+
+void Chat::unloadModel()
+{
+    if (llamaThread) {
+        llamaThread->quit();
+        delete llamaThread;
+    }
+}
+
+void Chat::appendUserMessage(const QString &message)
 {
     appendMessage(message, USER);
 }
 
-void Chat::appendLLMMessage(const std::string &message)
+void Chat::appendLLMMessage(const QString &message)
 {
     appendMessage(message, LLM);
 }
 
-void Chat::appendSystemMessage(const std::string &message)
+void Chat::appendSystemMessage(const QString &message)
 {
     appendMessage(message, SYSTEM);
 }
 
-void Chat::continueMessage(const std::string &text)
+void Chat::continueMessage(const QString &text)
 {
-    const std::lock_guard<std::mutex> lock(this->mutex);
-    this->chat_messages.back().content += text;
-    this->llama_messages.back().content = this->chat_messages.back().content.c_str();
+#warning not implemented
 }
 
-llama_chat_message Chat::getMessage(const size_t index) const
+QString Chat::getString()
 {
-    return this->llama_messages[index];
-}
-
-size_t Chat::getAllMessages(llama_chat_message **message_ptr)
-{
-    const std::lock_guard<std::mutex> lock(this->mutex);
-    *message_ptr = new llama_chat_message[this->llama_messages.size()];
-    std::copy(this->llama_messages.begin(), this->llama_messages.end(), *message_ptr);
-    return this->llama_messages.size();
-}
-
-std::string Chat::getString()
-{
-    std::string output;
+    QString output;
 
     for (messageT &message : this->chat_messages) {
-        if (message.role != SYSTEM)
-            output += std::string(getRoleStringUI(message.role)) + ": " + message.content + "\n";
+        if (message.role != SYSTEM) {
+            output += getRoleStringUI(message.role);
+            output += QString::fromStdString(": " + message.content + "\n");
+        }
+
     }
 
     return output;
