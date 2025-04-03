@@ -16,11 +16,15 @@ Chat::Chat(const QString &systemPrompt)
 
 void Chat::on_messageReceived(QString message, SamplersArrayT samplers)
 {
+    QString prompt;
+
     this->appendMessage(message, USER);
+    prompt = this->promptify();
+
     this->appendMessage("", LLM);
 #warning send required state here
     emit updateGUI();
-    emit replyStart(this->llama_messages, samplers);
+    emit replyStart(prompt, samplers);
 }
 
 void Chat::on_interruptReceived()
@@ -44,17 +48,12 @@ void Chat::appendMessage(const QString &message, const messageRoleE role)
 {
     std::string test = message.toStdString();
     messageT chat_message;
-    llama_chat_message llama_message;
 
     const std::lock_guard lock(this->mutex);
 
     chat_message.content = message.toStdString();
     chat_message.role = role;
     chat_messages.append(chat_message);
-
-    llama_message.role = getRoleStringPrompt(role);
-    llama_message.content = (chat_messages.end() - 1)->content.c_str();
-    llama_messages.push_back(llama_message);
     }
 
 const char *Chat::getRoleStringUI(const messageRoleE role)
@@ -83,6 +82,39 @@ const char *Chat::getRoleStringPrompt(const messageRoleE role)
     default:
         return "unknown";
     }
+}
+
+
+QString Chat::promptify()
+{
+#warning bandaid solution with magic number
+    QString prompt;
+    llama_chat_message *llama_messages;
+    char buf[8192];
+    QString templateStr;
+    char *templateCStr;
+
+    this->mutex.lock();
+
+    llama_messages = new llama_chat_message[this->size()];
+
+    for (int i = 0; i < this->size(); i++) {
+        llama_messages[i].content = this->chat_messages[i].content.c_str();
+        llama_messages[i].role = getRoleStringPrompt(this->chat_messages[i].role);
+    }
+
+    this->mutex.unlock();
+
+    templateStr = llamaThread->getTemplate();
+    templateCStr = templateStr.toUtf8().data();
+
+    llama_chat_apply_template(templateCStr, llama_messages, this->size(), true, buf, 8192);
+
+    delete[] llama_messages;
+
+    prompt = QString(buf);
+
+    return prompt;
 }
 
 void Chat::loadModel(const QString &modelPath)
@@ -143,14 +175,13 @@ QString Chat::getString()
 
 size_t Chat::size() const
 {
-    return llama_messages.size();
+    return chat_messages.size();
 }
 
 void Chat::clear()
 {
     this->mutex.lock();
     this->chat_messages.clear();
-    this->llama_messages.clear();
     this->mutex.unlock();
 
     this->appendSystemMessage(this->systemPrompt);

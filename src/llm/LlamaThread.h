@@ -18,14 +18,15 @@ class LlamaThread : public QThread
     Q_OBJECT
 
     public slots:
-    void on_replyStart(const QVector <llama_chat_message> &messages,
-            const SamplersArrayT &samplers); // comes from Chat
+    void on_replyStart(QString prompt,
+                           SamplersArrayT samplers); // comes from Chat
     void on_replyStop(); // comes from Chat
     void on_tokenGenerated(QString token); // comes from LlamaInterface
     void on_generationEnd(); // comes from LlamaInterface
 
     signals:
-    void replyStart(const QVector <llama_chat_message> &messages, SamplersArrayT samplers); // proxied from Chat to LlamaInterface
+    void replyStart(
+            QString prompt, SamplersArrayT samplers); // proxied from Chat to LlamaInterface
     void replyStop(); // proxied from Chat to LlamaInterface
     void tokenGenerated(QString token); // proxied from LlamaInterface to Chat
     void generationEnd(); // proxied from LlamaInterface to Chat
@@ -39,7 +40,7 @@ private:
     QWaitCondition generationCondition;
     bool loaded;
 
-    QVector <llama_chat_message> messages;
+    QString prompt;
     SamplersArrayT samplers;
 
     void run() override;
@@ -50,6 +51,7 @@ public:
 
     bool isGenerating();
     QString getName();
+    QString getTemplate();
 };
 
 #endif // LLAMATHREAD_H

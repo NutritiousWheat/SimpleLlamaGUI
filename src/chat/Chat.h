@@ -7,17 +7,18 @@ class Chat : public QObject
 {
     Q_OBJECT
 
-    public slots:
+public slots:
     void on_messageReceived(QString message, SamplersArrayT samplers); // comes from MainWindow
-    void on_interruptReceived(); // comes from MainWindow
-    void on_tokenGenerated(QString token); // comes from LlamaThread
-    void on_generationEnd(); // comes from LlamaThread
+    void on_interruptReceived();                                       // comes from MainWindow
+    void on_tokenGenerated(QString token);                             // comes from LlamaThread
+    void on_generationEnd();                                           // comes from LlamaThread
 
-    signals:
-    void replyStart(const QVector <llama_chat_message> &messages, const SamplersArrayT &samplers); // sent to LlamaThread
-    void replyStop(); // sent to LlamaThread
-    void appendText(); // sent to MainWindow
+signals:
+    void replyStart(const QString &prompt, const SamplersArrayT &samplers); // sent to LlamaThread
+    void replyStop();                                                       // sent to LlamaThread
+    void appendText();                                                      // sent to MainWindow
     void updateGUI();
+
 private:
     enum messageRoleE { USER, LLM, SYSTEM };
 
@@ -32,12 +33,12 @@ private:
 
     QString systemPrompt;
     QVector<messageT> chat_messages;
-    QVector<llama_chat_message> llama_messages;
     QMutex mutex;
 
     void appendMessage(const QString &message, messageRoleE role);
     static const char *getRoleStringUI(messageRoleE role);
     static const char *getRoleStringPrompt(messageRoleE role);
+    QString promptify();
 
 public:
     Chat();

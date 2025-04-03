@@ -42,7 +42,7 @@ class LlamaInterface : public QObject
     Q_OBJECT
 
 public slots:
-    void on_replyStart(const QVector <llama_chat_message> &messages, const SamplersArrayT &samplers);
+    void on_replyStart(QString prompt, SamplersArrayT samplers);
     void on_replyStop();
 
     signals:
@@ -73,6 +73,7 @@ public:
 
     bool isGenerating();
     QString getName();
+    QString getTemplate();
 };
 
 #endif // LLAMAINTERFACE_H

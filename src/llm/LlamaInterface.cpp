@@ -113,9 +113,9 @@ QString LlamaInterface::promptify(const QVector <llama_chat_message> &messages)
     return prompt;
 }
 
-void LlamaInterface::on_replyStart(const QVector <llama_chat_message> &messages, const SamplersArrayT &samplers)
+void LlamaInterface::on_replyStart(QString prompt, SamplersArrayT samplers)
 {
-    QString prompt;
+    std::string promptStdStr = prompt.toStdString();
     llama_token *tokens;
     const llama_vocab *vocab;
 
@@ -132,14 +132,12 @@ void LlamaInterface::on_replyStart(const QVector <llama_chat_message> &messages,
 
     generating = true;
 
-    prompt = promptify(messages);
-
     tokens = new llama_token[prompt.size()];
 
     vocab = llama_model_get_vocab(model);
 #warning context breaks after second message
     n_tokens
-        = llama_tokenize(vocab, prompt.toUtf8(), prompt.size(), tokens, prompt.size(), true, true);
+        = llama_tokenize(vocab, promptStdStr.c_str(), promptStdStr.size(), tokens, promptStdStr.size(), true, true);
     n_ctx = llama_n_ctx(ctx);
     n_kv_req = N_CTX + (N_PREDICT - N_CTX);
 
@@ -249,4 +247,11 @@ void LlamaInterface::setSamplers(const SamplersArrayT &samplers)
 QString LlamaInterface::getName()
 {
     return this->name;
+}
+
+QString LlamaInterface::getTemplate()
+{
+    const char *templateCStr = llama_model_chat_template(model, NULL);
+
+    return {templateCStr};
 }

@@ -21,7 +21,7 @@ void LlamaThread::run()
         while (this->loaded) {
             generationMutex.lock();
             generationCondition.wait(&generationMutex);
-            emit replyStart(messages, samplers);
+            emit replyStart(prompt, samplers);
             generationMutex.unlock();
         }
 
@@ -49,9 +49,9 @@ LlamaThread::~LlamaThread()
     this->loaded = false;
 }
 
-void LlamaThread::on_replyStart(const QVector <llama_chat_message> &messages, const SamplersArrayT &samplers)
+void LlamaThread::on_replyStart(QString prompt, SamplersArrayT samplers)
 {
-    this->messages = messages;
+    this->prompt = prompt;
     this->samplers = samplers;
     generationCondition.wakeOne();
 }
@@ -73,10 +73,21 @@ void LlamaThread::on_generationEnd()
 
 bool LlamaThread::isGenerating()
 {
-    return this->llama->isGenerating();
+    if (this->llama)
+        return this->llama->isGenerating();
+
+    return false;
 }
 
 QString LlamaThread::getName()
 {
     return this->name;
+}
+
+QString LlamaThread::getTemplate()
+{
+    if (this->llama)
+        return llama->getTemplate();
+
+    return "";
 }
