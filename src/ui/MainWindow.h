@@ -46,6 +46,10 @@ private slots:
 
     void on_responseSlider_valueChanged(int value);
 
+    void on_unloadButton_clicked();
+
+    void on_refreshButton_clicked();
+
 signals:
     void sendMessage(const QString &message, SamplersArrayT samplers);
     void interruptGeneration();
@@ -67,8 +71,8 @@ private:
 
     void startGenerating();
     void stopGenerating();
-    void refreshChat();
     void initSliderValues() const;
     SamplersArrayT fetchSamplers() const;
+    void refreshModels();
 };
 #endif // MAINWINDOW_H

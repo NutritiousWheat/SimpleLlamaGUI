@@ -26,18 +26,16 @@ void LlamaThread::run()
             generationMutex.lock();
             generationCondition.wait(&generationMutex);
 
-            emit replyStart(prompt, samplers);
+            if (this->loaded)
+                emit replyStart(prompt, samplers);
 
             generationMutex.unlock();
         }
-
-        emit modelUnloaded();
-
     } catch (std::exception &e) {
-        emit modelUnloaded();
         emit exceptionOccured(e.what());
     }
 
+    emit modelUnloaded();
     if (this->llama)
         delete this->llama;
 }
@@ -51,10 +49,9 @@ LlamaThread::LlamaThread(const QString &modelPath)
 
 LlamaThread::~LlamaThread()
 {
-    if (this->llama)
-        delete this->llama;
-
     this->loaded = false;
+    this->generationCondition.wakeOne();
+    this->wait();
 }
 
 void LlamaThread::on_replyStart(QString prompt, SamplersArrayT samplers)

@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 
+#include <QDir>
 #include <QMessageBox>
 
 #include "./ui_MainWindow.h"
@@ -10,8 +11,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->statusbar->showMessage("Loaded model: None");
-    ui->pathLine->setText(config.getValue(ConfigApp::LastUsedModel));
 
     connect(this, &MainWindow::sendMessage, &chat, &Chat::on_messageReceived);
     connect(this, &MainWindow::interruptGeneration, &chat, &Chat::on_interruptReceived);
@@ -22,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     initSliderValues();
     procStateNotLoaded();
+    refreshModels();
 }
 
 MainWindow::~MainWindow()
@@ -143,11 +143,12 @@ void MainWindow::on_exceptionOccured(QString errorMsg)
 
 void MainWindow::on_loadButton_clicked()
 {
-    QString path = this->ui->pathLine->text();
+    QString name = ui->modelBox->itemText(ui->modelBox->currentIndex());
+    QString path = config.getValue(ConfigApp::ModelDir) + "/" + name;
 
     chat.loadModel(path);
 
-    config.setValue(ConfigApp::LastUsedModel, path);
+    config.setValue(ConfigApp::LastUsedModel, name);
 }
 
 void MainWindow::on_clearButton_pressed()
@@ -170,6 +171,16 @@ void MainWindow::on_responseSlider_valueChanged(int value)
     QString stringValue = QString::number(value);
 
     this->ui->responseValueLabel->setText(stringValue);
+}
+
+void MainWindow::on_unloadButton_clicked()
+{
+    chat.unloadModel();
+}
+
+void MainWindow::on_refreshButton_clicked()
+{
+    refreshModels();
 }
 
 void MainWindow::initSliderValues() const
@@ -227,4 +238,21 @@ SamplersArrayT MainWindow::fetchSamplers() const
         }
     }
     return samplers;
+}
+
+void MainWindow::refreshModels()
+{
+    QString lastUsedModel = config.getValue(ConfigApp::LastUsedModel);
+    QString modelDirPath = config.getValue(ConfigApp::ModelDir);
+    QDir modelDir(modelDirPath);
+    QList fileList = modelDir.entryList(QDir::Files, QDir::Name);
+
+    ui->modelBox->clear();
+    for (int i = 0; i < fileList.size(); i++) {
+        ui->modelBox->addItem(fileList[i]);
+    }
+
+    if (fileList.contains(lastUsedModel)) {
+        ui->modelBox->setCurrentText(lastUsedModel);
+    }
 }

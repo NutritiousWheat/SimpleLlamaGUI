@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QJsonDocument>
+#include <QDir>
 
 void ConfigApp::initFile()
 {
@@ -60,10 +61,24 @@ void ConfigApp::writeFile()
 #warning implement a delay which is reset afeter every write operation
 }
 
+void ConfigApp::initDir(QString path)
+{
+    bool result = true;
+    if (!QDir(path).exists()) {
+        result = QDir().mkdir(path);
+    }
+    if (!result) {
+        throw std::runtime_error("config::initDir: Failed to create directory");
+    }
+}
+
 ConfigApp::ConfigApp(const QString &config_path)
 {
     this->configPath = config_path;
     readFile();
+    initDir(getValue(ModelDir));
+    initDir(getValue(ModelConfigDir));
+    initDir(getValue(SamplerPresetDir));
 }
 
 QString ConfigApp::keyToString(KeyIntE key)

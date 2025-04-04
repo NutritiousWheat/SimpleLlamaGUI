@@ -25,6 +25,7 @@ private:
     void initFile();
     void readFile();
     void writeFile();
+    void initDir(QString path);
 
 public:
     enum KeyIntE
