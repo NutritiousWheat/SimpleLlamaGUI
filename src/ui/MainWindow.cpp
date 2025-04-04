@@ -32,21 +32,25 @@ MainWindow::~MainWindow()
 void MainWindow::procStateNotLoaded()
 {
     ui->submitButton->setDisabled(true);
+    this->ui->statusbar->showMessage("Model unloaded");
 }
 
 void MainWindow::procStateLoading()
 {
     ui->submitButton->setDisabled(true);
+    this->ui->statusbar->showMessage("Model loading");
 }
 
 void MainWindow::procStateIdle()
 {
     ui->submitButton->setDisabled(false);
+    this->ui->statusbar->showMessage("Loaded model: " + this->chat.getModelName());
 }
 
 void MainWindow::procStateGenerating()
 {
     ui->submitButton->setDisabled(true); // replace with stop button
+    this->ui->statusbar->showMessage("Loaded model: " + this->chat.getModelName());
 }
 
 void MainWindow::startGenerating()
@@ -137,15 +141,11 @@ void MainWindow::on_exceptionOccured(QString errorMsg)
     QMessageBox::warning(nullptr, ERR_HEADER, "Exception occured:\n" + errorMsg);
 }
 
-#warning mind the edge cases
 void MainWindow::on_loadButton_clicked()
 {
     QString path = this->ui->pathLine->text();
 
     chat.loadModel(path);
-
-#warning do this with a signal
-    this->ui->statusbar->showMessage("Loaded model: " + path);
 
     config.setValue(ConfigApp::LastUsedModel, path);
 }

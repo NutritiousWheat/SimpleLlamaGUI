@@ -78,6 +78,7 @@ public:
     QString getString();
     [[nodiscard]] size_t size() const;
     void clear();
+    QString getModelName() const;
 };
 
 #endif // CHAT_H

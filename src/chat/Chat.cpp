@@ -218,3 +218,12 @@ void Chat::clear()
 
     this->appendSystemMessage(this->systemPrompt);
 }
+
+QString Chat::getModelName() const
+{
+    if (llamaThread) {
+        return llamaThread->getName();
+    }
+
+    return "";
+}

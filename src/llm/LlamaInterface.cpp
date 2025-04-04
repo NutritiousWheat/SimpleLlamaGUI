@@ -1,4 +1,6 @@
 #include "LlamaInterface.h"
+
+#include <llama-model.h>
 #include <stdexcept>
 
 #define N_PREDICT 250
@@ -63,7 +65,7 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     ctx_params.flash_attn = false;  // whether to use flash attention [EXPERIMENTAL]
     ctx_params.abort_callback = nullptr;
     ctx_params.abort_callback_data = nullptr;
-#warning context doesnt get cleared
+
     ctx = llama_init_from_model(model, ctx_params);
 
     if (ctx == nullptr) {
@@ -81,7 +83,7 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     batch = llama_batch_init(N_UBATCH, 0, 1);
 
 #warning get actual name from metadata
-    this->name = modelPath;
+    this->name = QString::fromStdString(model->name);
 }
 
 LlamaInterface::~LlamaInterface()

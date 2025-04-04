@@ -7,13 +7,6 @@
 #include "../chat/Chat.h"
 #include "../llm/LlamaThread.h"
 
-#warning TODO
-#warning use QThread for llamathread
-#warning use QObject for the rest of the classes
-#warning do signals and slots
-#warning no exceptions in event handlers
-
-
 #define CRIT_HEADER "Critical error"
 #define ERR_HEADER "Error"
 

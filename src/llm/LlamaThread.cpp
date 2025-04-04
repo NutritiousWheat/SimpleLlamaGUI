@@ -36,7 +36,6 @@ void LlamaThread::run()
     } catch (std::exception &e) {
         emit modelUnloaded();
         emit exceptionOccured(e.what());
-#warning add error window
     }
 
     if (this->llama)
