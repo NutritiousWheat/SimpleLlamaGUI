@@ -8,6 +8,8 @@
 void LlamaThread::run()
 {
     try {
+        emit modelLoading();
+
         this->llama = new LlamaInterface(this->modelPath);
         this->name = this->llama->getName();
         this->loaded = true;
@@ -18,15 +20,22 @@ void LlamaThread::run()
         connect(this->llama, &LlamaInterface::tokenGenerated, this, &LlamaThread::on_tokenGenerated);
         connect(this->llama, &LlamaInterface::generationEnd, this, &LlamaThread::on_generationEnd);
 
+        emit modelLoaded();
+
         while (this->loaded) {
             generationMutex.lock();
             generationCondition.wait(&generationMutex);
+
             emit replyStart(prompt, samplers);
+
             generationMutex.unlock();
         }
 
+        emit modelUnloaded();
+
     } catch (std::exception &e) {
-        std::cerr << "llama.cpp error: " << e.what() << std::endl;
+        emit modelUnloaded();
+        emit exceptionOccured(e.what());
 #warning add error window
     }
 

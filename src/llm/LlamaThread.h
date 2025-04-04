@@ -4,8 +4,11 @@
 #include <QThread>
 #include <QWaitCondition>
 #include <QMutex>
+#include <QException>
 
 #include "LlamaInterface.h"
+
+
 
 QT_BEGIN_NAMESPACE
 namespace LLM {
@@ -30,6 +33,10 @@ class LlamaThread : public QThread
     void replyStop(); // proxied from Chat to LlamaInterface
     void tokenGenerated(QString token); // proxied from LlamaInterface to Chat
     void generationEnd(); // proxied from LlamaInterface to Chat
+    void exceptionOccured(QString e);
+    void modelLoading();
+    void modelLoaded();
+    void modelUnloaded();
 
 private:
 

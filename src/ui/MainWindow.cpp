@@ -1,4 +1,7 @@
 #include "MainWindow.h"
+
+#include <QMessageBox>
+
 #include "./ui_MainWindow.h"
 #include <QObject>
 
@@ -15,8 +18,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(&chat, &Chat::appendText, this, &MainWindow::on_appendText);
     connect(&chat, &Chat::updateGUI, this, &MainWindow::on_updateGUI);
+    connect(&chat, &Chat::exceptionOccured, this, &MainWindow::on_exceptionOccured);
 
     initSliderValues();
+    procStateNotLoaded();
 }
 
 MainWindow::~MainWindow()
@@ -24,11 +29,31 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::procStateNotLoaded()
+{
+    ui->submitButton->setDisabled(true);
+}
+
+void MainWindow::procStateLoading()
+{
+    ui->submitButton->setDisabled(true);
+}
+
+void MainWindow::procStateIdle()
+{
+    ui->submitButton->setDisabled(false);
+}
+
+void MainWindow::procStateGenerating()
+{
+    ui->submitButton->setDisabled(true); // replace with stop button
+}
+
 void MainWindow::startGenerating()
 {
     const QString message = ui->promptBox->toPlainText();
     const SamplersArrayT samplers = fetchSamplers();
-#warning do not store slider values, fetch them here
+
     emit sendMessage(message, samplers);
 }
 
@@ -84,22 +109,32 @@ void MainWindow::on_minPSlider_valueChanged(int value)
 
 void MainWindow::on_appendText()
 {
-    // if (this->llamaThread->isGenerating()) {
-    //     this->ui->submitButton->setText("stop");
-    // } else {
-    //     this->ui->submitButton->setText("submit");
-    // }
     this->ui->chatBox->setText(chat.getString());
 }
 
-void MainWindow::on_updateGUI()
+void MainWindow::on_updateGUI(Chat::chatStateE state)
 {
-    // if (this->llamaThread->isGenerating()) {
-    //     this->ui->submitButton->setText("stop");
-    // } else {
-    //     this->ui->submitButton->setText("submit");
-    // }
-    this->ui->chatBox->setText(chat.getString());
+    switch (state) {
+    case Chat::CHAT_STATE_NOT_LOADED:
+        procStateNotLoaded();
+        break;
+    case Chat::CHAT_STATE_LOADING:
+        procStateLoading();
+        break;
+    case Chat::CHAT_STATE_IDLE:
+        procStateIdle();
+        break;
+    case Chat::CHAT_STATE_GENERATING:
+        procStateGenerating();
+        break;
+    default:
+        throw std::runtime_error("Unknown state");
+    }
+}
+
+void MainWindow::on_exceptionOccured(QString errorMsg)
+{
+    QMessageBox::warning(nullptr, ERR_HEADER, "Exception occured:\n" + errorMsg);
 }
 
 #warning mind the edge cases

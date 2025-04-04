@@ -7,21 +7,26 @@ class Chat : public QObject
 {
     Q_OBJECT
 
-public slots:
-    void on_messageReceived(QString message, SamplersArrayT samplers); // comes from MainWindow
-    void on_interruptReceived();                                       // comes from MainWindow
-    void on_tokenGenerated(QString token);                             // comes from LlamaThread
-    void on_generationEnd();                                           // comes from LlamaThread
+public:
+    enum chatStateE
+    {
+        CHAT_STATE_NOT_LOADED,
+        CHAT_STATE_LOADING,
+        CHAT_STATE_IDLE,
+        CHAT_STATE_GENERATING,
 
-signals:
-    void replyStart(const QString &prompt, const SamplersArrayT &samplers); // sent to LlamaThread
-    void replyStop();                                                       // sent to LlamaThread
-    void appendText();                                                      // sent to MainWindow
-    void updateGUI();
+        CHAT_STATE_COUNT
+    };
 
 private:
-    enum messageRoleE { USER, LLM, SYSTEM };
+    enum messageRoleE
+    {
+        MESSAGE_ROLE_USER,
+        MESSAGE_ROLE_LLM,
+        MESSAGE_ROLE_SYSTEM,
 
+        MESSAGE_ROLE_COUNT
+    };
     struct messageT
     {
 #warning try figuring out a better way to store llama messages
@@ -29,6 +34,24 @@ private:
         messageRoleE role;
     };
 
+public slots:
+    void on_messageReceived(QString message, SamplersArrayT samplers); // comes from MainWindow
+    void on_interruptReceived();                                       // comes from MainWindow
+    void on_tokenGenerated(QString token);                             // comes from LlamaThread
+    void on_generationEnd();                                           // comes from LlamaThread
+    void on_exceptionOccured(QString errorMsg);
+    void on_modelLoading();
+    void on_modelLoaded();
+    void on_modelUnloaded();
+
+signals:
+    void replyStart(const QString &prompt, const SamplersArrayT &samplers); // sent to LlamaThread
+    void replyStop();                                                       // sent to LlamaThread
+    void appendText();                                                      // sent to MainWindow
+    void updateGUI(chatStateE state);
+    void exceptionOccured(QString e);
+
+private:
     LlamaThread *llamaThread = nullptr;
 
     QString systemPrompt;

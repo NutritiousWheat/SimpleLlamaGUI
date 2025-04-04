@@ -135,7 +135,6 @@ void LlamaInterface::on_replyStart(QString prompt, SamplersArrayT samplers)
     tokens = new llama_token[prompt.size()];
 
     vocab = llama_model_get_vocab(model);
-#warning context breaks after second message
     n_tokens
         = llama_tokenize(vocab, promptStdStr.c_str(), promptStdStr.size(), tokens, promptStdStr.size(), true, true);
     n_ctx = llama_n_ctx(ctx);

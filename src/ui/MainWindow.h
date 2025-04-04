@@ -13,6 +13,10 @@
 #warning do signals and slots
 #warning no exceptions in event handlers
 
+
+#define CRIT_HEADER "Critical error"
+#define ERR_HEADER "Error"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -27,6 +31,10 @@ public:
     ~MainWindow() override;
 
 private slots:
+    void on_appendText();
+    void on_updateGUI(Chat::chatStateE state);
+    void on_exceptionOccured(QString errorMsg);
+
     void on_submitButton_clicked();
 
     void on_tempSlider_valueChanged(int value);
@@ -38,9 +46,6 @@ private slots:
     void on_minPSlider_valueChanged(int value);
 
     void on_loadButton_clicked();
-
-    void on_appendText();
-    void on_updateGUI();
 
     void on_clearButton_pressed();
 
@@ -60,6 +65,11 @@ private:
     bool generating = false;
 
     float decimalMultiplier = 100.f;
+
+    void procStateNotLoaded();
+    void procStateLoading();
+    void procStateIdle();
+    void procStateGenerating();
 
 
     void startGenerating();
