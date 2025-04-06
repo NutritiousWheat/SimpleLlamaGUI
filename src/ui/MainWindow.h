@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSlider>
 
 #include "../config/ConfigApp.h"
 #include "../chat/Chat.h"
@@ -30,13 +31,7 @@ private slots:
 
     void on_submitButton_clicked();
 
-    void on_tempSlider_valueChanged(int value);
 
-    void on_topKSlider_valueChanged(int value);
-
-    void on_topPSlider_valueChanged(int value);
-
-    void on_minPSlider_valueChanged(int value);
 
     void on_loadButton_clicked();
 
@@ -50,18 +45,22 @@ private slots:
 
     void on_refreshButton_clicked();
 
+public slots:
+    void on_sampler_valueChanged(Sampler sampler);
+
 signals:
-    void sendMessage(const QString &message, SamplersArrayT samplers);
+    void sendMessage(const QString &message, SamplerArray samplers);
     void interruptGeneration();
 private:
+    QSlider test;
     Ui::MainWindow *ui;
 
     ConfigApp config = ConfigApp("config.json");
 
     Chat chat;
-    bool generating = false;
+    SamplerArray samplers;
 
-    float decimalMultiplier = 100.f;
+
 
     void procStateNotLoaded();
     void procStateLoading();
@@ -71,8 +70,6 @@ private:
 
     void startGenerating();
     void stopGenerating();
-    void initSliderValues() const;
-    SamplersArrayT fetchSamplers() const;
     void refreshModels();
 };
 #endif // MAINWINDOW_H

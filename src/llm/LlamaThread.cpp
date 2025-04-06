@@ -36,8 +36,11 @@ void LlamaThread::run()
     }
 
     emit modelUnloaded();
-    if (this->llama)
+    if (this->llama) {
         delete this->llama;
+        this->llama = nullptr;
+    }
+
 }
 
 LlamaThread::LlamaThread(const QString &modelPath)
@@ -54,7 +57,7 @@ LlamaThread::~LlamaThread()
     this->wait();
 }
 
-void LlamaThread::on_replyStart(QString prompt, SamplersArrayT samplers)
+void LlamaThread::on_replyStart(QString prompt, SamplerArray samplers)
 {
     this->prompt = prompt;
     this->samplers = samplers;

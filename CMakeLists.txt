@@ -23,7 +23,14 @@ set(PROJECT_SOURCES
         src/config/ConfigApp.h
         src/config/ConfigModel.cpp
         src/config/ConfigModel.h
+        src/ui/SamplerSlider.cpp
+        src/ui/SamplerSlider.h
+        src/llm/Sampler.h
+        src/llm/Sampler.cpp
+        src/llm/SamplerArray.cpp
+        src/llm/SamplerArray.h
 )
+include_directories(${PROJECT_SOURCE_DIR}/src/ui) # hack for custom widgets
 
 set(LLAMA_CPP_DIR submodules/llama.cpp)
 set(LLAMA_CPP_HEADERS ${LLAMA_CPP_DIR}/include/llama.h)
@@ -40,6 +47,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 else()
     add_executable(qtllama
         ${PROJECT_SOURCES}
+        ${LLAMA_CPP_HEADERS}
     )
 endif()
 

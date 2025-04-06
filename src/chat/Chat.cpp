@@ -14,7 +14,7 @@ Chat::Chat(const QString &systemPrompt)
     this->appendSystemMessage(this->systemPrompt);
 }
 
-void Chat::on_messageReceived(QString message, SamplersArrayT samplers)
+void Chat::on_messageReceived(QString message, const SamplerArray &samplers)
 {
     QString prompt;
 
@@ -166,6 +166,7 @@ void Chat::unloadModel()
     if (llamaThread) {
         llamaThread->quit();
         delete llamaThread;
+        llamaThread = nullptr;
     }
     emit updateGUI(CHAT_STATE_NOT_LOADED);
 }

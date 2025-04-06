@@ -7,8 +7,7 @@
 #include <QException>
 
 #include "LlamaInterface.h"
-
-
+#include "SamplerArray.h"
 
 QT_BEGIN_NAMESPACE
 namespace LLM {
@@ -22,14 +21,14 @@ class LlamaThread : public QThread
 
     public slots:
     void on_replyStart(QString prompt,
-                           SamplersArrayT samplers); // comes from Chat
+                           SamplerArray samplers); // comes from Chat
     void on_replyStop(); // comes from Chat
     void on_tokenGenerated(QString token); // comes from LlamaInterface
     void on_generationEnd(); // comes from LlamaInterface
 
     signals:
     void replyStart(
-            QString prompt, SamplersArrayT samplers); // proxied from Chat to LlamaInterface
+            QString prompt, SamplerArray samplers); // proxied from Chat to LlamaInterface
     void replyStop(); // proxied from Chat to LlamaInterface
     void tokenGenerated(QString token); // proxied from LlamaInterface to Chat
     void generationEnd(); // proxied from LlamaInterface to Chat
@@ -48,7 +47,7 @@ private:
     bool loaded;
 
     QString prompt;
-    SamplersArrayT samplers;
+    SamplerArray samplers;
 
     void run() override;
 

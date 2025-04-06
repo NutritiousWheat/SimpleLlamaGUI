@@ -1,5 +1,6 @@
 #include "LlamaInterface.h"
 
+#include "SamplerArray.h"
 #include <llama-model.h>
 #include <stdexcept>
 
@@ -115,7 +116,7 @@ QString LlamaInterface::promptify(const QVector <llama_chat_message> &messages)
     return prompt;
 }
 
-void LlamaInterface::on_replyStart(QString prompt, SamplersArrayT samplers)
+void LlamaInterface::on_replyStart(QString prompt, SamplerArray samplers)
 {
     std::string promptStdStr = prompt.toStdString();
     llama_token *tokens;
@@ -217,30 +218,31 @@ void LlamaInterface::on_replyStop()
     this->forceStop = true;
 }
 
-#warning rewrite that
-void LlamaInterface::setSamplers(const SamplersArrayT &samplers)
+void LlamaInterface::setSamplers(SamplerArray samplers)
 {
     if (sampler)
         free(sampler);
 
     sampler = llama_sampler_chain_init({true}); // no_perf = true
 
+    samplers[Sampler::SAMPLER_TEMP];
+
     if (sampler == nullptr) {
         throw std::runtime_error("unable to init sampler chain");
     }
-
+#warning remove that debug print
     fprintf(
         stderr,
         "temp: %f, top p: %f, min p: %f, top k: %u\n",
-        samplers.array[TEMP].value.floatValue,
-        samplers.array[TOP_P].value.floatValue,
-        samplers.array[MIN_P].value.floatValue,
-        samplers.array[TOP_K].value.intValue);
+        samplers[Sampler::SAMPLER_TEMP].getValueFloat(),
+        samplers[Sampler::SAMPLER_TOP_P].getValueFloat(),
+        samplers[Sampler::SAMPLER_MIN_P].getValueFloat(),
+        samplers[Sampler::SAMPLER_TOP_K].getValueInt());
 
-    llama_sampler_chain_add(sampler, llama_sampler_init_temp(samplers.array[TEMP].value.floatValue));
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(samplers.array[TOP_P].value.floatValue, 1));
-    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(samplers.array[MIN_P].value.floatValue, 1));
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_k(samplers.array[TOP_K].value.intValue));
+    llama_sampler_chain_add(sampler, llama_sampler_init_temp(samplers[Sampler::SAMPLER_TEMP].getValueFloat()));
+    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(samplers[Sampler::SAMPLER_TOP_P].getValueFloat(), 1));
+    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(samplers[Sampler::SAMPLER_MIN_P].getValueFloat(), 1));
+    llama_sampler_chain_add(sampler, llama_sampler_init_top_k(samplers[Sampler::SAMPLER_TOP_K].getValueInt()));
 
     llama_sampler_chain_add(sampler, llama_sampler_init_dist(rng.getRand()));
 }

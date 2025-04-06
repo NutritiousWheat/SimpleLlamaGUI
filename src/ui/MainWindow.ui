@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabChat">
      <attribute name="title">
@@ -127,7 +127,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QSlider" name="topKSlider">
+          <widget class="SamplerSlider" name="topKSlider">
            <property name="minimum">
             <number>-1</number>
            </property>
@@ -418,12 +418,19 @@
      <x>0</x>
      <y>0</y>
      <width>1227</width>
-     <height>23</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SamplerSlider</class>
+   <extends>QSlider</extends>
+   <header>SamplerSlider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

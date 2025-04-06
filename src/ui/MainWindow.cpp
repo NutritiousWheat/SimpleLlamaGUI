@@ -6,11 +6,14 @@
 #include "./ui_MainWindow.h"
 #include <QObject>
 
+#include "SamplerSlider.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->topKSlider->init(this, Sampler::SAMPLER_TOP_K);
 
     connect(this, &MainWindow::sendMessage, &chat, &Chat::on_messageReceived);
     connect(this, &MainWindow::interruptGeneration, &chat, &Chat::on_interruptReceived);
@@ -19,7 +22,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&chat, &Chat::updateGUI, this, &MainWindow::on_updateGUI);
     connect(&chat, &Chat::exceptionOccured, this, &MainWindow::on_exceptionOccured);
 
-    initSliderValues();
     procStateNotLoaded();
     refreshModels();
 }
@@ -56,7 +58,6 @@ void MainWindow::procStateGenerating()
 void MainWindow::startGenerating()
 {
     const QString message = ui->promptBox->toPlainText();
-    const SamplersArrayT samplers = fetchSamplers();
 
     emit sendMessage(message, samplers);
 }
@@ -80,35 +81,9 @@ void MainWindow::on_submitButton_clicked()
     // }
 }
 
-void MainWindow::on_topKSlider_valueChanged(int value)
+void MainWindow::on_sampler_valueChanged(const Sampler sampler)
 {
-    QString stringValue = QString::number(value);
-
-    this->ui->topKValueLabel->setText(stringValue);
-}
-
-void MainWindow::on_tempSlider_valueChanged(int value)
-{
-    float floatValue = value / decimalMultiplier;
-    QString stringValue = QString::number(floatValue, 'f', 2);
-
-    this->ui->tempValueLabel->setText(stringValue);
-}
-
-void MainWindow::on_topPSlider_valueChanged(int value)
-{
-    float floatValue = value / decimalMultiplier;
-    QString stringValue = QString::number(floatValue, 'f', 2);
-
-    this->ui->topPValueLabel->setText(stringValue);
-}
-
-void MainWindow::on_minPSlider_valueChanged(int value)
-{
-    float floatValue = value / decimalMultiplier;
-    QString stringValue = QString::number(floatValue, 'f', 2);
-
-    this->ui->minPValueLabel->setText(stringValue);
+    samplers[sampler.getType()] = sampler;
 }
 
 void MainWindow::on_appendText()
@@ -153,8 +128,8 @@ void MainWindow::on_loadButton_clicked()
 
 void MainWindow::on_clearButton_pressed()
 {
-#warning just disable the button
     this->chat.clear();
+    this->ui->chatBox->setText("");
 }
 
 void MainWindow::on_contextSlider_valueChanged(int value)
@@ -181,63 +156,6 @@ void MainWindow::on_unloadButton_clicked()
 void MainWindow::on_refreshButton_clicked()
 {
     refreshModels();
-}
-
-void MainWindow::initSliderValues() const
-{
-    this->ui->contextSlider->valueChanged(this->ui->contextSlider->value());
-    this->ui->responseSlider->valueChanged(this->ui->responseSlider->value());
-
-    for (int i = 0; i < SAMPLER_COUNT; i++) {
-#warning make this prettier
-        switch (i) {
-        case TOP_K:
-            this->ui->topKSlider->valueChanged(this->ui->topKSlider->value());
-            break;
-        case TEMP:
-            this->ui->tempSlider->valueChanged(this->ui->tempSlider->value());
-            break;
-        case TOP_P:
-            this->ui->topPSlider->valueChanged(this->ui->topPSlider->value());
-            break;
-        case MIN_P:
-            this->ui->minPSlider->valueChanged(this->ui->minPSlider->value());
-            break;
-        default:
-            fprintf(stderr, "you forgot about the %d sampler", i);
-            break;
-        }
-    }
-}
-
-SamplersArrayT MainWindow::fetchSamplers() const
-{
-    SamplersArrayT samplers;
-    for (int i = 0; i < SAMPLER_COUNT; i++) {
-#warning make this prettier
-        switch (i) {
-        case TOP_K:
-            samplers.array[i].type = TOP_K;
-            samplers.array[i].value.intValue = this->ui->topKSlider->value();
-            break;
-        case TEMP:
-            samplers.array[i].type = TEMP;
-            samplers.array[i].value.floatValue = this->ui->tempSlider->value() / decimalMultiplier;
-            break;
-        case TOP_P:
-            samplers.array[i].type = TOP_P;
-            samplers.array[i].value.floatValue = this->ui->topPSlider->value() / decimalMultiplier;
-            break;
-        case MIN_P:
-            samplers.array[i].type = MIN_P;
-            samplers.array[i].value.floatValue = this->ui->minPSlider->value() / decimalMultiplier;
-            break;
-        default:
-            fprintf(stderr, "you forgot about the %d sampler", i);
-            break;
-        }
-    }
-    return samplers;
 }
 
 void MainWindow::refreshModels()

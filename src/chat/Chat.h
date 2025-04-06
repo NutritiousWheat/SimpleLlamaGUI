@@ -35,7 +35,7 @@ private:
     };
 
 public slots:
-    void on_messageReceived(QString message, SamplersArrayT samplers); // comes from MainWindow
+    void on_messageReceived(QString message, const SamplerArray &samplers); // comes from MainWindow
     void on_interruptReceived();                                       // comes from MainWindow
     void on_tokenGenerated(QString token);                             // comes from LlamaThread
     void on_generationEnd();                                           // comes from LlamaThread
@@ -45,7 +45,7 @@ public slots:
     void on_modelUnloaded();
 
 signals:
-    void replyStart(const QString &prompt, const SamplersArrayT &samplers); // sent to LlamaThread
+    void replyStart(const QString &prompt, const SamplerArray &samplers); // sent to LlamaThread
     void replyStop();                                                       // sent to LlamaThread
     void appendText();                                                      // sent to MainWindow
     void updateGUI(chatStateE state);
