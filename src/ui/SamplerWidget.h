@@ -1,0 +1,37 @@
+#ifndef SAMPLERWIDGET_H
+#define SAMPLERWIDGET_H
+
+#include <QWidget>
+#include "../llm/Sampler.h"
+
+namespace Ui {
+class SamplerWidget;
+}
+
+class SamplerWidget : public QWidget
+{
+    Q_OBJECT
+    Sampler sampler;
+
+public:
+    explicit SamplerWidget(QWidget *parent = nullptr);
+    ~SamplerWidget();
+
+    signals:
+    void samplerUpdated(Sampler sampler);
+
+private slots:
+    void on_samplerSlider_valueChanged(int value);
+
+    void on_samplerLine_textChanged(const QString &text);
+
+private:
+    static int samplerCount;
+    static Sampler::SamplerTypeE getNextSamplerType();
+    Ui::SamplerWidget *ui;
+
+    int parseInt(const QString &text);
+    float parseFloat(const QString &text);
+};
+
+#endif // SAMPLERWIDGET_H

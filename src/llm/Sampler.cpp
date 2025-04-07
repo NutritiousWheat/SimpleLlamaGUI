@@ -1,22 +1,26 @@
 #include "Sampler.h"
 
 #include <stdexcept>
+#include <QMap>
+
+float Sampler::floatMultiplier = 100.f;
+
+QMap<QString, Sampler::SamplerTypeE> Sampler::nameMap
+        = {{"Temperature", SAMPLER_TEMP}, // TODO: UI shouldn't get strings from this
+           {"Top K", SAMPLER_TOP_K},
+           {"Top P", SAMPLER_TOP_P},
+           {"Min P", SAMPLER_MIN_P}};
 
 Sampler::Sampler()
 {
     this->type = SAMPLERS_COUNT; // invalidates the empty sampler
-    this->value = {};
+    this->value = 0;
 }
 
 Sampler::Sampler(const SamplerTypeE type)
 {
     this->type = type;
-
-    if (isInt()) {
-        this->value.intValue = getDefaultValueInt();
-    } else {
-        this->value.floatValue = getDefaultValueFloat();
-    }
+    this->setValueInt(getDefaultValueInt());
 }
 
 Sampler::Sampler(const Sampler &new_sampler)
@@ -28,7 +32,7 @@ Sampler::Sampler(const Sampler &new_sampler)
 Sampler &Sampler::operator=(const Sampler &new_sampler)
 {
     this->type = new_sampler.type;
-    this->value.intValue = new_sampler.value.intValue;
+    this->value = new_sampler.value;
     return *this;
 }
 
@@ -51,51 +55,44 @@ Sampler::SamplerTypeE Sampler::getType() const
     return this->type;
 }
 
-void Sampler::setValueInt(const int32_t value)
+void Sampler::setValueInt(const int value)
 {
-    if (!isInt()) {
-        throw std::invalid_argument("Wrong sampler type");
-    }
-
-    this->value.intValue = value;
+    this->value = value;
 }
 
 void Sampler::setValueFloat(const float value)
 {
     if (isInt()) {
-        throw std::invalid_argument("Wrong sampler type");
+        this->value = value;
     }
 
-    this->value.floatValue = value;
+    this->value = value * floatMultiplier;
 }
 
-int32_t Sampler::getValueInt() const
+int Sampler::getValueInt() const
 {
-    if (!isInt()) {
-        throw std::invalid_argument("Wrong sampler type");
-    }
-
-    return this->value.intValue;
+    return this->value;
 }
 
 float Sampler::getValueFloat() const
 {
     if (isInt()) {
-        throw std::invalid_argument("Wrong sampler type");
+        return value;
     }
-
-    return this->value.floatValue;
+    return this->value / floatMultiplier;
 }
 
-int32_t Sampler::getDefaultValueInt() const
+int Sampler::getDefaultValueInt() const
 {
-    if (!isInt()) {
-        throw std::invalid_argument("Wrong sampler type");
-    }
-
     switch (this->type) {
+    case SAMPLER_TEMP:
+        return getDefaultValueFloat() * floatMultiplier;
     case SAMPLER_TOP_K:
         return 0;
+    case SAMPLER_TOP_P:
+        return getDefaultValueFloat() * floatMultiplier;
+    case SAMPLER_MIN_P:
+        return getDefaultValueFloat() * floatMultiplier;
     default:
         throw std::invalid_argument("Invalid Sampler type");
     }
@@ -103,13 +100,11 @@ int32_t Sampler::getDefaultValueInt() const
 
 float Sampler::getDefaultValueFloat() const
 {
-    if (isInt()) {
-        throw std::invalid_argument("Wrong sampler type");
-    }
-
     switch (this->type) {
     case SAMPLER_TEMP:
         return 1.0f;
+    case SAMPLER_TOP_K:
+        return getDefaultValueInt();
     case SAMPLER_TOP_P:
         return 1.0f;
     case SAMPLER_MIN_P:
@@ -117,4 +112,70 @@ float Sampler::getDefaultValueFloat() const
     default:
         throw std::invalid_argument("Invalid Sampler type");
     }
+}
+
+Sampler::SamplerRangeIntT Sampler::getRangeInt() const
+{
+    SamplerRangeFloatT rangeFloat;
+    SamplerRangeIntT rangeFloatScaled = {};
+    if (!isInt()) {
+        rangeFloat = getRangeFloat();
+        rangeFloatScaled.min = rangeFloat.min * floatMultiplier;
+        rangeFloatScaled.max = rangeFloat.max * floatMultiplier;
+    }
+
+    switch (this->type) {
+    case SAMPLER_TEMP:
+        return rangeFloatScaled;
+    case SAMPLER_TOP_K:
+        return {-1, 200};
+    case SAMPLER_TOP_P:
+        return rangeFloatScaled;
+    case SAMPLER_MIN_P:
+        return rangeFloatScaled;
+    default:
+        throw std::invalid_argument("Invalid Sampler type");
+    }
+}
+
+Sampler::SamplerRangeFloatT Sampler::getRangeFloat() const
+{
+    SamplerRangeIntT rangeInt;
+    SamplerRangeFloatT rangeIntFloatifieded = {};
+    if (isInt()) {
+        rangeInt = getRangeInt();
+        rangeIntFloatifieded.min = rangeInt.min;
+        rangeIntFloatifieded.max = rangeInt.max;
+    }
+
+    switch (this->type) {
+    case SAMPLER_TEMP:
+        return {0.0f, 5.0f};
+    case SAMPLER_TOP_K:
+        return rangeIntFloatifieded;
+    case SAMPLER_TOP_P:
+        return {0.0f, 1.0f};
+    case SAMPLER_MIN_P:
+        return {0.0f, 1.0f};
+    default:
+        throw std::invalid_argument("Invalid Sampler type");
+    }
+}
+
+Sampler::SamplerTypeE Sampler::stringToSamplerType(const QString &type)
+{
+    if (nameMap.keys().contains(type)) {
+        return nameMap.value(type);
+    }
+
+    throw std::invalid_argument("Invalid Sampler type");
+}
+
+QString Sampler::samplerTypeToString(SamplerTypeE type)
+{
+    if (nameMap.values().contains(type)) {
+        return nameMap.key(type);
+    }
+
+    throw std::invalid_argument("Invalid Sampler type");
 }

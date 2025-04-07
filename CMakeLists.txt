@@ -23,8 +23,6 @@ set(PROJECT_SOURCES
         src/config/ConfigApp.h
         src/config/ConfigModel.cpp
         src/config/ConfigModel.h
-        src/ui/SamplerSlider.cpp
-        src/ui/SamplerSlider.h
         src/llm/Sampler.h
         src/llm/Sampler.cpp
         src/llm/SamplerArray.cpp
@@ -48,6 +46,7 @@ else()
     add_executable(qtllama
         ${PROJECT_SOURCES}
         ${LLAMA_CPP_HEADERS}
+        src/ui/SamplerWidget.h src/ui/SamplerWidget.cpp src/ui/SamplerWidget.ui
     )
 endif()
 

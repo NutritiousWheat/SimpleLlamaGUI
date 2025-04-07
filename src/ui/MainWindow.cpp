@@ -6,14 +6,17 @@
 #include "./ui_MainWindow.h"
 #include <QObject>
 
-#include "SamplerSlider.h"
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->topKSlider->init(this, Sampler::SAMPLER_TOP_K);
+
+    // TODO: connect from sampler widget
+    connect(ui->samplerWidget_1, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
+    connect(ui->samplerWidget_2, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
+    connect(ui->samplerWidget_3, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
+    connect(ui->samplerWidget_4, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
 
     connect(this, &MainWindow::sendMessage, &chat, &Chat::on_messageReceived);
     connect(this, &MainWindow::interruptGeneration, &chat, &Chat::on_interruptReceived);

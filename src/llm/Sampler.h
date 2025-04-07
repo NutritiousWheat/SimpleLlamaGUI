@@ -1,8 +1,8 @@
 #ifndef SAMPLERS_H
 #define SAMPLERS_H
 
-#include <cstdint>
 #include <QObject>
+#include <QMap>
 
 class Sampler : public QObject
 {
@@ -17,17 +17,29 @@ public:
         SAMPLERS_COUNT
     };
 
-    Q_ENUM(SamplerTypeE type)
+    struct SamplerRangeIntT
+    {
+        int min;
+        int max;
+    };
+
+    struct SamplerRangeFloatT
+    {
+        float min;
+        float max;
+    };
+
 private:
     SamplerTypeE type;
-    union {
-        float floatValue;
-        int32_t intValue;
-    } value{};
+    int value;
+
+    static QMap<QString, SamplerTypeE> nameMap;
+    static float floatMultiplier;
 
 public:
     Sampler();
     explicit Sampler(SamplerTypeE type);
+    explicit Sampler(const QString& type);
     Sampler(const Sampler &new_sampler);
     ~Sampler() = default;
 
@@ -37,14 +49,21 @@ public:
 
     SamplerTypeE getType() const;
 
-    void setValueInt(int32_t value);
+    void setValueInt(int value);
     void setValueFloat(float value);
 
-    int32_t getValueInt() const;
+    int getValueInt() const;
     float getValueFloat() const;
 
-    int32_t getDefaultValueInt() const;
+    int getDefaultValueInt() const;
     float getDefaultValueFloat() const;
+
+    SamplerRangeIntT getRangeInt() const;
+    SamplerRangeFloatT getRangeFloat() const;
+
+    static SamplerTypeE stringToSamplerType(const QString& type);
+    static QString samplerTypeToString(SamplerTypeE type);
+
 };
 
 #endif //SAMPLERS_H
