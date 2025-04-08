@@ -49,6 +49,7 @@ public:
     bool isGenerating();
     QString getName();
     QString getTemplate();
+    QString getEOT();
 };
 
 #endif // LLAMAINTERFACE_H

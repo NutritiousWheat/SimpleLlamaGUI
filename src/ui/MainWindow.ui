@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabChat">
        <attribute name="title">
@@ -48,16 +48,16 @@
         <property name="geometry">
          <rect>
           <x>1110</x>
-          <y>420</y>
+          <y>410</y>
           <width>86</width>
-          <height>83</height>
+          <height>125</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QPushButton" name="submitButton">
            <property name="text">
-            <string>submit</string>
+            <string>Submit</string>
            </property>
           </widget>
          </item>
@@ -75,9 +75,29 @@
           </spacer>
          </item>
          <item>
+          <widget class="QPushButton" name="continueButton">
+           <property name="text">
+            <string>Continue</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QPushButton" name="clearButton">
            <property name="text">
-            <string>clear</string>
+            <string>Clear</string>
            </property>
           </widget>
          </item>
@@ -98,100 +118,8 @@
          </rect>
         </property>
         <layout class="QGridLayout" name="optionsLayout">
-         <item row="3" column="0">
-          <layout class="QVBoxLayout" name="contextLayout">
-           <item>
-            <widget class="QLabel" name="contextLabel">
-             <property name="text">
-              <string>Context tokens</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="contextValueLabel">
-             <property name="text">
-              <string>0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSlider" name="contextSlider">
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>8192</number>
-             </property>
-             <property name="pageStep">
-              <number>256</number>
-             </property>
-             <property name="value">
-              <number>8192</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="tickPosition">
-              <enum>QSlider::TickPosition::TicksBelow</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="3" column="1">
-          <layout class="QVBoxLayout" name="responseLayout">
-           <item>
-            <widget class="QLabel" name="responseLabel">
-             <property name="text">
-              <string>Response tokens</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="responseValueLabel">
-             <property name="text">
-              <string>0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSlider" name="responseSlider">
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>8192</number>
-             </property>
-             <property name="pageStep">
-              <number>256</number>
-             </property>
-             <property name="value">
-              <number>256</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="tickPosition">
-              <enum>QSlider::TickPosition::TicksBelow</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="1" column="0">
-          <widget class="SamplerWidget" name="samplerWidget_1" native="true"/>
+         <item row="2" column="1">
+          <widget class="SamplerWidget" name="samplerWidget_4" native="true"/>
          </item>
          <item row="1" column="1">
           <widget class="SamplerWidget" name="samplerWidget_2" native="true"/>
@@ -199,8 +127,8 @@
          <item row="2" column="0">
           <widget class="SamplerWidget" name="samplerWidget_3" native="true"/>
          </item>
-         <item row="2" column="1">
-          <widget class="SamplerWidget" name="samplerWidget_4" native="true"/>
+         <item row="1" column="0">
+          <widget class="SamplerWidget" name="samplerWidget_1" native="true"/>
          </item>
         </layout>
        </widget>

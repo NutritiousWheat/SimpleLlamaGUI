@@ -31,19 +31,16 @@ private slots:
 
     void on_submitButton_clicked();
 
-
+    void on_continueButton_clicked();
 
     void on_loadButton_clicked();
 
     void on_clearButton_pressed();
 
-    void on_contextSlider_valueChanged(int value);
-
-    void on_responseSlider_valueChanged(int value);
-
     void on_unloadButton_clicked();
 
     void on_refreshButton_clicked();
+
 
 public slots:
     void on_sampler_valueChanged(Sampler sampler);

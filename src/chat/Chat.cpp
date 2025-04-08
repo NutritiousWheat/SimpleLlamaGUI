@@ -86,7 +86,7 @@ const char *Chat::getRoleStringPrompt(const messageRoleE role)
 }
 
 
-QString Chat::promptify()
+QString Chat::promptify(bool newMessage)
 {
 // TODO: bandaid solution with magic number
     QString prompt;
@@ -109,11 +109,15 @@ QString Chat::promptify()
     templateStr = llamaThread->getTemplate().toStdString();
     templateCStr = templateStr.c_str();
 
-    llama_chat_apply_template(templateCStr, llama_messages, this->size(), true, buf, 8192);
+    llama_chat_apply_template(templateCStr, llama_messages, this->size(), newMessage, buf, 8192);
 
     delete[] llama_messages;
 
     prompt = QString(buf);
+
+    if (!newMessage) {
+        prompt.remove(llamaThread->getEOT()); // TODO: there may be better ways to create a prompt without the EOT token
+    }
 
     return prompt;
 }
@@ -170,7 +174,7 @@ void Chat::reply(const QString &userMessage, const SamplerArray &samplers)
     QString prompt;
 
     this->appendMessage(userMessage, MESSAGE_ROLE_USER);
-    prompt = this->promptify();
+    prompt = this->promptify(true);
 
     this->appendMessage("", MESSAGE_ROLE_LLM);
 
@@ -185,7 +189,14 @@ void Chat::interruptGeneration()
 
 void Chat::continueLastMessage(const SamplerArray &samplers)
 {
-// TODO: not implemented
+    QString prompt;
+
+    prompt = this->promptify(false);
+
+    auto test = chat_messages.toStdVector();
+
+    emit updateGUI(CHAT_STATE_GENERATING);
+    llamaThread->startGeneration(prompt, samplers);
 }
 
 QString Chat::getString()

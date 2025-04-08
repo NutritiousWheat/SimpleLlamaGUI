@@ -96,3 +96,11 @@ QString LlamaThread::getTemplate()
 
     return "";
 }
+
+QString LlamaThread::getEOT()
+{
+    if (this->llama)
+        return llama->getEOT();
+
+    return "";
+}

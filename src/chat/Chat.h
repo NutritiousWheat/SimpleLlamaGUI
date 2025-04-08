@@ -55,7 +55,7 @@ private:
     void appendMessage(const QString &message, messageRoleE role);
     static const char *getRoleStringUI(messageRoleE role);
     static const char *getRoleStringPrompt(messageRoleE role);
-    QString promptify();
+    QString promptify(bool newMessage);
 
 public:
     Chat();

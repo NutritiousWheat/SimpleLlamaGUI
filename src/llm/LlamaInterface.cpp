@@ -245,3 +245,13 @@ QString LlamaInterface::getTemplate()
 
     return {templateCStr};
 }
+
+QString LlamaInterface::getEOT()
+{
+    char buffer[1024]; // TODO: magic number
+    llama_token eot = llama_vocab_eot(&model->vocab);
+
+    llama_token_to_piece(&model->vocab, eot, buffer, sizeof(buffer), 0, true);
+
+    return {buffer};
+}

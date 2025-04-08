@@ -36,6 +36,8 @@ void MainWindow::procStateNotLoaded()
     ui->submitButton->setDisabled(true);
     ui->submitButton->setText("Submit");
 
+    ui->continueButton->setDisabled(true);
+
     ui->clearButton->setDisabled(false);
 
     this->ui->statusbar->showMessage("Model unloaded");
@@ -45,6 +47,8 @@ void MainWindow::procStateLoading()
 {
     ui->submitButton->setDisabled(true);
     ui->submitButton->setText("Submit");
+
+    ui->continueButton->setDisabled(true);
 
     ui->clearButton->setDisabled(false);
 
@@ -56,6 +60,8 @@ void MainWindow::procStateIdle()
     ui->submitButton->setDisabled(false);
     ui->submitButton->setText("Submit");
 
+    ui->continueButton->setDisabled(false);
+
     ui->clearButton->setDisabled(false);
 
     this->ui->statusbar->showMessage("Loaded model: " + this->chat.getModelName());
@@ -65,6 +71,8 @@ void MainWindow::procStateGenerating()
 {
     ui->submitButton->setDisabled(false);
     ui->submitButton->setText("Stop");
+
+    ui->continueButton->setDisabled(true);
 
     ui->clearButton->setDisabled(true);
 
@@ -91,6 +99,12 @@ void MainWindow::on_submitButton_clicked()
         startGenerating();
     }
 }
+
+void MainWindow::on_continueButton_clicked()
+{
+    this->chat.continueLastMessage(samplers);
+}
+
 
 void MainWindow::on_sampler_valueChanged(const Sampler sampler)
 {
@@ -141,22 +155,6 @@ void MainWindow::on_clearButton_pressed()
 {
     this->chat.clear();
     this->ui->chatBox->setText("");
-}
-
-void MainWindow::on_contextSlider_valueChanged(int value)
-{
-// TODO: not implemented
-    QString stringValue = QString::number(value);
-
-    this->ui->contextValueLabel->setText(stringValue);
-}
-
-void MainWindow::on_responseSlider_valueChanged(int value)
-{
-// TODO: not implemented
-    QString stringValue = QString::number(value);
-
-    this->ui->responseValueLabel->setText(stringValue);
 }
 
 void MainWindow::on_unloadButton_clicked()

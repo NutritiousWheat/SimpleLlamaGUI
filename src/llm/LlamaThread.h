@@ -58,6 +58,7 @@ public:
     bool isGenerating();
     QString getName();
     QString getTemplate();
+    QString getEOT();
 };
 
 #endif // LLAMATHREAD_H
