@@ -37,7 +37,6 @@ private:
 
     QString name;
 
-    QString promptify(const QVector <llama_chat_message> &messages);
     void setSamplers(SamplerArray samplers);
 
 public:

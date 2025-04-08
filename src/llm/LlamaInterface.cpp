@@ -205,21 +205,6 @@ bool LlamaInterface::isGenerating()
     return generating;
 }
 
-QString LlamaInterface::promptify(const QVector <llama_chat_message> &messages)
-{
-    QString prompt;
-    char buffer[N_CTX];
-    const char *tmpl = llama_model_chat_template(model, nullptr);
-// TODO: what the fuck is this buffer length
-    llama_chat_apply_template(tmpl, &messages[0], messages.size(), false, buffer, N_CTX);
-
-    prompt = QString(buffer);
-
-    fprintf(stderr, "Prompt: %s\n", buffer);
-
-    return prompt;
-}
-
 void LlamaInterface::setSamplers(SamplerArray samplers)
 {
     if (sampler)
