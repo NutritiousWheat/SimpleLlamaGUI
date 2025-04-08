@@ -34,25 +34,41 @@ MainWindow::~MainWindow()
 void MainWindow::procStateNotLoaded()
 {
     ui->submitButton->setDisabled(true);
+    ui->submitButton->setText("Submit");
+
+    ui->clearButton->setDisabled(false);
+
     this->ui->statusbar->showMessage("Model unloaded");
 }
 
 void MainWindow::procStateLoading()
 {
     ui->submitButton->setDisabled(true);
+    ui->submitButton->setText("Submit");
+
+    ui->clearButton->setDisabled(false);
+
     this->ui->statusbar->showMessage("Model loading");
 }
 
 void MainWindow::procStateIdle()
 {
     ui->submitButton->setDisabled(false);
+    ui->submitButton->setText("Submit");
+
+    ui->clearButton->setDisabled(false);
+
     this->ui->statusbar->showMessage("Loaded model: " + this->chat.getModelName());
 }
 
 void MainWindow::procStateGenerating()
 {
-    ui->submitButton->setDisabled(true); // replace with stop button
-    this->ui->statusbar->showMessage("Loaded model: " + this->chat.getModelName());
+    ui->submitButton->setDisabled(false);
+    ui->submitButton->setText("Stop");
+
+    ui->clearButton->setDisabled(true);
+
+    this->ui->statusbar->showMessage("Loaded model (generating): " + this->chat.getModelName());
 }
 
 void MainWindow::startGenerating()
@@ -68,17 +84,12 @@ void MainWindow::stopGenerating()
 }
 
 void MainWindow::on_submitButton_clicked()
-{
-    startGenerating();
-    // if (llamaThread->isGenerating()) {
-    //     generating = false;
-    //     stopGenerating();
-    //     this->ui->submitButton->setText("submit");
-    // } else {
-    //     generating = true;
-    //     startGenerating();
-    //     this->ui->submitButton->setText("stop");
-    // }
+{ // TODO: do not use QString comparison here... just store the current state in some variable in MainWindow
+    if (ui->submitButton->text() == "Stop") {
+        stopGenerating();
+    } else {
+        startGenerating();
+    }
 }
 
 void MainWindow::on_sampler_valueChanged(const Sampler sampler)
