@@ -89,6 +89,7 @@ const char *Chat::getRoleStringPrompt(const messageRoleE role)
 QString Chat::promptify(bool newMessage)
 {
 // TODO: bandaid solution with magic number
+// TODO: russian seems to break token generation
     QString prompt;
     llama_chat_message *llama_messages;
     char buf[8192];
@@ -192,8 +193,6 @@ void Chat::continueLastMessage(const SamplerArray &samplers)
     QString prompt;
 
     prompt = this->promptify(false);
-
-    auto test = chat_messages.toStdVector();
 
     emit updateGUI(CHAT_STATE_GENERATING);
     llamaThread->startGeneration(prompt, samplers);
