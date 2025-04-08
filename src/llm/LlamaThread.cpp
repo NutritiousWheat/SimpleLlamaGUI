@@ -14,9 +14,6 @@ void LlamaThread::run()
         this->name = this->llama->getName();
         this->loaded = true;
 
-        connect(this, &LlamaThread::replyStart, this->llama, &LlamaInterface::on_replyStart);
-        connect(this, &LlamaThread::replyStop, this->llama, &LlamaInterface::on_replyStop);
-
         connect(this->llama, &LlamaInterface::tokenGenerated, this, &LlamaThread::on_tokenGenerated);
         connect(this->llama, &LlamaInterface::generationEnd, this, &LlamaThread::on_generationEnd);
 
@@ -27,7 +24,7 @@ void LlamaThread::run()
             generationCondition.wait(&generationMutex);
 
             if (this->loaded)
-                emit replyStart(prompt, samplers);
+                llama->startGeneration(prompt, samplers);
 
             generationMutex.unlock();
         }
@@ -57,16 +54,16 @@ LlamaThread::~LlamaThread()
     this->wait();
 }
 
-void LlamaThread::on_replyStart(QString prompt, SamplerArray samplers)
+void LlamaThread::startGeneration(const QString &prompt, const SamplerArray &samplers)
 {
     this->prompt = prompt;
     this->samplers = samplers;
     generationCondition.wakeOne();
 }
 
-void LlamaThread::on_replyStop()
+void LlamaThread::interruptGeneration()
 {
-    emit replyStop();
+    llama->interruptGeneration();
 }
 
 void LlamaThread::on_tokenGenerated(QString token)

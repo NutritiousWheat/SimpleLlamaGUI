@@ -58,7 +58,7 @@ void ConfigApp::writeFile()
     file.write(jsonString.toUtf8());
     file.close();
 
-#warning implement a delay which is reset afeter every write operation
+// TODO: implement a delay which is reset afeter every write operation
 }
 
 void ConfigApp::initDir(QString path)

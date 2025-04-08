@@ -14,24 +14,6 @@ Chat::Chat(const QString &systemPrompt)
     this->appendSystemMessage(this->systemPrompt);
 }
 
-void Chat::on_messageReceived(QString message, const SamplerArray &samplers)
-{
-    QString prompt;
-
-    this->appendMessage(message, MESSAGE_ROLE_USER);
-    prompt = this->promptify();
-
-    this->appendMessage("", MESSAGE_ROLE_LLM);
-
-    emit updateGUI(CHAT_STATE_GENERATING);
-    emit replyStart(prompt, samplers);
-}
-
-void Chat::on_interruptReceived()
-{
-    emit replyStop();
-}
-
 void Chat::on_tokenGenerated(QString token)
 {
     this->chat_messages.last().content += token.toStdString();
@@ -106,7 +88,7 @@ const char *Chat::getRoleStringPrompt(const messageRoleE role)
 
 QString Chat::promptify()
 {
-#warning bandaid solution with magic number
+// TODO: bandaid solution with magic number
     QString prompt;
     llama_chat_message *llama_messages;
     char buf[8192];
@@ -143,9 +125,6 @@ void Chat::loadModel(const QString &modelPath)
     try {
         llamaThread = new LlamaThread(modelPath);
         llamaThread->start();
-
-        connect(this, &Chat::replyStart, llamaThread, &LlamaThread::on_replyStart);
-        connect(this, &Chat::replyStop, llamaThread, &LlamaThread::on_replyStop);
 
         connect(llamaThread, &LlamaThread::tokenGenerated, this, &Chat::on_tokenGenerated);
         connect(llamaThread, &LlamaThread::generationEnd, this, &Chat::on_generationEnd);
@@ -186,9 +165,27 @@ void Chat::appendSystemMessage(const QString &message)
     appendMessage(message, MESSAGE_ROLE_SYSTEM);
 }
 
-void Chat::continueMessage(const QString &text)
+void Chat::reply(const QString &userMessage, const SamplerArray &samplers)
 {
-#warning not implemented
+    QString prompt;
+
+    this->appendMessage(userMessage, MESSAGE_ROLE_USER);
+    prompt = this->promptify();
+
+    this->appendMessage("", MESSAGE_ROLE_LLM);
+
+    emit updateGUI(CHAT_STATE_GENERATING);
+    llamaThread->startGeneration(prompt, samplers);
+}
+
+void Chat::interruptGeneration()
+{
+    llamaThread->interruptGeneration();
+}
+
+void Chat::continueLastMessage(const SamplerArray &samplers)
+{
+// TODO: not implemented
 }
 
 QString Chat::getString()

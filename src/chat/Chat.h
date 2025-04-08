@@ -8,8 +8,7 @@ class Chat : public QObject
     Q_OBJECT
 
 public:
-    enum chatStateE
-    {
+    enum chatStateE {
         CHAT_STATE_NOT_LOADED,
         CHAT_STATE_LOADING,
         CHAT_STATE_IDLE,
@@ -19,8 +18,7 @@ public:
     };
 
 private:
-    enum messageRoleE
-    {
+    enum messageRoleE {
         MESSAGE_ROLE_USER,
         MESSAGE_ROLE_LLM,
         MESSAGE_ROLE_SYSTEM,
@@ -29,25 +27,21 @@ private:
     };
     struct messageT
     {
-#warning try figuring out a better way to store llama messages
+        // TODO: try figuring out a better way to store llama messages
         std::string content; // needs to be std::string to have easy access to it as a C-string
         messageRoleE role;
     };
 
 public slots:
-    void on_messageReceived(QString message, const SamplerArray &samplers); // comes from MainWindow
-    void on_interruptReceived();                                       // comes from MainWindow
-    void on_tokenGenerated(QString token);                             // comes from LlamaThread
-    void on_generationEnd();                                           // comes from LlamaThread
+    void on_tokenGenerated(QString token); // comes from LlamaThread
+    void on_generationEnd();               // comes from LlamaThread
     void on_exceptionOccured(QString errorMsg);
     void on_modelLoading();
     void on_modelLoaded();
     void on_modelUnloaded();
 
 signals:
-    void replyStart(const QString &prompt, const SamplerArray &samplers); // sent to LlamaThread
-    void replyStop();                                                       // sent to LlamaThread
-    void appendText();                                                      // sent to MainWindow
+    void appendText(); // sent to MainWindow
     void updateGUI(chatStateE state);
     void exceptionOccured(QString e);
 
@@ -74,7 +68,11 @@ public:
     void appendUserMessage(const QString &message);
     void appendLLMMessage(const QString &message);
     void appendSystemMessage(const QString &message);
-    void continueMessage(const QString &text);
+
+    void reply(const QString &userMessage, const SamplerArray &samplers);
+    void continueLastMessage(const SamplerArray &samplers);
+    void interruptGeneration();
+
     QString getString();
     [[nodiscard]] size_t size() const;
     void clear();

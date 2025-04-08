@@ -20,9 +20,6 @@ class LlamaThread : public QThread
     Q_OBJECT
 
     public slots:
-    void on_replyStart(QString prompt,
-                           SamplerArray samplers); // comes from Chat
-    void on_replyStop(); // comes from Chat
     void on_tokenGenerated(QString token); // comes from LlamaInterface
     void on_generationEnd(); // comes from LlamaInterface
 
@@ -54,6 +51,9 @@ private:
 public:
     LlamaThread(const QString &modelPath);
     ~LlamaThread();
+
+    void startGeneration(const QString &prompt, const SamplerArray &samplers);
+    void interruptGeneration();
 
     bool isGenerating();
     QString getName();

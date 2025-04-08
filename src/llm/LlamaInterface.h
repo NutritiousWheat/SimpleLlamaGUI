@@ -18,10 +18,6 @@ class LlamaInterface : public QObject
 {
     Q_OBJECT
 
-public slots:
-    void on_replyStart(QString prompt, SamplerArray samplers);
-    void on_replyStop();
-
     signals:
     void generationEnd();
     void tokenGenerated(QString token);
@@ -47,6 +43,9 @@ private:
 public:
     LlamaInterface(const QString &modelPath);
     ~LlamaInterface();
+
+    void startGeneration(const QString &prompt, const SamplerArray &samplers);
+    void interruptGeneration();
 
     bool isGenerating();
     QString getName();

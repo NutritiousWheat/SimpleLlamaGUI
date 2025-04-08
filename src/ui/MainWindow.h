@@ -48,9 +48,6 @@ private slots:
 public slots:
     void on_sampler_valueChanged(Sampler sampler);
 
-signals:
-    void sendMessage(const QString &message, SamplerArray samplers);
-    void interruptGeneration();
 private:
     QSlider test;
     Ui::MainWindow *ui;

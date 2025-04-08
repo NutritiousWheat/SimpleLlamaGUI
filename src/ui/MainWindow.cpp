@@ -18,9 +18,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->samplerWidget_3, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
     connect(ui->samplerWidget_4, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
 
-    connect(this, &MainWindow::sendMessage, &chat, &Chat::on_messageReceived);
-    connect(this, &MainWindow::interruptGeneration, &chat, &Chat::on_interruptReceived);
-
     connect(&chat, &Chat::appendText, this, &MainWindow::on_appendText);
     connect(&chat, &Chat::updateGUI, this, &MainWindow::on_updateGUI);
     connect(&chat, &Chat::exceptionOccured, this, &MainWindow::on_exceptionOccured);
@@ -62,12 +59,12 @@ void MainWindow::startGenerating()
 {
     const QString message = ui->promptBox->toPlainText();
 
-    emit sendMessage(message, samplers);
+    chat.reply(message, samplers);
 }
 
 void MainWindow::stopGenerating()
 {
-    emit interruptGeneration();
+    chat.interruptGeneration();
 }
 
 void MainWindow::on_submitButton_clicked()
@@ -137,7 +134,7 @@ void MainWindow::on_clearButton_pressed()
 
 void MainWindow::on_contextSlider_valueChanged(int value)
 {
-#warning not implemented
+// TODO: not implemented
     QString stringValue = QString::number(value);
 
     this->ui->contextValueLabel->setText(stringValue);
@@ -145,7 +142,7 @@ void MainWindow::on_contextSlider_valueChanged(int value)
 
 void MainWindow::on_responseSlider_valueChanged(int value)
 {
-#warning not implemented
+// TODO: not implemented
     QString stringValue = QString::number(value);
 
     this->ui->responseValueLabel->setText(stringValue);
