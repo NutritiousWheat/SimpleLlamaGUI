@@ -23,8 +23,6 @@ set(PROJECT_SOURCES
         src/llm/RNG.h src/llm/RNG.cpp
         src/config/ConfigApp.cpp
         src/config/ConfigApp.h
-        src/config/ConfigModel.cpp
-        src/config/ConfigModel.h
         src/llm/Sampler.h
         src/llm/Sampler.cpp
         src/llm/SamplerArray.cpp
