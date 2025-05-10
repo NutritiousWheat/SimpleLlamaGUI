@@ -72,9 +72,9 @@ void ConfigApp::initDir(QString path)
     }
 }
 
-ConfigApp::ConfigApp(const QString &config_path)
+ConfigApp::ConfigApp(const QString &configPath)
 {
-    this->configPath = config_path;
+    this->configPath = configPath;
     readFile();
     initDir(getValue(ModelDir));
     initDir(getValue(ModelConfigDir));

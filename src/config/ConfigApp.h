@@ -48,7 +48,7 @@ public:
         AutoLoadLastOnStart
     };
 
-    explicit ConfigApp(const QString &config_path);
+    explicit ConfigApp(const QString &configPath);
     ~ConfigApp() = default;
 
     QString keyToString(KeyIntE key);
