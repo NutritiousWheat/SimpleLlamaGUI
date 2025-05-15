@@ -4,20 +4,21 @@
 
 Chat::Chat()
 {
-    this->systemPrompt = QString("You are a helpful assistant. Assist with whatever user requires.");
-    this->appendSystemMessage(this->systemPrompt);
+    // TODO: it is not always needed
+    //this->systemPrompt = QString("You are a helpful assistant. Assist with whatever user requires.");
+    //this->appendSystemMessage(this->systemPrompt);
 }
 
 Chat::Chat(const QString &systemPrompt)
 {
-    this->systemPrompt = systemPrompt;
-    this->appendSystemMessage(this->systemPrompt);
+    //this->systemPrompt = systemPrompt;
+    //this->appendSystemMessage(this->systemPrompt);
 }
 
 void Chat::on_tokenGenerated(QString token)
 {
     this->chat_messages.last().content += token.toStdString();
-    emit appendText();
+    emit appendText(token);
 }
 
 void Chat::on_generationEnd()
@@ -173,14 +174,19 @@ void Chat::appendSystemMessage(const QString &message)
 void Chat::reply(const QString &userMessage, const SamplerArray &samplers)
 {
     QString prompt;
+    QString text;
 
-    this->appendMessage(userMessage, MESSAGE_ROLE_USER);
+    this->appendMessage("\n"+userMessage, MESSAGE_ROLE_USER);
     prompt = this->promptify(true);
 
     this->appendMessage("", MESSAGE_ROLE_LLM);
 
+    text = this->getString();
+
     emit updateGUI(CHAT_STATE_GENERATING);
-    llamaThread->startGeneration(prompt, samplers);
+    emit setText(text); // TODO: use append
+
+    llamaThread->startGenerating(prompt, samplers);
 }
 
 void Chat::interruptGeneration()
@@ -195,7 +201,7 @@ void Chat::continueLastMessage(const SamplerArray &samplers)
     prompt = this->promptify(false);
 
     emit updateGUI(CHAT_STATE_GENERATING);
-    llamaThread->startGeneration(prompt, samplers);
+    llamaThread->startGenerating(prompt, samplers);
 }
 
 QString Chat::getString()

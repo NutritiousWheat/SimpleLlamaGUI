@@ -52,7 +52,7 @@ public:
     LlamaThread(const QString &modelPath);
     ~LlamaThread();
 
-    void startGeneration(const QString &prompt, const SamplerArray &samplers);
+    void startGenerating(const QString &prompt, const SamplerArray &samplers);
     void interruptGeneration();
 
     bool isGenerating();

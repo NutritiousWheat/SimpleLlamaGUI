@@ -18,7 +18,7 @@ class LlamaInterface : public QObject
 {
     Q_OBJECT
 
-    signals:
+signals:
     void generationEnd();
     void tokenGenerated(QString token);
 
@@ -38,12 +38,13 @@ private:
     QString name;
 
     void setSamplers(SamplerArray samplers);
+    void resetContext();
 
 public:
     LlamaInterface(const QString &modelPath);
     ~LlamaInterface();
 
-    void startGeneration(const QString &prompt, const SamplerArray &samplers);
+    void startGenerating(const QString &prompt, const SamplerArray &samplers);
     void interruptGeneration();
 
     bool isGenerating();

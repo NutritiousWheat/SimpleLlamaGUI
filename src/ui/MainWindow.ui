@@ -26,7 +26,11 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0,0">
         <item>
-         <widget class="QTextBrowser" name="chatBox"/>
+         <widget class="QTextBrowser" name="chatBox">
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <spacer name="horizontalSpacer">
@@ -44,7 +48,11 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QTextEdit" name="promptBox"/>
+           <widget class="QTextEdit" name="promptBox">
+            <property name="acceptRichText">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout">

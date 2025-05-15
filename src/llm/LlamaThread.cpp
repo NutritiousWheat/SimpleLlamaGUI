@@ -24,7 +24,7 @@ void LlamaThread::run()
             generationCondition.wait(&generationMutex);
 
             if (this->loaded)
-                llama->startGeneration(prompt, samplers);
+                llama->startGenerating(prompt, samplers);
 
             generationMutex.unlock();
         }
@@ -54,7 +54,7 @@ LlamaThread::~LlamaThread()
     this->wait();
 }
 
-void LlamaThread::startGeneration(const QString &prompt, const SamplerArray &samplers)
+void LlamaThread::startGenerating(const QString &prompt, const SamplerArray &samplers)
 {
     this->prompt = prompt;
     this->samplers = samplers;

@@ -41,9 +41,10 @@ public slots:
     void on_modelUnloaded();
 
 signals:
-    void appendText(); // sent to MainWindow
-    void updateGUI(chatStateE state);
-    void exceptionOccured(QString e);
+    void appendText(QString &text); // sent to MainWindow
+    void setText(QString &text); // sent to MainWindow
+    void updateGUI(chatStateE state); // sent to MainWindow
+    void exceptionOccured(QString e); // sent to MainWindow
 
 private:
     LlamaThread *llamaThread = nullptr;

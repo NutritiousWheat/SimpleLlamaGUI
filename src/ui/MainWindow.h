@@ -25,7 +25,8 @@ public:
     ~MainWindow() override;
 
 private slots:
-    void on_appendText();
+    void on_appendText(QString &text);
+    void on_setText(QString &text);
     void on_updateGUI(Chat::chatStateE state);
     void on_exceptionOccured(QString errorMsg);
 

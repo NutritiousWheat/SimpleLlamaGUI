@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->samplerWidget_4, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
 
     connect(&chat, &Chat::appendText, this, &MainWindow::on_appendText);
+    connect(&chat, &Chat::setText, this, &MainWindow::on_setText);
     connect(&chat, &Chat::updateGUI, this, &MainWindow::on_updateGUI);
     connect(&chat, &Chat::exceptionOccured, this, &MainWindow::on_exceptionOccured);
 
@@ -111,9 +112,15 @@ void MainWindow::on_sampler_valueChanged(const Sampler sampler)
     samplers[sampler.getType()] = sampler;
 }
 
-void MainWindow::on_appendText()
+void MainWindow::on_appendText(QString &text)
 {
-    this->ui->chatBox->setText(chat.getString());
+    this->ui->chatBox->moveCursor(QTextCursor::End);
+    this->ui->chatBox->insertPlainText(text);
+}
+
+void MainWindow::on_setText(QString &text)
+{
+    this->ui->chatBox->setText(text);
 }
 
 void MainWindow::on_updateGUI(Chat::chatStateE state)
