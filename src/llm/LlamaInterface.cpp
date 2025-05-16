@@ -171,8 +171,8 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
 
     timeMs = duration_cast<milliseconds>(end - start).count();
 
-    fprintf(stderr, "prompt: %d tokens\n", batch.n_tokens);
-    fprintf(stderr, "prompt processing time: %lu ms, (%f t/s)\n",
+    qDebug("prompt: %d tokens", batch.n_tokens);
+    qDebug("prompt processing time: %lu ms, (%f t/s)",
         timeMs,
         (static_cast<double>(batch.n_tokens) / static_cast<double>(timeMs)) * 1000.0
         );
@@ -222,8 +222,8 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
 
     timeMs = duration_cast<milliseconds>(end - start).count();
 
-    fprintf(stderr, "generated: %d tokens\n", n_decode);
-    fprintf(stderr, "generating time: %lu ms, (%f t/s)\n",
+    qDebug("generated: %d tokens", n_decode);
+    qDebug("generating time: %lu ms, (%f t/s)",
         timeMs,
         (static_cast<double>(n_decode) / static_cast<double>(timeMs)) * 1000.0
         );
@@ -256,10 +256,9 @@ void LlamaInterface::setSamplers(SamplerArray samplers)
     if (sampler == nullptr) {
         throw std::runtime_error("unable to init sampler chain");
     }
-// TODO: remove that debug print
-    fprintf(
-        stderr,
-        "temp: %f, top p: %f, min p: %f, top k: %u\n",
+
+    qDebug(
+        "Set samplers: temp: %f, top p: %f, min p: %f, top k: %u",
         samplers[Sampler::SAMPLER_TEMP].getValueFloat(),
         samplers[Sampler::SAMPLER_TOP_P].getValueFloat(),
         samplers[Sampler::SAMPLER_MIN_P].getValueFloat(),
