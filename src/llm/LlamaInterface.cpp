@@ -5,11 +5,11 @@
 #include <stdexcept>
 
 #define N_PREDICT 250
-#define N_CTX 2048 // TODO: do proper batching
+#define N_CTX 1024 // TODO: do proper batching
 #define N_BATCH N_CTX
 #define N_UBATCH N_BATCH
 
-#define THREADS 16
+#define THREADS 8
 
 LlamaInterface::LlamaInterface(const QString &modelPath)
 {
@@ -75,6 +75,9 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
 
     batch = llama_batch_init(N_UBATCH, 0, 1);
 
+    sampler = NULL;
+    ctx = NULL;
+
     this->name = QString::fromStdString(model->name);
 }
 
@@ -109,6 +112,7 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
     unsigned long timeMs;
 
     std::string promptStdStr = prompt.toStdString();
+    char *promptCStr = new char[promptStdStr.size() + 1];
     llama_token *tokens;
     const llama_vocab *vocab;
 
@@ -128,10 +132,14 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
     resetContext(); // TODO: bad for performance, do caching instead
 
     tokens = new llama_token[prompt.size()];
+    strncpy(promptCStr, promptStdStr.c_str(), promptStdStr.size());
 
     vocab = llama_model_get_vocab(model);
     n_tokens
-        = llama_tokenize(vocab, promptStdStr.c_str(), promptStdStr.size(), tokens, promptStdStr.size(), true, true);
+        = llama_tokenize(vocab, promptCStr, promptStdStr.size(), tokens, promptStdStr.size(), true, true);
+
+    delete[] promptCStr;
+
     n_ctx = llama_n_ctx(ctx);
     n_kv_req = N_CTX; // TODO: smarter kv cache allocation... and also caching
 

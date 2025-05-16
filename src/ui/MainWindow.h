@@ -50,7 +50,12 @@ private:
     QSlider test;
     Ui::MainWindow *ui;
 
+#ifdef __APPLE__
+    // TODO: get path relative to .app... what in the world is an .app file????
+    ConfigApp config = ConfigApp("/Users/potato/code_projects/llm_ui/cmake-build-debug/config.json");
+#else
     ConfigApp config = ConfigApp("config.json");
+#endif
 
     Chat chat;
     SamplerArray samplers;
