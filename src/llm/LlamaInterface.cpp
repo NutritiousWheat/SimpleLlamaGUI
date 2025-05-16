@@ -1,7 +1,7 @@
 #include "LlamaInterface.h"
 
+#include "../../submodules/llama.cpp/src/llama-model.h" // TODO: why?
 #include "SamplerArray.h"
-#include <llama-model.h>
 #include <stdexcept>
 
 #define N_PREDICT 250
@@ -59,8 +59,6 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     ctx_params.cb_eval_user_data = nullptr;
     ctx_params.type_k = GGML_TYPE_F16; // data type for K cache [EXPERIMENTAL]
     ctx_params.type_v = GGML_TYPE_F16; // data type for V cache [EXPERIMENTAL]
-    ctx_params.logits_all
-        = false; // the llama_decode() call computes all logits, not just the last one (DEPRECATED - set llama_batch.logits instead)
     ctx_params.embeddings = false;  // if true, extract embeddings (together with logits)
     ctx_params.offload_kqv = false; // whether to offload the KQV ops (including the KV cache) to GPU
     ctx_params.flash_attn = false;  // whether to use flash attention [EXPERIMENTAL]
