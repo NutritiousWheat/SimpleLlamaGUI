@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     try {
         result = a.exec();
     }
-    catch (std::exception &e) { // this should never happen, but it's here in case shit hits the fan
+    catch (std::exception &e) { // this should never happen, but it would be nice to show an error if something goes really wrong
         QMessageBox::critical(nullptr, CRIT_HEADER, e.what());
         result = EXIT_FAILURE;
     }
