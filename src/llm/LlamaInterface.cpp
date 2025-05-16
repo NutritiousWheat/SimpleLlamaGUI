@@ -99,8 +99,13 @@ using namespace std::chrono;
 void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &samplers)
 {
     // TODO: do some abstraction over that
+#ifdef __APPLE__
+    time_point<steady_clock> start;
+    time_point<steady_clock> end;
+#else
     time_point<system_clock> start;
     time_point<system_clock> end;
+#endif
     unsigned long timeMs;
 
     std::string promptStdStr = prompt.toStdString();

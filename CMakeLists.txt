@@ -6,7 +6,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+set(CMAKE_OSX_ARCHITECTURES "arm64")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,6 +27,8 @@ set(PROJECT_SOURCES
         src/llm/Sampler.cpp
         src/llm/SamplerArray.cpp
         src/llm/SamplerArray.h
+        src/ui/SamplerWidget.cpp
+        src/ui/SamplerWidget.h
 )
 include_directories(${PROJECT_SOURCE_DIR}/src/ui) # hack for custom widgets
 
