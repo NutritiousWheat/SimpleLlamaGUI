@@ -10,6 +10,12 @@ MessageWidget::MessageWidget(QWidget *parent, const Chat::messageRoleE role)
     this->role = role;
 
     this->ui->roleLabel->setText(Chat::getRoleStringUI(role));
+    if (role == Chat::MESSAGE_ROLE_USER) { // TODO: make it less ugly
+        this->ui->roleLabel->setStyleSheet("QLabel { background-color : rgba(0, 255, 0, 80); color : black; }");
+    }
+    else if (role == Chat::MESSAGE_ROLE_LLM) {
+        this->ui->roleLabel->setStyleSheet("QLabel { background-color : rgba(255, 0, 0, 80); color : black; }");
+    }
 }
 
 MessageWidget::~MessageWidget()
