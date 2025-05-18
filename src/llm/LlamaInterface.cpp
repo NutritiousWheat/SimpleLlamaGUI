@@ -5,9 +5,9 @@
 #include <stdexcept>
 
 #define N_PREDICT 250
-#define N_CTX 1024 // TODO: do proper batching
-#define N_BATCH N_CTX
-#define N_UBATCH N_BATCH
+#define N_CTX 8192 // TODO: do proper batching
+#define N_BATCH 512
+#define N_UBATCH 1
 
 #define THREADS 8
 
@@ -71,7 +71,7 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
         throw std::runtime_error("unable to create context");
     }
 
-    batch = llama_batch_init(N_UBATCH, 0, 1);
+    vocab = llama_model_get_vocab(model);
 
     sampler = NULL;
     ctx = NULL;
@@ -95,9 +95,24 @@ LlamaInterface::~LlamaInterface()
     llama_backend_free();
 }
 
+QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
+{
+    char promptCStr[prompt.size() + 1];
+    QVector<llama_token> tokens;
+    tokens.resize(prompt.size());
+
+    strncpy(promptCStr, prompt.toUtf8().constData(), prompt.size() + 1);
+
+    llama_tokenize(vocab, promptCStr, prompt.size(), tokens.data(), prompt.size(), true, true);
+
+    tokens.shrink_to_fit();
+
+    return tokens;
+}
+
 using namespace std::chrono;
 
-void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &samplers)
+void LlamaInterface::batchProcess(QVector<llama_token> &tokens, int startingPos)
 {
     // TODO: do some abstraction over that
 #ifdef __APPLE__
@@ -109,45 +124,15 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
 #endif
     unsigned long timeMs;
 
-    std::string promptStdStr = prompt.toStdString();
-    char *promptCStr = new char[promptStdStr.size() + 1];
-    llama_token *tokens;
-    const llama_vocab *vocab;
-
-    int n_tokens;
-    int n_ctx;
-    int n_kv_req;
+    llama_token new_token_id;
+    char buffer[16] = {0};
 
     int n_cur;
     int n_chars;
     int n_decode;
 
-    llama_token new_token_id;
-    char buffer[16] = {0};
-
-    generating = true;
-
-    resetContext(); // TODO: bad for performance, do caching instead
-
-    tokens = new llama_token[prompt.size()];
-    strncpy(promptCStr, promptStdStr.c_str(), promptStdStr.size());
-
-    vocab = llama_model_get_vocab(model);
-    n_tokens
-        = llama_tokenize(vocab, promptCStr, promptStdStr.size(), tokens, promptStdStr.size(), true, true);
-
-    delete[] promptCStr;
-
-    n_ctx = llama_n_ctx(ctx);
-    n_kv_req = N_CTX; // TODO: smarter kv cache allocation... and also caching
-
-    if (n_kv_req > n_ctx) {
-        throw std::runtime_error("kv cache size is not big enough");
-    }
-
-    setSamplers(samplers);
-
-    for (size_t i = 0; i < n_tokens; i++) {
+    batch = llama_batch_init(llama_n_batch(ctx), 0, 1);
+    for (size_t i = startingPos; i < tokens.size(); i++) {
         batch.token[batch.n_tokens] = tokens[i];
         batch.pos[batch.n_tokens] = i;
 
@@ -160,8 +145,6 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
     }
 
     batch.logits[batch.n_tokens - 1] = true;
-
-    delete[] tokens;
 
     start = high_resolution_clock::now();
     if (llama_decode(ctx, batch) != 0) {
@@ -227,6 +210,31 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
         timeMs,
         (static_cast<double>(n_decode) / static_cast<double>(timeMs)) * 1000.0
         );
+}
+
+void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &samplers)
+{
+    QVector<llama_token> tokens;
+
+    int n_ctx;
+    int n_kv_req;
+
+    generating = true;
+
+    resetContext(); // TODO: bad for performance, do caching instead
+
+    tokens = tokenize(prompt);
+
+    n_ctx = llama_n_ctx(ctx);
+    n_kv_req = N_CTX; // TODO: smarter kv cache allocation... and also caching
+
+    if (n_kv_req > n_ctx) {
+        throw std::runtime_error("kv cache size is not big enough");
+    }
+
+    setSamplers(samplers);
+
+    batchProcess(tokens, 0);
 
     generating = false;
     forceStop = false;

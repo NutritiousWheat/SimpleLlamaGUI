@@ -27,6 +27,7 @@ private:
 
     llama_model_params params{};
     llama_model *model;
+    const llama_vocab *vocab;
     llama_context_params ctx_params{};
     llama_context *ctx;
     llama_sampler *sampler;
@@ -37,6 +38,9 @@ private:
 
     QString name;
 
+
+    QVector<llama_token> tokenize(const QString &prompt);
+    void batchProcess(QVector<llama_token> &tokens, int startingPos);
     void setSamplers(SamplerArray samplers);
     void resetContext();
 
