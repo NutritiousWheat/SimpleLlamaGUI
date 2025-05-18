@@ -49,6 +49,7 @@ else()
         ${PROJECT_SOURCES}
         ${LLAMA_CPP_HEADERS}
         src/ui/SamplerWidget.h src/ui/SamplerWidget.cpp src/ui/SamplerWidget.ui
+        src/ui/MessageWidget.h src/ui/MessageWidget.cpp src/ui/MessageWidget.ui
     )
 endif()
 

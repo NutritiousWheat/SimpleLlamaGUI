@@ -6,25 +6,30 @@
 #include "./ui_MainWindow.h"
 #include <QObject>
 
+#include "MessageWidget.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    // TODO: connect from sampler widget
+    // TODO: add sampler widgets at runtime
     connect(ui->samplerWidget_1, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
     connect(ui->samplerWidget_2, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
     connect(ui->samplerWidget_3, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
     connect(ui->samplerWidget_4, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
 
     connect(&chat, &Chat::appendText, this, &MainWindow::on_appendText);
-    connect(&chat, &Chat::setText, this, &MainWindow::on_setText);
+    connect(&chat, &Chat::newMessage, this, &MainWindow::on_appendMessage);
     connect(&chat, &Chat::updateGUI, this, &MainWindow::on_updateGUI);
     connect(&chat, &Chat::exceptionOccured, this, &MainWindow::on_exceptionOccured);
 
     procStateNotLoaded();
     refreshModels();
+
+    this->chatLayout.setAlignment(Qt::AlignTop);
+    this->ui->chatAreaWidgetContents->setLayout(&chatLayout);
 }
 
 MainWindow::~MainWindow()
@@ -114,13 +119,14 @@ void MainWindow::on_sampler_valueChanged(const Sampler sampler)
 
 void MainWindow::on_appendText(QString &text)
 {
-    this->ui->chatBox->moveCursor(QTextCursor::End);
-    this->ui->chatBox->insertPlainText(text);
+    this->messages.last()->appendText(text);
 }
 
-void MainWindow::on_setText(QString &text)
+void MainWindow::on_appendMessage(const QString &text, Chat::messageRoleE role)
 {
-    this->ui->chatBox->setText(text);
+    this->messages.append(new MessageWidget(this->ui->chatArea, role));
+    this->chatLayout.addWidget(this->messages.last());
+    this->messages.last()->appendText(text);
 }
 
 void MainWindow::on_updateGUI(Chat::chatStateE state)
@@ -161,7 +167,12 @@ void MainWindow::on_loadButton_clicked()
 void MainWindow::on_clearButton_pressed()
 {
     this->chat.clear();
-    this->ui->chatBox->setText("");
+    for (const auto message : messages) {
+        this->chatLayout.removeWidget(message);
+        delete message;
+    }
+    messages.clear();
+
 }
 
 void MainWindow::on_unloadButton_clicked()

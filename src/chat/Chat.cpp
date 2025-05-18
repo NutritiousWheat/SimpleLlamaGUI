@@ -56,7 +56,9 @@ void Chat::appendMessage(const QString &message, const messageRoleE role)
     chat_message.content = message.toStdString();
     chat_message.role = role;
     chat_messages.append(chat_message);
-    }
+
+    emit newMessage(message, role);
+}
 
 const char *Chat::getRoleStringUI(const messageRoleE role)
 {
@@ -174,17 +176,13 @@ void Chat::appendSystemMessage(const QString &message)
 void Chat::reply(const QString &userMessage, const SamplerArray &samplers)
 {
     QString prompt;
-    QString text;
 
-    this->appendMessage("\n"+userMessage, MESSAGE_ROLE_USER);
+    this->appendUserMessage(userMessage);
     prompt = this->promptify(true);
 
-    this->appendMessage("", MESSAGE_ROLE_LLM);
-
-    text = this->getString();
+    this->appendLLMMessage("");
 
     emit updateGUI(CHAT_STATE_GENERATING);
-    emit setText(text); // TODO: use append
 
     llamaThread->startGenerating(prompt, samplers);
 }

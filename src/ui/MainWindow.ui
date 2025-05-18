@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1219</width>
-    <height>634</height>
+    <width>1146</width>
+    <height>774</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,12 +24,22 @@
        <attribute name="title">
         <string>Chat</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
         <item>
-         <widget class="QTextBrowser" name="chatBox">
-          <property name="horizontalScrollBarPolicy">
-           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+         <widget class="QScrollArea" name="chatArea">
+          <property name="widgetResizable">
+           <bool>true</bool>
           </property>
+          <widget class="QWidget" name="chatAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1104</width>
+             <height>312</height>
+            </rect>
+           </property>
+          </widget>
          </widget>
         </item>
         <item>
@@ -156,7 +166,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1219</width>
+     <width>1146</width>
      <height>23</height>
     </rect>
    </property>

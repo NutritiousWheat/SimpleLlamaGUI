@@ -2,11 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QSlider>
+#include <QVBoxLayout>
 
-#include "../config/ConfigApp.h"
 #include "../chat/Chat.h"
+#include "../config/ConfigApp.h"
 #include "../llm/LlamaThread.h"
+#include "MessageWidget.h"
 
 #define CRIT_HEADER "Critical error"
 #define ERR_HEADER "Error"
@@ -26,7 +27,7 @@ public:
 
 private slots:
     void on_appendText(QString &text);
-    void on_setText(QString &text);
+    void on_appendMessage(const QString &text, Chat::messageRoleE role);
     void on_updateGUI(Chat::chatStateE state);
     void on_exceptionOccured(QString errorMsg);
 
@@ -47,8 +48,8 @@ public slots:
     void on_sampler_valueChanged(Sampler sampler);
 
 private:
-    QSlider test;
     Ui::MainWindow *ui;
+    QVBoxLayout chatLayout;
 
 #ifdef __APPLE__
     // TODO: get path relative to .app... what in the world is an .app file????
@@ -59,6 +60,8 @@ private:
 
     Chat chat;
     SamplerArray samplers;
+
+    QVector<MessageWidget *> messages;
 
 
 

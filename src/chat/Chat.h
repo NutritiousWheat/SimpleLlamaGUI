@@ -17,7 +17,6 @@ public:
         CHAT_STATE_COUNT
     };
 
-private:
     enum messageRoleE {
         MESSAGE_ROLE_USER,
         MESSAGE_ROLE_LLM,
@@ -25,6 +24,9 @@ private:
 
         MESSAGE_ROLE_COUNT
     };
+
+private:
+
     struct messageT
     {
         // TODO: try figuring out a better way to store llama messages
@@ -42,7 +44,7 @@ public slots:
 
 signals:
     void appendText(QString &text); // sent to MainWindow
-    void setText(QString &text); // sent to MainWindow
+    void newMessage(const QString &text, messageRoleE role); // sent to MainWindow
     void updateGUI(chatStateE state); // sent to MainWindow
     void exceptionOccured(QString e); // sent to MainWindow
 
@@ -54,14 +56,15 @@ private:
     QMutex mutex;
 
     void appendMessage(const QString &message, messageRoleE role);
-    static const char *getRoleStringUI(messageRoleE role);
-    static const char *getRoleStringPrompt(messageRoleE role);
     QString promptify(bool newMessage);
 
 public:
     Chat();
     explicit Chat(const QString &systemPrompt);
     ~Chat() = default;
+
+    static const char *getRoleStringUI(messageRoleE role);
+    static const char *getRoleStringPrompt(messageRoleE role);
 
     void loadModel(const QString &ggufPath);
     void unloadModel();
