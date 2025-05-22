@@ -31,7 +31,6 @@ private:
     llama_context_params ctx_params{};
     llama_context *ctx;
     llama_sampler *sampler;
-    llama_batch batch{};
 
     bool forceStop = false;
     bool generating = false;
@@ -40,7 +39,7 @@ private:
 
 
     QVector<llama_token> tokenize(const QString &prompt);
-    void batchProcess(QVector<llama_token> &tokens, int startingPos);
+    void generate(QVector<llama_token> &tokens);
     void setSamplers(SamplerArray samplers);
     void resetContext();
 

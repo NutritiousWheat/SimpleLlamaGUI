@@ -5,9 +5,9 @@
 #include <stdexcept>
 
 #define N_PREDICT 250
-#define N_CTX 8192 // TODO: do proper batching
+#define N_CTX 8192
 #define N_BATCH 512
-#define N_UBATCH 1
+#define N_UBATCH N_BATCH
 
 #define THREADS 8
 
@@ -35,8 +35,15 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     }
 
     ctx_params.n_ctx = N_CTX;     // text context, 0 = from model
-    ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
-    ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
+    if (params.n_gpu_layers) {
+        ctx_params.n_batch = 1; // logical maximum batch size that can be submitted to llama_decode
+        ctx_params.n_ubatch = 1; // physical maximum batch size
+    }
+    else {
+        ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
+        ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
+    }
+
     ctx_params.n_seq_max = 1; // max number of sequences (i.e. distinct states for recurrent models)
     ctx_params.n_threads = params.n_gpu_layers = THREADS;       // number of threads to use for generation
     ctx_params.n_threads_batch = params.n_gpu_layers = THREADS; // number of threads to use for batch processing
@@ -81,8 +88,6 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
 
 LlamaInterface::~LlamaInterface()
 {
-    llama_batch_free(batch);
-
     if (sampler)
         llama_sampler_free(sampler);
 
@@ -97,22 +102,26 @@ LlamaInterface::~LlamaInterface()
 
 QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
 {
+    int tokenCount;
     char promptCStr[prompt.size() + 1];
+    llama_token tokensCArr[prompt.size()]{};
+
     QVector<llama_token> tokens;
-    tokens.resize(prompt.size());
 
     strncpy(promptCStr, prompt.toUtf8().constData(), prompt.size() + 1);
 
-    llama_tokenize(vocab, promptCStr, prompt.size(), tokens.data(), prompt.size(), true, true);
+    tokenCount = llama_tokenize(vocab, promptCStr, prompt.size(), tokensCArr, prompt.size(), true, true);
 
-    tokens.shrink_to_fit();
+    for (int i = 0; i < tokenCount; i++) {
+        tokens.append(tokensCArr[i]);
+    }
 
     return tokens;
 }
 
 using namespace std::chrono;
 
-void LlamaInterface::batchProcess(QVector<llama_token> &tokens, int startingPos)
+void LlamaInterface::generate(QVector<llama_token> &tokens)
 {
     // TODO: do some abstraction over that
 #ifdef __APPLE__
@@ -124,91 +133,71 @@ void LlamaInterface::batchProcess(QVector<llama_token> &tokens, int startingPos)
 #endif
     unsigned long timeMs;
 
-    llama_token new_token_id;
-    char buffer[16] = {0};
+    int pieceSize;
+    int tokensGenerated;
+    bool firstDecode;
 
-    int n_cur;
-    int n_chars;
-    int n_decode;
-
-    batch = llama_batch_init(llama_n_batch(ctx), 0, 1);
-    for (size_t i = startingPos; i < tokens.size(); i++) {
-        batch.token[batch.n_tokens] = tokens[i];
-        batch.pos[batch.n_tokens] = i;
-
-        batch.n_seq_id[batch.n_tokens] = 1;
-        batch.seq_id[batch.n_tokens][0] = 0;
-
-        batch.logits[batch.n_tokens] = false;
-
-        batch.n_tokens++;
-    }
-
-    batch.logits[batch.n_tokens - 1] = true;
+    llama_batch batch;
+    llama_token newTokenId;
+    char pieceBuffer[256] = {0};
 
     start = high_resolution_clock::now();
-    if (llama_decode(ctx, batch) != 0) {
-        throw std::runtime_error("first decode failed");
+    for (int i = 0; i < tokens.size(); i += 1) { // TODO: support >1 batch size
+        batch = llama_batch_get_one(&tokens.data()[i], 1); // TODO: the docs say the function should be avoided
+
+        if (llama_decode(ctx, batch) != 0) { // TODO: if prompt is big enough, first batch processing causes the first generated token to be gibberish
+            throw std::runtime_error("first decode failed");
+        }
     }
     end = high_resolution_clock::now();
 
     timeMs = duration_cast<milliseconds>(end - start).count();
 
-    qDebug("prompt: %d tokens", batch.n_tokens);
+    qDebug("prompt: %d tokens", tokens.size());
     qDebug("prompt processing time: %lu ms, (%f t/s)",
         timeMs,
-        (static_cast<double>(batch.n_tokens) / static_cast<double>(timeMs)) * 1000.0
+        (static_cast<double>(tokens.size()) / static_cast<double>(timeMs)) * 1000.0
         );
 
-    n_cur = batch.n_tokens;
-    n_decode = 0;
+    tokensGenerated = 0;
+    firstDecode = true;
 
     start = high_resolution_clock::now();
-    while (n_decode <= N_PREDICT) {
-        // sample the next token
-        {
-            new_token_id = llama_sampler_sample(sampler, ctx, batch.n_tokens - 1);
+    while (tokensGenerated <= N_PREDICT) {
+        if (firstDecode) {
+            firstDecode = false;
+        }
+        else {
+            batch = llama_batch_get_one(&newTokenId, 1);
 
-            // is it the end?
-            if (llama_vocab_is_eog(vocab, new_token_id) || this->forceStop) {
-                this->forceStop = false;
-                break;
+            if (llama_decode(ctx, batch)) {
+                throw std::runtime_error("decode failed");
             }
-
-            n_chars = llama_token_to_piece(vocab, new_token_id, buffer, sizeof(buffer), 0, false);
-            buffer[n_chars] = '\0'; // llama_token_to_piece does not null-terminate
-
-            // prepare the next batch
-            batch.n_tokens = 0;
-
-            // push this new token for next evaluation
-            batch.token[batch.n_tokens] = new_token_id;
-            batch.pos[batch.n_tokens] = n_cur;
-            batch.n_seq_id[batch.n_tokens] = 1;
-            batch.seq_id[batch.n_tokens][0] = 0;
-            batch.logits[batch.n_tokens] = true;
-            batch.n_tokens++;
-
-            n_decode += 1;
-
-            emit tokenGenerated(QString(buffer));
         }
 
-        n_cur += 1;
+        newTokenId = llama_sampler_sample(sampler, ctx, -1);
 
-        // evaluate the current batch with the transformer model
-        if (llama_decode(ctx, batch)) {
-            throw std::runtime_error("decode failed");
+        // is it the end?
+        if (llama_vocab_is_eog(vocab, newTokenId) || this->forceStop) {
+            this->forceStop = false;
+            break;
         }
+
+        tokensGenerated += 1;
+
+        pieceSize = llama_token_to_piece(vocab, newTokenId, pieceBuffer, sizeof(pieceBuffer), 0, false);
+        pieceBuffer[pieceSize] = '\0'; // llama_token_to_piece does not null-terminate
+
+        emit tokenGenerated(QString(pieceBuffer));
     }
     end = high_resolution_clock::now();
 
     timeMs = duration_cast<milliseconds>(end - start).count();
 
-    qDebug("generated: %d tokens", n_decode);
+    qDebug("generated: %d tokens", tokensGenerated);
     qDebug("generating time: %lu ms, (%f t/s)",
         timeMs,
-        (static_cast<double>(n_decode) / static_cast<double>(timeMs)) * 1000.0
+        (static_cast<double>(tokensGenerated) / static_cast<double>(timeMs)) * 1000.0
         );
 }
 
@@ -234,7 +223,7 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
 
     setSamplers(samplers);
 
-    batchProcess(tokens, 0);
+    generate(tokens);
 
     generating = false;
     forceStop = false;
@@ -282,9 +271,6 @@ void LlamaInterface::setSamplers(SamplerArray samplers)
 
 void LlamaInterface::resetContext()
 {
-    // TODO: BAAAAAND AAAAAAID
-    llama_batch_free(batch);
-
     if (ctx)
         llama_free(ctx);
 
@@ -293,8 +279,6 @@ void LlamaInterface::resetContext()
     if (ctx == nullptr) {
         throw std::runtime_error("unable to create context");
     }
-
-    batch = llama_batch_init(N_UBATCH, 0, 1);
 }
 
 QString LlamaInterface::getName()
