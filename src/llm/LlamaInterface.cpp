@@ -6,8 +6,8 @@
 
 #define N_PREDICT 250
 #define N_CTX 8192
-#define N_BATCH 512
-#define N_UBATCH N_BATCH
+#define N_BATCH 2048
+#define N_UBATCH 512
 
 #define THREADS 8
 
@@ -35,14 +35,8 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     }
 
     ctx_params.n_ctx = N_CTX;     // text context, 0 = from model
-    if (params.n_gpu_layers) {
-        ctx_params.n_batch = 1; // logical maximum batch size that can be submitted to llama_decode
-        ctx_params.n_ubatch = 1; // physical maximum batch size
-    }
-    else {
-        ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
-        ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
-    }
+    ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
+    ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
 
     ctx_params.n_seq_max = 1; // max number of sequences (i.e. distinct states for recurrent models)
     ctx_params.n_threads = params.n_gpu_layers = THREADS;       // number of threads to use for generation
@@ -141,13 +135,18 @@ void LlamaInterface::generate(QVector<llama_token> &tokens)
     llama_token newTokenId;
     char pieceBuffer[256] = {0};
 
+    int tokensPerBatch; // TODO: support >1 batch size
+
     start = high_resolution_clock::now();
-    for (int i = 0; i < tokens.size(); i += 1) { // TODO: support >1 batch size
-        batch = llama_batch_get_one(&tokens.data()[i], 1); // TODO: the docs say the function should be avoided
+    for (int i = 0; i < tokens.size();) {
+        tokensPerBatch = std::min((int) llama_n_batch(ctx), tokens.size() - i);
+        batch = llama_batch_get_one(&tokens.data()[i], std::min(tokensPerBatch, tokens.size() - i));
 
         if (llama_decode(ctx, batch) != 0) { // TODO: if prompt is big enough, first batch processing causes the first generated token to be gibberish
             throw std::runtime_error("first decode failed");
         }
+
+        i += tokensPerBatch;
     }
     end = high_resolution_clock::now();
 
