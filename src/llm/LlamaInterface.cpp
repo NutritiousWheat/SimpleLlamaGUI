@@ -39,8 +39,8 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
 
     ctx_params.n_seq_max = 1; // max number of sequences (i.e. distinct states for recurrent models)
-    ctx_params.n_threads = params.n_gpu_layers = THREADS;       // number of threads to use for generation
-    ctx_params.n_threads_batch = params.n_gpu_layers = THREADS; // number of threads to use for batch processing
+    ctx_params.n_threads = params.n_gpu_layers ? 1: THREADS;       // number of threads to use for generation
+    ctx_params.n_threads_batch = params.n_gpu_layers ? 1 : THREADS; // number of threads to use for batch processing
     ctx_params.rope_scaling_type
         = LLAMA_ROPE_SCALING_TYPE_UNSPECIFIED; // RoPE scaling type, from `enum llama_rope_scaling_type`
     ctx_params.pooling_type
@@ -97,14 +97,14 @@ LlamaInterface::~LlamaInterface()
 QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
 {
     int tokenCount;
-    char promptCStr[prompt.size() + 1];
-    llama_token tokensCArr[prompt.size()]{};
+    char promptCStr[prompt.length() + 1];{};
 
+    llama_token tokensCArr[prompt.length() + 1]{};
     QVector<llama_token> tokens;
 
-    strncpy(promptCStr, prompt.toUtf8().constData(), prompt.size() + 1);
+    strcpy(promptCStr, prompt.toUtf8().data());
 
-    tokenCount = llama_tokenize(vocab, promptCStr, prompt.size(), tokensCArr, prompt.size(), true, true);
+    tokenCount = llama_tokenize(vocab, promptCStr, strlen(promptCStr), tokensCArr, strlen(promptCStr), true, true);
 
     for (int i = 0; i < tokenCount; i++) {
         tokens.append(tokensCArr[i]);
@@ -135,14 +135,14 @@ void LlamaInterface::generate(QVector<llama_token> &tokens)
     llama_token newTokenId;
     char pieceBuffer[256] = {0};
 
-    int tokensPerBatch; // TODO: support >1 batch size
+    int tokensPerBatch;
 
     start = high_resolution_clock::now();
     for (int i = 0; i < tokens.size();) {
-        tokensPerBatch = std::min((int) llama_n_batch(ctx), tokens.size() - i);
-        batch = llama_batch_get_one(&tokens.data()[i], std::min(tokensPerBatch, tokens.size() - i));
+        tokensPerBatch = std::min((int) llama_n_ubatch(ctx), tokens.size() - i);
+        batch = llama_batch_get_one(&tokens[i], tokensPerBatch);;
 
-        if (llama_decode(ctx, batch) != 0) { // TODO: if prompt is big enough, first batch processing causes the first generated token to be gibberish
+        if (llama_decode(ctx, batch) != 0) {
             throw std::runtime_error("first decode failed");
         }
 

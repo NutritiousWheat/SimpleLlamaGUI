@@ -117,7 +117,7 @@ QString Chat::promptify(bool newMessage)
 
     delete[] llama_messages;
 
-    prompt = QString(buf);
+    prompt = QString::fromUtf8(buf);
 
     if (!newMessage) {
         prompt.remove(llamaThread->getEOT()); // TODO: there may be better ways to create a prompt without the EOT token
