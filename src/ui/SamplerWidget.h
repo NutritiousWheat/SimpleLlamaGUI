@@ -14,11 +14,10 @@ class SamplerWidget : public QWidget
     Sampler sampler;
 
 public:
-    explicit SamplerWidget(QWidget *parent = nullptr);
+    explicit SamplerWidget(QWidget *parent, Sampler::SamplerTypeE type);
     ~SamplerWidget();
 
-    signals:
-    void samplerUpdated(Sampler sampler);
+    Sampler getValue();
 
 private slots:
     void on_samplerSlider_valueChanged(int value);
@@ -27,7 +26,6 @@ private slots:
 
 private:
     static int samplerCount;
-    static Sampler::SamplerTypeE getNextSamplerType();
     Ui::SamplerWidget *ui;
 
     int parseInt(const QString &text);

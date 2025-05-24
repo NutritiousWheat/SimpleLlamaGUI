@@ -8,6 +8,7 @@
 #include "../config/ConfigApp.h"
 #include "../llm/LlamaThread.h"
 #include "MessageWidget.h"
+#include "SamplerWidget.h"
 
 #define CRIT_HEADER "Critical error"
 #define ERR_HEADER "Error"
@@ -43,10 +44,6 @@ private slots:
 
     void on_refreshButton_clicked();
 
-
-public slots:
-    void on_sampler_valueChanged(Sampler sampler);
-
 private:
     Ui::MainWindow *ui;
     QVBoxLayout chatLayout;
@@ -59,8 +56,8 @@ private:
 #endif
 
     Chat chat;
-    SamplerArray samplers;
 
+    QVector<SamplerWidget *> samplers;
     QVector<MessageWidget *> messages;
 
 
@@ -74,5 +71,7 @@ private:
     void startGenerating();
     void stopGenerating();
     void refreshModels();
+
+    SamplerArray getSamplerArray();
 };
 #endif // MAINWINDOW_H

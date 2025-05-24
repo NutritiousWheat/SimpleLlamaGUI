@@ -53,6 +53,8 @@ else()
         ${LLAMA_CPP_HEADERS}
         src/ui/SamplerWidget.h src/ui/SamplerWidget.cpp src/ui/SamplerWidget.ui
         src/ui/MessageWidget.h src/ui/MessageWidget.cpp src/ui/MessageWidget.ui
+        src/ui/BoolParamWidget.h src/ui/BoolParamWidget.cpp src/ui/BoolParamWidget.ui
+        src/ui/NumParamWidget.h src/ui/NumParamWidget.cpp src/ui/NumParamWidget.ui
     )
 endif()
 

@@ -1,12 +1,14 @@
 #include "MainWindow.h"
 
-#include <QDir>
+#include <QDir> // TODO: include code style
 #include <QMessageBox>
 
 #include "./ui_MainWindow.h"
 #include <QObject>
 
 #include "MessageWidget.h"
+#include "SamplerWidget.h"
+#include "BoolParamWidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,11 +16,23 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // TODO: add sampler widgets at runtime
-    connect(ui->samplerWidget_1, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
-    connect(ui->samplerWidget_2, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
-    connect(ui->samplerWidget_3, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
-    connect(ui->samplerWidget_4, &SamplerWidget::samplerUpdated, this, &MainWindow::on_sampler_valueChanged);
+    int samplersColumns = sqrt(Sampler::SamplerTypeE::SAMPLERS_COUNT);
+
+    for (int i = 0; i < Sampler::SamplerTypeE::SAMPLERS_COUNT; i++) {
+        QGridLayout *samplerLayout = static_cast<QGridLayout *>(ui->tabParams->layout());
+        SamplerWidget *samplerWidget = new SamplerWidget(ui->tabParams, static_cast<Sampler::SamplerTypeE>(i));
+
+        samplerLayout->addWidget(samplerWidget, i % samplersColumns, i / samplersColumns);
+
+        samplers.append(samplerWidget);
+    }
+
+    ui->boolAreaWidgetContents->layout()->setAlignment(Qt::AlignTop);
+
+    for (int i = 0; i < BoolParamWidget::BoolParamE::BOOL_PARAM_COUNT; i++) {
+        BoolParamWidget *boolParamWidget = new BoolParamWidget(ui->tabParams, static_cast<BoolParamWidget::BoolParamE>(i));
+        ui->boolAreaWidgetContents->layout()->addWidget(boolParamWidget);
+    }
 
     connect(&chat, &Chat::appendText, this, &MainWindow::on_appendText);
     connect(&chat, &Chat::newMessage, this, &MainWindow::on_appendMessage);
@@ -28,8 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
     procStateNotLoaded();
     refreshModels();
 
-    this->chatLayout.setAlignment(Qt::AlignTop);
-    this->ui->chatAreaWidgetContents->setLayout(&chatLayout);
+    chatLayout.setAlignment(Qt::AlignTop);
+    ui->chatAreaWidgetContents->setLayout(&chatLayout);
 }
 
 MainWindow::~MainWindow()
@@ -46,7 +60,7 @@ void MainWindow::procStateNotLoaded()
 
     ui->clearButton->setDisabled(false);
 
-    this->ui->statusbar->showMessage("Model unloaded");
+    ui->statusbar->showMessage("Model unloaded");
 }
 
 void MainWindow::procStateLoading()
@@ -58,7 +72,7 @@ void MainWindow::procStateLoading()
 
     ui->clearButton->setDisabled(false);
 
-    this->ui->statusbar->showMessage("Model loading");
+    ui->statusbar->showMessage("Model loading");
 }
 
 void MainWindow::procStateIdle()
@@ -70,7 +84,7 @@ void MainWindow::procStateIdle()
 
     ui->clearButton->setDisabled(false);
 
-    this->ui->statusbar->showMessage("Loaded model: " + this->chat.getModelName());
+    ui->statusbar->showMessage("Loaded model: " + chat.getModelName());
 }
 
 void MainWindow::procStateGenerating()
@@ -82,14 +96,15 @@ void MainWindow::procStateGenerating()
 
     ui->clearButton->setDisabled(true);
 
-    this->ui->statusbar->showMessage("Loaded model (generating): " + this->chat.getModelName());
+    ui->statusbar->showMessage("Loaded model (generating): " + chat.getModelName());
 }
 
 void MainWindow::startGenerating()
 {
     const QString message = ui->promptBox->toPlainText();
+    const SamplerArray samplerArray = getSamplerArray();
 
-    chat.reply(message, samplers);
+    chat.reply(message, samplerArray);
 }
 
 void MainWindow::stopGenerating()
@@ -108,14 +123,11 @@ void MainWindow::on_submitButton_clicked()
 
 void MainWindow::on_continueButton_clicked()
 {
-    this->chat.continueLastMessage(samplers);
+    const SamplerArray samplerArray = getSamplerArray();
+
+    this->chat.continueLastMessage(samplerArray);
 }
 
-
-void MainWindow::on_sampler_valueChanged(const Sampler sampler)
-{
-    samplers[sampler.getType()] = sampler;
-}
 
 void MainWindow::on_appendText(QString &text)
 {
@@ -200,4 +212,15 @@ void MainWindow::refreshModels()
     if (fileList.contains(lastUsedModel)) {
         ui->modelBox->setCurrentText(lastUsedModel);
     }
+}
+
+SamplerArray MainWindow::getSamplerArray()
+{
+    SamplerArray samplerArray;
+
+    for (int i = 0; i < samplers.count(); i++) {
+        samplerArray[static_cast<Sampler::SamplerTypeE>(i)] = samplers[i]->getValue();
+    }
+
+    return samplerArray;
 }

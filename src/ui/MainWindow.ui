@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabChat">
        <attribute name="title">
@@ -97,20 +97,7 @@
        <attribute name="title">
         <string>Params</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="SamplerWidget" name="samplerWidget_1" native="true"/>
-        </item>
-        <item row="0" column="1">
-         <widget class="SamplerWidget" name="samplerWidget_2" native="true"/>
-        </item>
-        <item row="1" column="0">
-         <widget class="SamplerWidget" name="samplerWidget_3" native="true"/>
-        </item>
-        <item row="1" column="1">
-         <widget class="SamplerWidget" name="samplerWidget_4" native="true"/>
-        </item>
-       </layout>
+       <layout class="QGridLayout" name="gridLayout_3"/>
       </widget>
       <widget class="QWidget" name="tabModel">
        <attribute name="title">
@@ -156,6 +143,54 @@
          </item>
         </layout>
        </widget>
+       <widget class="QScrollArea" name="boolArea">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>100</y>
+          <width>281</width>
+          <height>561</height>
+         </rect>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="boolAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>279</width>
+           <height>559</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4"/>
+        </widget>
+       </widget>
+       <widget class="QScrollArea" name="numArea">
+        <property name="geometry">
+         <rect>
+          <x>290</x>
+          <y>10</y>
+          <width>401</width>
+          <height>651</height>
+         </rect>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="numAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>399</width>
+           <height>649</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5"/>
+        </widget>
+       </widget>
       </widget>
      </widget>
     </item>
@@ -173,14 +208,6 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>SamplerWidget</class>
-   <extends>QWidget</extends>
-   <header>SamplerWidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -3,6 +3,11 @@
 #include <QApplication>
 #include <QMessageBox>
 
+// TODO: use namespaces
+// TODO: maybe rework the directory structure
+// TODO: rework enum scope
+
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
