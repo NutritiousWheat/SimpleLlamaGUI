@@ -66,11 +66,11 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     ctx_params.abort_callback = nullptr;
     ctx_params.abort_callback_data = nullptr;
 
-    ctx = llama_init_from_model(model, ctx_params);
-
-    if (ctx == nullptr) {
-        throw std::runtime_error("unable to create context");
-    }
+    // ctx = llama_init_from_model(model, ctx_params); // TODO: this only needed if i don't reset context
+    //
+    // if (ctx == nullptr) {
+    //     throw std::runtime_error("unable to create context");
+    // }
 
     vocab = llama_model_get_vocab(model);
 
