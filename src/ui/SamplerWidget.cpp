@@ -4,8 +4,6 @@
 #include "ui_SamplerWidget.h"
 #include <qtextstream.h>
 
-int SamplerWidget::samplerCount = 0;
-
 SamplerWidget::SamplerWidget(QWidget *parent, Sampler::SamplerTypeE type)
     : QWidget(parent)
     , ui(new Ui::SamplerWidget)
@@ -54,22 +52,12 @@ void SamplerWidget::on_samplerSlider_valueChanged(int value)
 void SamplerWidget::on_samplerLine_textChanged(const QString &text)
 {
     if (sampler.isInt()) {
-        int value = parseInt(text);
+        int value = text.toInt();
         sampler.setValueInt(value);
         ui->samplerSlider->setValue(value);
     } else {
-        float value = parseFloat(text);
+        float value = text.toFloat();
         sampler.setValueFloat(value);
         ui->samplerSlider->setValue(sampler.getValueInt());
     }
 }
-
-int SamplerWidget::parseInt(const QString &text)
-{
-    return text.toInt();
-}
-float SamplerWidget::parseFloat(const QString &text)
-{
-    return text.toFloat();
-}
-

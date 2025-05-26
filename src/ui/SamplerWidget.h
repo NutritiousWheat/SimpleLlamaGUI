@@ -25,11 +25,7 @@ private slots:
     void on_samplerLine_textChanged(const QString &text);
 
 private:
-    static int samplerCount;
     Ui::SamplerWidget *ui;
-
-    int parseInt(const QString &text);
-    float parseFloat(const QString &text);
 };
 
 #endif // SAMPLERWIDGET_H
