@@ -78,6 +78,9 @@ void MainWindow::procStateNotLoaded()
 
     ui->clearButton->setDisabled(false);
 
+    ui->loadButton->setDisabled(false);
+    ui->loadButton->setText("Load");
+
     ui->statusbar->showMessage("Model unloaded");
 }
 
@@ -89,6 +92,9 @@ void MainWindow::procStateLoading()
     ui->continueButton->setDisabled(true);
 
     ui->clearButton->setDisabled(false);
+
+    ui->loadButton->setDisabled(true);
+    ui->loadButton->setText("Unload");
 
     ui->statusbar->showMessage("Model loading");
 }
@@ -102,6 +108,9 @@ void MainWindow::procStateIdle()
 
     ui->clearButton->setDisabled(false);
 
+    ui->loadButton->setDisabled(false);
+    ui->loadButton->setText("Unload");
+
     ui->statusbar->showMessage("Loaded model: " + chat.getModelName());
 }
 
@@ -113,6 +122,9 @@ void MainWindow::procStateGenerating()
     ui->continueButton->setDisabled(true);
 
     ui->clearButton->setDisabled(true);
+
+    ui->loadButton->setDisabled(true);
+    ui->loadButton->setText("Unload");
 
     ui->statusbar->showMessage("Loaded model (generating): " + chat.getModelName());
 }
@@ -186,12 +198,16 @@ void MainWindow::on_exceptionOccured(QString errorMsg)
 
 void MainWindow::on_loadButton_clicked()
 {
-    QString name = ui->modelBox->itemText(ui->modelBox->currentIndex());
-    QString path = config.getValue(ConfigApp::ModelDir) + "/" + name;
+    // TODO: do not use QString comparison here... just store the current state in some variable in MainWindow
+    if (ui->loadButton->text() == "Load") {
+        QString name = ui->modelBox->itemText(ui->modelBox->currentIndex());
+        QString path = config.getValue(ConfigApp::ModelDir) + "/" + name;
 
-    chat.loadModel(path, getModelParams(), getCtxParams());
-
-    config.setValue(ConfigApp::LastUsedModel, name);
+        chat.loadModel(path, getModelParams(), getCtxParams());
+        config.setValue(ConfigApp::LastUsedModel, name);
+    } else {
+        chat.unloadModel();
+    }
 }
 
 void MainWindow::on_clearButton_pressed()
@@ -203,11 +219,6 @@ void MainWindow::on_clearButton_pressed()
     }
     messages.clear();
 
-}
-
-void MainWindow::on_unloadButton_clicked()
-{
-    chat.unloadModel();
 }
 
 void MainWindow::on_refreshButton_clicked()

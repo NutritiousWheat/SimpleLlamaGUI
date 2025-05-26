@@ -43,8 +43,6 @@ private slots:
 
     void on_clearButton_pressed();
 
-    void on_unloadButton_clicked();
-
     void on_refreshButton_clicked();
 
 private:
