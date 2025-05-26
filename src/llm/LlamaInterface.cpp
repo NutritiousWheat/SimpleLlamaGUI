@@ -96,9 +96,9 @@ LlamaInterface::~LlamaInterface()
 QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
 {
     int tokenCount;
-    char promptCStr[prompt.length() + 1];{};
+    char promptCStr[prompt.toLocal8Bit().length() + 1];{};
 
-    llama_token tokensCArr[prompt.length() + 1]{};
+    llama_token tokensCArr[prompt.toLocal8Bit().length() + 1]{};
     QVector<llama_token> tokens;
 
     strncpy(promptCStr, prompt.toLocal8Bit().data(), sizeof(promptCStr)); // TODO: figure out how to feed wide chars to llama_tokenize
@@ -108,6 +108,9 @@ QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
     for (int i = 0; i < tokenCount; i++) {
         tokens.append(tokensCArr[i]);
     }
+
+    char test[8192];
+    llama_detokenize(vocab, tokens.data(), tokens.size(), test, 8192, false, true);
 
     return tokens;
 }
