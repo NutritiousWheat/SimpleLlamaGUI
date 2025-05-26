@@ -9,6 +9,9 @@
 #include "../llm/LlamaThread.h"
 #include "MessageWidget.h"
 #include "SamplerWidget.h"
+#include "NumParamWidget.h"
+#include "BoolParamWidget.h"
+
 
 #define CRIT_HEADER "Critical error"
 #define ERR_HEADER "Error"
@@ -57,7 +60,10 @@ private:
 
     Chat chat;
 
-    QVector<SamplerWidget *> samplers;
+    QMap<Sampler::SamplerTypeE, SamplerWidget *> samplers;
+    QMap<BoolParamWidget::BoolParamE, BoolParamWidget *> boolParams;
+    QMap<NumParamWidget::NumParamE, NumParamWidget *> numParams;
+
     QVector<MessageWidget *> messages;
 
 
@@ -73,5 +79,7 @@ private:
     void refreshModels();
 
     SamplerArray getSamplerArray();
+    llama_model_params getModelParams();
+    llama_context_params getCtxParams();
 };
 #endif // MAINWINDOW_H

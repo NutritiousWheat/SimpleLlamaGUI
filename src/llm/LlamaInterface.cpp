@@ -5,18 +5,17 @@
 #include <stdexcept>
 
 #define N_PREDICT 250
-#define N_CTX 8192
 #define N_BATCH 2048
 #define N_UBATCH 512
 
 #define THREADS 8
 
-LlamaInterface::LlamaInterface(const QString &modelPath)
+LlamaInterface::LlamaInterface(const QString &modelPath, llama_model_params modelParams, llama_context_params ctxParams)
 {
     llama_backend_init();
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
 
-    params.n_gpu_layers = 256;
+    params.n_gpu_layers = modelParams.n_gpu_layers; // TODO: set parameters outside
     params.split_mode = LLAMA_SPLIT_MODE_LAYER;
     params.main_gpu = 0;
     params.tensor_split = nullptr;
@@ -31,16 +30,16 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     model = llama_model_load_from_file(modelPath.toUtf8(), params);
 
     if (model == nullptr) {
-        throw std::runtime_error("unable to load model");
+        throw std::runtime_error("unable to load model"); // TODO: do proper exceptions
     }
 
-    ctx_params.n_ctx = N_CTX;     // text context, 0 = from model
+    ctx_params.n_ctx = ctxParams.n_ctx;     // text context, 0 = from model // TODO: separate context settings
     ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
     ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
 
     ctx_params.n_seq_max = 1; // max number of sequences (i.e. distinct states for recurrent models)
-    ctx_params.n_threads = params.n_gpu_layers ? 1: THREADS;       // number of threads to use for generation
-    ctx_params.n_threads_batch = params.n_gpu_layers ? 1 : THREADS; // number of threads to use for batch processing
+    ctx_params.n_threads = params.n_gpu_layers ? 1: ctxParams.n_threads;       // number of threads to use for generation
+    ctx_params.n_threads_batch = params.n_gpu_layers ? 1 : ctxParams.n_threads_batch; // number of threads to use for batch processing
     ctx_params.rope_scaling_type
         = LLAMA_ROPE_SCALING_TYPE_UNSPECIFIED; // RoPE scaling type, from `enum llama_rope_scaling_type`
     ctx_params.pooling_type
@@ -62,7 +61,7 @@ LlamaInterface::LlamaInterface(const QString &modelPath)
     ctx_params.type_v = GGML_TYPE_F16; // data type for V cache [EXPERIMENTAL]
     ctx_params.embeddings = false;  // if true, extract embeddings (together with logits)
     ctx_params.offload_kqv = false; // whether to offload the KQV ops (including the KV cache) to GPU
-    ctx_params.flash_attn = false;  // whether to use flash attention [EXPERIMENTAL]
+    ctx_params.flash_attn = ctxParams.flash_attn;  // whether to use flash attention [EXPERIMENTAL]
     ctx_params.abort_callback = nullptr;
     ctx_params.abort_callback_data = nullptr;
 
@@ -204,8 +203,8 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
 {
     QVector<llama_token> tokens;
 
-    int n_ctx;
-    int n_kv_req;
+    // int n_ctx; // TODO: why was it needed in the first place?
+    // int n_kv_req;
 
     generating = true;
 
@@ -213,12 +212,12 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
 
     tokens = tokenize(prompt);
 
-    n_ctx = llama_n_ctx(ctx);
-    n_kv_req = N_CTX; // TODO: smarter kv cache allocation... and also caching
-
-    if (n_kv_req > n_ctx) {
-        throw std::runtime_error("kv cache size is not big enough");
-    }
+    // n_ctx = llama_n_ctx(ctx);
+    // n_kv_req = N_CTX; // TODO: smarter kv cache allocation... and also caching
+    //
+    // if (n_kv_req > n_ctx) {
+    //     throw std::runtime_error("kv cache size is not big enough");
+    // }
 
     setSamplers(samplers);
 

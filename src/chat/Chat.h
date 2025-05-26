@@ -66,7 +66,7 @@ public:
     static const char *getRoleStringUI(messageRoleE role);
     static const char *getRoleStringPrompt(messageRoleE role);
 
-    void loadModel(const QString &ggufPath);
+    void loadModel(const QString &ggufPath, llama_model_params modelParams, llama_context_params ctxParams);
     void unloadModel();
 
     void appendUserMessage(const QString &message);

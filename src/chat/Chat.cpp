@@ -126,12 +126,12 @@ QString Chat::promptify(bool newMessage)
     return prompt;
 }
 
-void Chat::loadModel(const QString &modelPath)
+void Chat::loadModel(const QString &modelPath, llama_model_params modelParams, llama_context_params ctxParams)
 {
     unloadModel();
     emit updateGUI(CHAT_STATE_LOADING);
     try {
-        llamaThread = new LlamaThread(modelPath);
+        llamaThread = new LlamaThread(modelPath, modelParams, ctxParams);
         llamaThread->start();
 
         connect(llamaThread, &LlamaThread::tokenGenerated, this, &Chat::on_tokenGenerated);

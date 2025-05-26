@@ -12,8 +12,19 @@ class NumParamWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit NumParamWidget(QWidget *parent = nullptr);
+    enum NumParamE
+    {
+        N_GPU_LAYERS,
+        N_CONTEXT_TOKENS,
+        N_THREADS,
+
+        NUM_PARAM_COUNT
+    };
+
+    explicit NumParamWidget(QWidget *parent, NumParamE type);
     ~NumParamWidget();
+
+    int getValue();
 
 private slots:
     void on_lineEdit_textChanged(const QString &arg1);
@@ -22,6 +33,10 @@ private slots:
 
 private:
     Ui::NumParamWidget *ui;
+    NumParamE type;
+
+    void init(QString label, int defaultValue, int min, int max, int step = 1);
+
 };
 
 #endif // NUMPARAMWIDGET_H

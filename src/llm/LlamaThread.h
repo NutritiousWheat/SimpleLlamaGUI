@@ -45,11 +45,13 @@ private:
 
     QString prompt;
     SamplerArray samplers;
+    llama_model_params modelParams;
+    llama_context_params ctxParams;
 
     void run() override;
 
 public:
-    LlamaThread(const QString &modelPath);
+    LlamaThread(const QString &modelPath, llama_model_params modelParams, llama_context_params ctxParams);
     ~LlamaThread();
 
     void startGenerating(const QString &prompt, const SamplerArray &samplers);

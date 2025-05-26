@@ -6,9 +6,10 @@
 #include "./ui_MainWindow.h"
 #include <QObject>
 
-#include "MessageWidget.h"
-#include "SamplerWidget.h"
 #include "BoolParamWidget.h"
+#include "MessageWidget.h"
+#include "NumParamWidget.h"
+#include "SamplerWidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -19,19 +20,36 @@ MainWindow::MainWindow(QWidget *parent)
     int samplersColumns = sqrt(Sampler::SamplerTypeE::SAMPLERS_COUNT);
 
     for (int i = 0; i < Sampler::SamplerTypeE::SAMPLERS_COUNT; i++) {
+        Sampler::SamplerTypeE type = static_cast<Sampler::SamplerTypeE>(i);
+
         QGridLayout *samplerLayout = static_cast<QGridLayout *>(ui->tabParams->layout());
-        SamplerWidget *samplerWidget = new SamplerWidget(ui->tabParams, static_cast<Sampler::SamplerTypeE>(i));
+        SamplerWidget *samplerWidget = new SamplerWidget(ui->tabParams, type);
 
         samplerLayout->addWidget(samplerWidget, i % samplersColumns, i / samplersColumns);
 
-        samplers.append(samplerWidget);
+        samplers.insert(type, samplerWidget);
     }
 
     ui->boolAreaWidgetContents->layout()->setAlignment(Qt::AlignTop);
 
     for (int i = 0; i < BoolParamWidget::BoolParamE::BOOL_PARAM_COUNT; i++) {
-        BoolParamWidget *boolParamWidget = new BoolParamWidget(ui->tabParams, static_cast<BoolParamWidget::BoolParamE>(i));
+        BoolParamWidget::BoolParamE type = static_cast<BoolParamWidget::BoolParamE>(i);
+
+        BoolParamWidget *boolParamWidget = new BoolParamWidget(ui->tabParams, type);
         ui->boolAreaWidgetContents->layout()->addWidget(boolParamWidget);
+
+        boolParams.insert(type, boolParamWidget);
+    }
+
+    ui->numAreaWidgetContents->layout()->setAlignment(Qt::AlignTop);
+
+    for (int i = 0; i < NumParamWidget::NumParamE::NUM_PARAM_COUNT; i++) {
+        NumParamWidget::NumParamE type = static_cast<NumParamWidget::NumParamE>(i);
+
+        NumParamWidget *numParamWidget = new NumParamWidget(ui->tabParams, type);
+        ui->numAreaWidgetContents->layout()->addWidget(numParamWidget);
+
+        numParams.insert(type, numParamWidget);
     }
 
     connect(&chat, &Chat::appendText, this, &MainWindow::on_appendText);
@@ -171,7 +189,7 @@ void MainWindow::on_loadButton_clicked()
     QString name = ui->modelBox->itemText(ui->modelBox->currentIndex());
     QString path = config.getValue(ConfigApp::ModelDir) + "/" + name;
 
-    chat.loadModel(path);
+    chat.loadModel(path, getModelParams(), getCtxParams());
 
     config.setValue(ConfigApp::LastUsedModel, name);
 }
@@ -217,10 +235,33 @@ void MainWindow::refreshModels()
 SamplerArray MainWindow::getSamplerArray()
 {
     SamplerArray samplerArray;
+    Sampler::SamplerTypeE type;
 
     for (int i = 0; i < samplers.count(); i++) {
-        samplerArray[static_cast<Sampler::SamplerTypeE>(i)] = samplers[i]->getValue();
+        type = static_cast<Sampler::SamplerTypeE>(i);
+        samplerArray[type] = samplers[type]->getValue();
     }
 
     return samplerArray;
+}
+
+llama_model_params MainWindow::getModelParams()
+{
+    llama_model_params params{};
+
+    params.n_gpu_layers = numParams[NumParamWidget::NumParamE::N_GPU_LAYERS]->getValue();
+
+    return params;
+}
+
+llama_context_params MainWindow::getCtxParams()
+{
+    llama_context_params params{};
+
+    params.n_ctx = numParams[NumParamWidget::NumParamE::N_CONTEXT_TOKENS]->getValue();
+    params.n_threads = numParams[NumParamWidget::NumParamE::N_THREADS]->getValue();
+    params.n_threads_batch = numParams[NumParamWidget::NumParamE::N_THREADS]->getValue(); // TODO: separate threads and batch threads
+    params.flash_attn = boolParams[BoolParamWidget::BoolParamE::USE_FLASH_ATTENTION]->getValue();
+
+    return params;
 }

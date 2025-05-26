@@ -44,7 +44,7 @@ private:
     void resetContext();
 
 public:
-    LlamaInterface(const QString &modelPath);
+    LlamaInterface(const QString &modelPath, llama_model_params modelParams, llama_context_params ctxParams);
     ~LlamaInterface();
 
     void startGenerating(const QString &prompt, const SamplerArray &samplers);

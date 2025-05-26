@@ -2,7 +2,10 @@
 
 #include "MainWindow.h"
 #include "ui_SamplerWidget.h"
-#include <qtextstream.h>
+
+
+// TODO: make it more in line with ParamWidgets
+
 
 SamplerWidget::SamplerWidget(QWidget *parent, Sampler::SamplerTypeE type)
     : QWidget(parent)

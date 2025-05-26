@@ -10,7 +10,7 @@ void LlamaThread::run()
     try {
         emit modelLoading();
 
-        this->llama = new LlamaInterface(this->modelPath);
+        this->llama = new LlamaInterface(this->modelPath, modelParams, ctxParams);
         this->name = this->llama->getName();
         this->loaded = true;
 
@@ -40,11 +40,13 @@ void LlamaThread::run()
 
 }
 
-LlamaThread::LlamaThread(const QString &modelPath)
+LlamaThread::LlamaThread(const QString &modelPath, llama_model_params modelParams, llama_context_params ctxParams)
 {
     this->llama = nullptr;
     this->loaded = false;
     this->modelPath = modelPath;
+    this->modelParams = modelParams;
+    this->ctxParams = ctxParams;
 }
 
 LlamaThread::~LlamaThread()
