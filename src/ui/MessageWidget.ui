@@ -37,7 +37,17 @@
     </layout>
    </item>
    <item>
-    <widget class="QTextBrowser" name="messageText"/>
+    <widget class="QTextBrowser" name="messageText">
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustIgnored</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

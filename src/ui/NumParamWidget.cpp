@@ -12,7 +12,7 @@ NumParamWidget::NumParamWidget(QWidget *parent, NumParamE type)
 
     switch (type) {
     case N_GPU_LAYERS:
-        init("GPU Layers", 0, 0, 256); // TODO: use Qt's localization
+        init("GPU Layers", 256, 0, 256); // TODO: use Qt's localization
         break;
     case N_CONTEXT_TOKENS:
         init("Context Tokens", 4096, 512, 65536, 512); // TODO: use actual max limit
@@ -49,9 +49,9 @@ void NumParamWidget::init(QString label, int defaultValue, int min, int max, int
 {
     ui->label->setText(label);
 
-    ui->horizontalSlider->setValue(defaultValue);
     ui->horizontalSlider->setRange(min, max);
     ui->horizontalSlider->setSingleStep(step);
+    ui->horizontalSlider->setValue(defaultValue);
 
     ui->lineEdit->setText(QString::number(ui->horizontalSlider->value()));
 }
