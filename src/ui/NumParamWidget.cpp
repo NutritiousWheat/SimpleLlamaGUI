@@ -15,7 +15,7 @@ NumParamWidget::NumParamWidget(QWidget *parent, NumParamE type)
         init("GPU Layers", 256, 0, 256); // TODO: use Qt's localization
         break;
     case N_CONTEXT_TOKENS:
-        init("Context Tokens", 4096, 512, 65536, 512); // TODO: use actual max limit
+        init("Context Tokens", 4096, 0, 65536, 512); // TODO: use actual max limit
         break;
     case N_THREADS:
         init("Threads", 0, 0, 256);
