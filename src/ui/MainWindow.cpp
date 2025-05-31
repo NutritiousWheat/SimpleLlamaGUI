@@ -135,6 +135,8 @@ void MainWindow::startGenerating()
     const SamplerArray samplerArray = getSamplerArray();
 
     chat.reply(message, samplerArray);
+
+    ui->promptBox->setText("");
 }
 
 void MainWindow::stopGenerating()
