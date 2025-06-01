@@ -11,7 +11,7 @@ BoolParamWidget::BoolParamWidget(QWidget *parent, BoolParamE type)
 
     switch (type) {
     case USE_FLASH_ATTENTION:
-        init("Use Flash Attention", true); // TODO: use Qt's localization
+        init("Use Flash Attention", true);
         break;
     default:
         init("Unknown Parameter", false);

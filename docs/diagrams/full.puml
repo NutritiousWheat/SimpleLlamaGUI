@@ -1,0 +1,267 @@
+@startuml
+class "RNG" as C_0014635009684545094393
+class C_0014635009684545094393 {
++RNG() : void
++~RNG() = default : void
+..
++getRand() : uint32_t
+__
+}
+class "Sampler" as C_0017437567022142754955
+class C_0017437567022142754955 {
++Sampler() : void
++Sampler(SamplerTypeE type) : void
++Sampler(const QString & type) : void
++Sampler(const Sampler & new_sampler) : void
++~Sampler() = default : void
+..
++operator=(const Sampler & new_sampler) : Sampler &
+..
++getDefaultValueFloat() const : float
++getDefaultValueInt() const : int
++getRangeFloat() const : SamplerRangeFloatT
++getRangeInt() const : SamplerRangeIntT
++getType() const : SamplerTypeE
++getValueFloat() const : float
++getValueInt() const : int
++isInt() const : bool
++metaObject() const : const QMetaObject *
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
+{static} +samplerTypeToString(SamplerTypeE type) : QString
++setValueFloat(float value) : void
++setValueInt(int value) : void
+{static} +stringToSamplerType(const QString & type) : SamplerTypeE
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
+__
+{static} +staticMetaObject : const QMetaObject
+}
+class "Sampler::SamplerRangeIntT" as C_0015111432292367143189
+class C_0015111432292367143189 {
+__
++max : int
++min : int
+}
+class "Sampler::SamplerRangeFloatT" as C_0003770051278349361440
+class C_0003770051278349361440 {
+__
++max : float
++min : float
+}
+class "SamplerArray" as C_0004836602127878775178
+class C_0004836602127878775178 {
++SamplerArray() : void
++~SamplerArray() = default : void
+..
++operator=(Sampler & new_sampler) : Sampler &
++operator[](Sampler::SamplerTypeE type) : Sampler &
+__
+}
+class "LlamaInterface" as C_0001762342326308483223
+class C_0001762342326308483223 {
++LlamaInterface(const QString & modelPath, llama_model_params modelParams, llama_context_params ctxParams) : void
++~LlamaInterface() : void
+..
++generationEnd() : void
++getEOT() : QString
++getName() : QString
++getTemplate() : QString
++interruptGeneration() : void
++isGenerating() : bool
++metaObject() const : const QMetaObject *
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
++startGenerating(const QString & prompt, const SamplerArray & samplers) : void
++tokenGenerated(QString token) : void
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
+__
+{static} +staticMetaObject : const QMetaObject
+}
+class "LlamaThread" as C_0016999311381274131122
+class C_0016999311381274131122 {
++LlamaThread(const QString & modelPath, llama_model_params modelParams, llama_context_params ctxParams) : void
++~LlamaThread() : void
+..
++exceptionOccured(QString e) : void
++generationEnd() : void
++getEOT() : QString
++getName() : QString
++getTemplate() : QString
++interruptGeneration() : void
++isGenerating() : bool
++metaObject() const : const QMetaObject *
++modelLoaded() : void
++modelLoading() : void
++modelUnloaded() : void
++on_generationEnd() : void
++on_tokenGenerated(QString token) : void
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
++replyStart(QString prompt, SamplerArray samplers) : void
++replyStop() : void
++startGenerating(const QString & prompt, const SamplerArray & samplers) : void
++tokenGenerated(QString token) : void
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
+__
+{static} +staticMetaObject : const QMetaObject
+}
+class "Chat" as C_0002735913247855831522
+class C_0002735913247855831522 {
++Chat() : void
++Chat(const QString & systemPrompt) : void
++~Chat() = default : void
+..
++appendLLMMessage(const QString & message) : void
++appendSystemMessage(const QString & message) : void
++appendText(QString & text) : void
++appendUserMessage(const QString & message) : void
++clear() : void
++continueLastMessage(const SamplerArray & samplers) : void
++exceptionOccured(QString e) : void
++getModelName() const : QString
+{static} +getRoleStringPrompt(messageRoleE role) : const char *
+{static} +getRoleStringUI(messageRoleE role) : const char *
++getString() : QString
++interruptGeneration() : void
++loadModel(const QString & ggufPath, llama_model_params modelParams, llama_context_params ctxParams) : void
++metaObject() const : const QMetaObject *
++newMessage(const QString & text, messageRoleE role) : void
++on_exceptionOccured(QString errorMsg) : void
++on_generationEnd() : void
++on_modelLoaded() : void
++on_modelLoading() : void
++on_modelUnloaded() : void
++on_tokenGenerated(QString token) : void
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
++reply(const QString & userMessage, const SamplerArray & samplers) : void
++size() const : size_t
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
++unloadModel() : void
++updateGUI(chatStateE state) : void
+__
+{static} +staticMetaObject : const QMetaObject
+}
+class "Chat::messageT" as C_0000527733225038730355
+class C_0000527733225038730355 {
+__
++content : std::string
++role : messageRoleE
+}
+class "ConfigApp" as C_0004550395464018990809
+class C_0004550395464018990809 {
++ConfigApp(const QString & configPath) : void
++~ConfigApp() = default : void
+..
++getValue(KeyIntE key) : int
++getValue(KeyDoubleE key) : float
++getValue(KeyStringE key) : QString
++getValue(KeyBoolE key) : bool
++keyToString(KeyIntE key) : QString
++keyToString(KeyDoubleE key) : QString
++keyToString(KeyStringE key) : QString
++keyToString(KeyBoolE key) : QString
++setValue(KeyIntE key, int value) : void
++setValue(KeyDoubleE key, double value) : void
++setValue(KeyStringE key, const QString & value) : void
++setValue(KeyBoolE key, bool value) : void
+__
+}
+class "MessageWidget" as C_0014891931194994086338
+class C_0014891931194994086338 {
++MessageWidget(QWidget * parent, Chat::messageRoleE role) : void
++~MessageWidget() : void
+..
++appendText(const QString & text) : void
++metaObject() const : const QMetaObject *
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
+__
+{static} +staticMetaObject : const QMetaObject
+}
+class "SamplerWidget" as C_0017641532287412410858
+class C_0017641532287412410858 {
++SamplerWidget(QWidget * parent, Sampler::SamplerTypeE type) : void
++~SamplerWidget() : void
+..
++getValue() : Sampler
++metaObject() const : const QMetaObject *
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
+__
+{static} +staticMetaObject : const QMetaObject
+}
+class "NumParamWidget" as C_0008554564353656062539
+class C_0008554564353656062539 {
++NumParamWidget(QWidget * parent, NumParamE type) : void
++~NumParamWidget() : void
+..
++getValue() : int
++metaObject() const : const QMetaObject *
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
+__
+{static} +staticMetaObject : const QMetaObject
+}
+class "BoolParamWidget" as C_0009594630659857336743
+class C_0009594630659857336743 {
++BoolParamWidget(QWidget * parent, BoolParamE type) : void
++~BoolParamWidget() : void
+..
++getType() : BoolParamE
++getValue() : bool
++metaObject() const : const QMetaObject *
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
+__
+{static} +staticMetaObject : const QMetaObject
+}
+class "MainWindow" as C_0005789804228041011096
+class C_0005789804228041011096 {
++MainWindow(QWidget * parent = nullptr) : void
++~MainWindow() : void
+..
++metaObject() const : const QMetaObject *
++qt_metacall(QMetaObject::Call, int, void **) : int
++qt_metacast(const char *) : void *
+{static} +tr(const char * s, const char * c = nullptr, int n = -1) : QString
+{static} +trUtf8(const char * s, const char * c = nullptr, int n = -1) : QString
+__
+{static} +staticMetaObject : const QMetaObject
+}
+C_0017437567022142754955 ..> C_0015111432292367143189
+C_0017437567022142754955 ..> C_0003770051278349361440
+C_0015111432292367143189 --+ C_0017437567022142754955
+C_0003770051278349361440 --+ C_0017437567022142754955
+C_0004836602127878775178 o-- "4" C_0017437567022142754955 : -samplers
+C_0001762342326308483223 ..> C_0004836602127878775178
+C_0001762342326308483223 o-- C_0014635009684545094393 : -rng
+C_0016999311381274131122 --> C_0001762342326308483223 : -llama
+C_0016999311381274131122 o-- C_0004836602127878775178 : -samplers
+C_0002735913247855831522 ..> C_0004836602127878775178
+C_0002735913247855831522 --> C_0016999311381274131122 : -llamaThread
+C_0000527733225038730355 --+ C_0002735913247855831522
+C_0017641532287412410858 o-- C_0017437567022142754955 : -sampler
+C_0005789804228041011096 ..> C_0004836602127878775178
+C_0005789804228041011096 o-- C_0004550395464018990809 : -config
+C_0005789804228041011096 o-- C_0002735913247855831522 : -chat
+C_0005789804228041011096 --> C_0017641532287412410858 : -samplers
+C_0005789804228041011096 --> C_0009594630659857336743 : -boolParams
+C_0005789804228041011096 --> C_0008554564353656062539 : -numParams
+C_0005789804228041011096 --> C_0014891931194994086338 : -messages
+
+'Generated with clang-uml, version 0.6.1-15-gbf4bfdc
+'LLVM version clang version 18.1.8 (Fedora 18.1.8-2.fc40)
+@enduml

@@ -29,7 +29,7 @@ private:
 
     struct messageT
     {
-        // TODO: try figuring out a better way to store llama messages
+
         std::string content; // needs to be std::string to have easy access to it as a C-string
         messageRoleE role;
     };

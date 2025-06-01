@@ -1,6 +1,6 @@
 #include "LlamaInterface.h"
 
-#include "../../submodules/llama.cpp/src/llama-model.h" // TODO: why?
+#include "../../submodules/llama.cpp/src/llama-model.h"
 #include "SamplerArray.h"
 #include <stdexcept>
 
@@ -15,7 +15,7 @@ LlamaInterface::LlamaInterface(const QString &modelPath, llama_model_params mode
     llama_backend_init();
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
 
-    params.n_gpu_layers = modelParams.n_gpu_layers; // TODO: set parameters outside
+    params.n_gpu_layers = modelParams.n_gpu_layers;
     params.split_mode = LLAMA_SPLIT_MODE_LAYER;
     params.main_gpu = 0;
     params.tensor_split = nullptr;
@@ -30,10 +30,10 @@ LlamaInterface::LlamaInterface(const QString &modelPath, llama_model_params mode
     model = llama_model_load_from_file(modelPath.toUtf8(), params);
 
     if (model == nullptr) {
-        throw std::runtime_error("unable to load model"); // TODO: do proper exceptions
+        throw std::runtime_error("unable to load model");
     }
 
-    ctx_params.n_ctx = ctxParams.n_ctx;     // text context, 0 = from model // TODO: separate context settings
+    ctx_params.n_ctx = ctxParams.n_ctx;     // text context, 0 = from model
     ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
     ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
 
@@ -65,7 +65,7 @@ LlamaInterface::LlamaInterface(const QString &modelPath, llama_model_params mode
     ctx_params.abort_callback = nullptr;
     ctx_params.abort_callback_data = nullptr;
 
-    // ctx = llama_init_from_model(model, ctx_params); // TODO: this only needed if i don't reset context
+    // ctx = llama_init_from_model(model, ctx_params);
     //
     // if (ctx == nullptr) {
     //     throw std::runtime_error("unable to create context");
@@ -101,7 +101,7 @@ QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
     llama_token tokensCArr[prompt.toLocal8Bit().length() + 1]{};
     QVector<llama_token> tokens;
 
-    strncpy(promptCStr, prompt.toLocal8Bit().data(), sizeof(promptCStr)); // TODO: figure out how to feed wide chars to llama_tokenize
+    strncpy(promptCStr, prompt.toLocal8Bit().data(), sizeof(promptCStr));
 
     tokenCount = llama_tokenize(vocab, promptCStr, strlen(promptCStr), tokensCArr, strlen(promptCStr), true, true);
 
@@ -119,7 +119,7 @@ using namespace std::chrono;
 
 void LlamaInterface::generate(QVector<llama_token> &tokens)
 {
-    // TODO: do some abstraction over that
+
 #ifdef __APPLE__
     time_point<steady_clock> start;
     time_point<steady_clock> end;
@@ -206,17 +206,17 @@ void LlamaInterface::startGenerating(const QString &prompt, const SamplerArray &
 {
     QVector<llama_token> tokens;
 
-    // int n_ctx; // TODO: why was it needed in the first place?
+    // int n_ctx;
     // int n_kv_req;
 
     generating = true;
 
-    resetContext(); // TODO: bad for performance, do caching instead
+    resetContext();
 
     tokens = tokenize(prompt);
 
     // n_ctx = llama_n_ctx(ctx);
-    // n_kv_req = N_CTX; // TODO: smarter kv cache allocation... and also caching
+    // n_kv_req = N_CTX;
     //
     // if (n_kv_req > n_ctx) {
     //     throw std::runtime_error("kv cache size is not big enough");
@@ -296,7 +296,7 @@ QString LlamaInterface::getTemplate()
 
 QString LlamaInterface::getEOT()
 {
-    char buffer[1024]; // TODO: magic number
+    char buffer[1024];
     llama_token eot = llama_vocab_eot(&model->vocab);
 
     llama_token_to_piece(&model->vocab, eot, buffer, sizeof(buffer), 0, true);

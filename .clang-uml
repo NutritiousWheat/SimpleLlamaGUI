@@ -1,0 +1,38 @@
+# Change to directory where compile_commands.json is
+compilation_database_dir: build
+# Change to directory where diagram should be written
+output_directory: docs/diagrams
+diagrams:
+  class_config:
+    type: class
+    generate_packages: false
+    glob:
+      - src/chat/*.hc
+      - src/chat/*.cpp
+      - src/config/*.h
+      - src/config/*.cpp
+      - src/llm/*.h
+      - src/llm/*.cpp
+      - src/ui/*.h
+      - src/ui/*.cpp
+    exclude:
+      element_types:
+        - enum
+      namespaces:
+        - std
+        - llama
+        - Ui
+        - LLM
+      access:
+        - private
+      elements:
+        - r: "llama_.*"
+        - r: "ggml_.*"
+        - r: "llm_.*"
+        - r: "Ui_.*"
+        - r: "gguf_.*"
+        - r: "LLM_.*"
+        - r: ".anonymous_.*"
+        - r: ".*Signal"
+        - r: "QMap.*"
+        - r: "QVector.*"

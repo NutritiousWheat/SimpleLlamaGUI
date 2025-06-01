@@ -58,7 +58,7 @@ void ConfigApp::writeFile()
     file.write(jsonString.toUtf8());
     file.close();
 
-// TODO: implement a delay which is reset afeter every write operation AND ALSO IMPLEMENT MUTEXES
+
 }
 
 void ConfigApp::initDir(QString path)

@@ -1,0 +1,81 @@
+@startuml
+class "LlamaInterface" as C_0001762342326308483223
+class C_0001762342326308483223 {
++LlamaInterface(const QString & modelPath, llama_model_params modelParams, llama_context_params ctxParams) : void
++~LlamaInterface() : void
+..
++generationEnd() : void
++getEOT() : QString
++getName() : QString
++getTemplate() : QString
++interruptGeneration() : void
++isGenerating() : bool
++startGenerating(const QString & prompt, const SamplerArray & samplers) : void
++tokenGenerated(QString token) : void
+}
+class "LlamaThread" as C_0016999311381274131122
+class C_0016999311381274131122 {
++LlamaThread(const QString & modelPath, llama_model_params modelParams, llama_context_params ctxParams) : void
++~LlamaThread() : void
+..
++exceptionOccured(QString e) : void
++generationEnd() : void
++getEOT() : QString
++getName() : QString
++getTemplate() : QString
++interruptGeneration() : void
++isGenerating() : bool
++modelLoaded() : void
++modelLoading() : void
++modelUnloaded() : void
++on_generationEnd() : void
++on_tokenGenerated(QString token) : void
++replyStart(QString prompt, SamplerArray samplers) : void
++replyStop() : void
++startGenerating(const QString & prompt, const SamplerArray & samplers) : void
++tokenGenerated(QString token) : void
+}
+class "Chat" as C_0002735913247855831522
+class C_0002735913247855831522 {
++Chat() : void
++Chat(const QString & systemPrompt) : void
++~Chat() = default : void
+..
++appendLLMMessage(const QString & message) : void
++appendSystemMessage(const QString & message) : void
++appendText(QString & text) : void
++appendUserMessage(const QString & message) : void
++clear() : void
++continueLastMessage(const SamplerArray & samplers) : void
++exceptionOccured(QString e) : void
++getModelName() const : QString
+{static} +getRoleStringPrompt(messageRoleE role) : const char *
+{static} +getRoleStringUI(messageRoleE role) : const char *
++getString() : QString
++interruptGeneration() : void
++loadModel(const QString & ggufPath, llama_model_params modelParams, llama_context_params ctxParams) : void
++newMessage(const QString & text, messageRoleE role) : void
++on_exceptionOccured(QString errorMsg) : void
++on_generationEnd() : void
++on_modelLoaded() : void
++on_modelLoading() : void
++on_modelUnloaded() : void
++on_tokenGenerated(QString token) : void
++reply(const QString & userMessage, const SamplerArray & samplers) : void
++size() const : size_t
++unloadModel() : void
++updateGUI(chatStateE state) : void
+}
+class "MainWindow" as C_0005789804228041011096
+class C_0005789804228041011096 {
++MainWindow(QWidget * parent = nullptr) : void
++~MainWindow() : void
+..
+}
+C_0016999311381274131122 --> C_0001762342326308483223 : -llama
+C_0002735913247855831522 --> C_0016999311381274131122 : -llamaThread
+C_0005789804228041011096 o-- C_0002735913247855831522 : -chat
+
+'Generated with clang-uml, version 0.6.1-15-gbf4bfdc
+'LLVM version clang version 18.1.8 (Fedora 18.1.8-2.fc40)
+@enduml

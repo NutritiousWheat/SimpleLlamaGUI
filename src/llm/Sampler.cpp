@@ -6,7 +6,7 @@
 float Sampler::floatMultiplier = 100.f;
 
 QMap<QString, Sampler::SamplerTypeE> Sampler::nameMap
-        = {{"Temperature", SAMPLER_TEMP}, // TODO: UI shouldn't get strings from this
+        = {{"Temperature", SAMPLER_TEMP},
            {"Top K", SAMPLER_TOP_K},
            {"Top P", SAMPLER_TOP_P},
            {"Min P", SAMPLER_MIN_P}};

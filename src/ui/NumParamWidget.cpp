@@ -12,10 +12,10 @@ NumParamWidget::NumParamWidget(QWidget *parent, NumParamE type)
 
     switch (type) {
     case N_GPU_LAYERS:
-        init("GPU Layers", 256, 0, 256); // TODO: use Qt's localization
+        init("GPU Layers", 256, 0, 256);
         break;
     case N_CONTEXT_TOKENS:
-        init("Context Tokens", 4096, 0, 65536, 512); // TODO: use actual max limit
+        init("Context Tokens", 4096, 0, 65536, 512);
         break;
     case N_THREADS:
         init("Threads", 0, 0, 256);
@@ -37,7 +37,7 @@ int NumParamWidget::getValue()
 
 void NumParamWidget::on_lineEdit_textChanged(const QString &arg1)
 {
-    ui->horizontalSlider->setValue(arg1.toInt()); // TODO: maybe respect the step size
+    ui->horizontalSlider->setValue(arg1.toInt());
 }
 
 void NumParamWidget::on_horizontalSlider_valueChanged(int value)

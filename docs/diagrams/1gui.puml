@@ -1,0 +1,46 @@
+@startuml
+
+class "MessageWidget" as C_0014891931194994086338
+class C_0014891931194994086338 {
++MessageWidget(QWidget * parent, messageRoleE role) : void
++~MessageWidget() : void
+..
++appendText(const QString & text) : void
+}
+class "SamplerWidget" as C_0017641532287412410858
+class C_0017641532287412410858 {
++SamplerWidget(QWidget * parent, SamplerTypeE type) : void
++~SamplerWidget() : void
+..
++getValue() : Sampler
+__
+}
+class "NumParamWidget" as C_0008554564353656062539
+class C_0008554564353656062539 {
++NumParamWidget(QWidget * parent, NumParamE type) : void
++~NumParamWidget() : void
+..
++getValue() : int
+}
+class "BoolParamWidget" as C_0009594630659857336743
+class C_0009594630659857336743 {
++BoolParamWidget(QWidget * parent, BoolParamE type) : void
++~BoolParamWidget() : void
+..
++getType() : BoolParamE
++getValue() : bool
+}
+class "MainWindow" as C_0005789804228041011096
+class C_0005789804228041011096 {
++MainWindow(QWidget * parent = nullptr) : void
++~MainWindow() : void
+..
+}
+C_0005789804228041011096 --> C_0017641532287412410858 : -samplers
+C_0005789804228041011096 --> C_0009594630659857336743 : -boolParams
+C_0005789804228041011096 --> C_0008554564353656062539 : -numParams
+C_0005789804228041011096 --> C_0014891931194994086338 : -messages
+
+'Generated with clang-uml, version 0.6.1-15-gbf4bfdc
+'LLVM version clang version 18.1.8 (Fedora 18.1.8-2.fc40)
+@enduml

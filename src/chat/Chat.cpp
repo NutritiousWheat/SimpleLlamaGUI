@@ -4,7 +4,7 @@
 
 Chat::Chat()
 {
-    // TODO: it is not always needed
+
     //this->systemPrompt = QString("You are a helpful assistant. Assist with whatever user requires.");
     //this->appendSystemMessage(this->systemPrompt);
 }
@@ -91,8 +91,8 @@ const char *Chat::getRoleStringPrompt(const messageRoleE role)
 
 QString Chat::promptify(bool newMessage)
 {
-// TODO: bandaid solution with magic number
-// TODO: russian seems to break token generation
+
+
     QString prompt;
     llama_chat_message *llama_messages;
     char buf[8192];
@@ -120,7 +120,7 @@ QString Chat::promptify(bool newMessage)
     prompt = QString::fromUtf8(buf);
 
     if (!newMessage) {
-        prompt.remove(llamaThread->getEOT()); // TODO: there may be better ways to create a prompt without the EOT token
+        prompt.remove(llamaThread->getEOT());
     }
 
     return prompt;

@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 
-#include <QDir> // TODO: include code style
+#include <QDir>
 #include <QMessageBox>
 
 #include "./ui_MainWindow.h"
@@ -145,7 +145,7 @@ void MainWindow::stopGenerating()
 }
 
 void MainWindow::on_submitButton_clicked()
-{ // TODO: do not use QString comparison here... just store the current state in some variable in MainWindow
+{
     if (ui->submitButton->text() == "Stop") {
         stopGenerating();
     } else {
@@ -200,7 +200,7 @@ void MainWindow::on_exceptionOccured(QString errorMsg)
 
 void MainWindow::on_loadButton_clicked()
 {
-    // TODO: do not use QString comparison here... just store the current state in some variable in MainWindow
+
     if (ui->loadButton->text() == "Load") {
         QString name = ui->modelBox->itemText(ui->modelBox->currentIndex());
         QString path = config.getValue(ConfigApp::ModelDir) + "/" + name;
@@ -273,7 +273,7 @@ llama_context_params MainWindow::getCtxParams()
 
     params.n_ctx = numParams[NumParamWidget::NumParamE::N_CONTEXT_TOKENS]->getValue();
     params.n_threads = numParams[NumParamWidget::NumParamE::N_THREADS]->getValue();
-    params.n_threads_batch = numParams[NumParamWidget::NumParamE::N_THREADS]->getValue(); // TODO: separate threads and batch threads
+    params.n_threads_batch = numParams[NumParamWidget::NumParamE::N_THREADS]->getValue();
     params.flash_attn = boolParams[BoolParamWidget::BoolParamE::USE_FLASH_ATTENTION]->getValue();
 
     return params;

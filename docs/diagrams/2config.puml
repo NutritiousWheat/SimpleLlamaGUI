@@ -1,0 +1,32 @@
+@startuml
+
+class "ConfigApp" as C_0004550395464018990809
+class C_0004550395464018990809 {
++ConfigApp(const QString & configPath) : void
++~ConfigApp() = default : void
+..
++getValue(KeyIntE key) : int
++getValue(KeyDoubleE key) : float
++getValue(KeyStringE key) : QString
++getValue(KeyBoolE key) : bool
++keyToString(KeyIntE key) : QString
++keyToString(KeyDoubleE key) : QString
++keyToString(KeyStringE key) : QString
++keyToString(KeyBoolE key) : QString
++setValue(KeyIntE key, int value) : void
++setValue(KeyDoubleE key, double value) : void
++setValue(KeyStringE key, const QString & value) : void
++setValue(KeyBoolE key, bool value) : void
+__
+}
+class "MainWindow" as C_0005789804228041011096
+class C_0005789804228041011096 {
++MainWindow(QWidget * parent = nullptr) : void
++~MainWindow() : void
+..
+}
+C_0005789804228041011096 o-- C_0004550395464018990809 : -config
+
+'Generated with clang-uml, version 0.6.1-15-gbf4bfdc
+'LLVM version clang version 18.1.8 (Fedora 18.1.8-2.fc40)
+@enduml
