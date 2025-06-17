@@ -25,7 +25,7 @@ private:
     void initFile();
     void readFile();
     void writeFile();
-    void initDir(QString path);
+    static void initDir(const QString &path);
 
 public:
     enum KeyIntE
@@ -51,16 +51,16 @@ public:
     explicit ConfigApp(const QString &configPath);
     ~ConfigApp() = default;
 
-    QString keyToString(KeyIntE key);
-    QString keyToString(KeyDoubleE key);
-    QString keyToString(KeyStringE key);
-    QString keyToString(KeyBoolE key);
+    static QString keyToString(KeyIntE key);
+    static QString keyToString(KeyDoubleE key);
+    static QString keyToString(KeyStringE key);
+    static QString keyToString(KeyBoolE key);
 
     void setValue(KeyIntE key, int value);
     int getValue(KeyIntE key);
 
     void setValue(KeyDoubleE key, double value);
-    float getValue(KeyDoubleE key);
+    double getValue(KeyDoubleE key);
 
     void setValue(KeyStringE key, const QString &value);
     QString getValue(KeyStringE key);

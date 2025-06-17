@@ -35,7 +35,7 @@ private:
     Ui::NumParamWidget *ui;
     NumParamE type;
 
-    void init(QString label, int defaultValue, int min, int max, int step = 1);
+    void init(const QString &label, int defaultValue, int min, int max, int step = 1);
 
 };
 

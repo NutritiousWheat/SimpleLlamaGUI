@@ -5,14 +5,14 @@
 Chat::Chat()
 {
     // TODO: it is not always needed
-    //this->systemPrompt = QString("You are a helpful assistant. Assist with whatever user requires.");
-    //this->appendSystemMessage(this->systemPrompt);
+    this->systemPrompt = QString("You are a helpful assistant. Assist with whatever user requires.");
+    this->appendSystemMessage(this->systemPrompt);
 }
 
 Chat::Chat(const QString &systemPrompt)
 {
-    //this->systemPrompt = systemPrompt;
-    //this->appendSystemMessage(this->systemPrompt);
+    this->systemPrompt = systemPrompt;
+    this->appendSystemMessage(this->systemPrompt);
 }
 
 void Chat::on_tokenGenerated(QString token)
@@ -26,7 +26,7 @@ void Chat::on_generationEnd()
     emit updateGUI(CHAT_STATE_IDLE);
 }
 
-void Chat::on_exceptionOccured(QString errorMsg)
+void Chat::on_exceptionOccured(const QString &errorMsg)
 {
     emit exceptionOccured(errorMsg);
 }

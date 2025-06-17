@@ -1,3 +1,5 @@
+#include <cmath> // TODO: maybe not?
+
 #include "MessageWidget.h"
 #include "ui_MessageWidget.h"
 
@@ -27,5 +29,5 @@ void MessageWidget::appendText(const QString &text)
 {
     ui->messageText->moveCursor(QTextCursor::End);
     ui->messageText->insertPlainText(text);
-    ui->messageText->setMinimumHeight(ui->messageText->document()->size().height());
+    ui->messageText->setMinimumHeight(std::ceil(ui->messageText->document()->size().height()));
 }

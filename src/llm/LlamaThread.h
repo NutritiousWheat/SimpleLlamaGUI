@@ -20,7 +20,7 @@ class LlamaThread : public QThread
     Q_OBJECT
 
     public slots:
-    void on_tokenGenerated(QString token); // comes from LlamaInterface
+    void on_tokenGenerated(const QString &token); // comes from LlamaInterface
     void on_generationEnd(); // comes from LlamaInterface
 
     signals:
@@ -45,8 +45,8 @@ private:
 
     QString prompt;
     SamplerArray samplers;
-    llama_model_params modelParams;
-    llama_context_params ctxParams;
+    llama_model_params modelParams{};
+    llama_context_params ctxParams{};
 
     void run() override;
 

@@ -29,7 +29,7 @@ private:
 
     BoolParamE type;
 
-    void init(QString label, bool defaultValue);
+    void init(const QString &label, bool defaultValue);
 };
 
 #endif // BOOLPARAMWIDGET_H

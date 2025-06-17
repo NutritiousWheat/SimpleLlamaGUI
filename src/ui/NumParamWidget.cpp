@@ -45,7 +45,7 @@ void NumParamWidget::on_horizontalSlider_valueChanged(int value)
     ui->lineEdit->setText(QString::number(value));
 }
 
-void NumParamWidget::init(QString label, int defaultValue, int min, int max, int step)
+void NumParamWidget::init(const QString &label, int defaultValue, int min, int max, int step)
 {
     ui->label->setText(label);
 

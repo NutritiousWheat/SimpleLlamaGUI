@@ -68,7 +68,7 @@ void LlamaThread::interruptGeneration()
     llama->interruptGeneration();
 }
 
-void LlamaThread::on_tokenGenerated(QString token)
+void LlamaThread::on_tokenGenerated(const QString &token)
 {
     emit tokenGenerated(token);
 }

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QMap>
 
+// TODO: rewrite this garbage
+
 class Sampler : public QObject
 {
     Q_OBJECT
@@ -31,7 +33,7 @@ public:
 
 private:
     SamplerTypeE type;
-    int value;
+    int value = 0;
 
     static QMap<QString, SamplerTypeE> nameMap;
     static float floatMultiplier;

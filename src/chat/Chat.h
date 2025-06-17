@@ -37,7 +37,7 @@ private:
 public slots:
     void on_tokenGenerated(QString token); // comes from LlamaThread
     void on_generationEnd();               // comes from LlamaThread
-    void on_exceptionOccured(QString errorMsg);
+    void on_exceptionOccured(const QString &errorMsg);
     void on_modelLoading();
     void on_modelLoaded();
     void on_modelUnloaded();
@@ -66,7 +66,7 @@ public:
     static const char *getRoleStringUI(messageRoleE role);
     static const char *getRoleStringPrompt(messageRoleE role);
 
-    void loadModel(const QString &ggufPath, llama_model_params modelParams, llama_context_params ctxParams);
+    void loadModel(const QString &modelPath, llama_model_params modelParams, llama_context_params ctxParams);
     void unloadModel();
 
     void appendUserMessage(const QString &message);

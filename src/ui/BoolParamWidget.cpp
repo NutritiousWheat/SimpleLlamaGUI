@@ -33,7 +33,7 @@ bool BoolParamWidget::getValue()
     return ui->checkBox->isChecked();
 }
 
-void BoolParamWidget::init(QString label, bool defaultValue)
+void BoolParamWidget::init(const QString &label, bool defaultValue)
 {
     ui->label->setText(label);
     ui->checkBox->setChecked(defaultValue);

@@ -2,6 +2,7 @@
 
 #include <QDir> // TODO: include code style
 #include <QMessageBox>
+#include <cmath>
 
 #include "./ui_MainWindow.h"
 #include <QObject>
@@ -20,10 +21,10 @@ MainWindow::MainWindow(QWidget *parent)
     int samplersColumns = sqrt(Sampler::SamplerTypeE::SAMPLERS_COUNT);
 
     for (int i = 0; i < Sampler::SamplerTypeE::SAMPLERS_COUNT; i++) {
-        Sampler::SamplerTypeE type = static_cast<Sampler::SamplerTypeE>(i);
+        auto type = static_cast<Sampler::SamplerTypeE>(i);
 
-        QGridLayout *samplerLayout = static_cast<QGridLayout *>(ui->tabParams->layout());
-        SamplerWidget *samplerWidget = new SamplerWidget(ui->tabParams, type);
+        auto samplerLayout = dynamic_cast<QGridLayout *>(ui->tabParams->layout());
+        auto samplerWidget = new SamplerWidget(ui->tabParams, type);
 
         samplerLayout->addWidget(samplerWidget, i % samplersColumns, i / samplersColumns);
 
@@ -33,9 +34,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->boolAreaWidgetContents->layout()->setAlignment(Qt::AlignTop);
 
     for (int i = 0; i < BoolParamWidget::BoolParamE::BOOL_PARAM_COUNT; i++) {
-        BoolParamWidget::BoolParamE type = static_cast<BoolParamWidget::BoolParamE>(i);
+        auto type = static_cast<BoolParamWidget::BoolParamE>(i);
 
-        BoolParamWidget *boolParamWidget = new BoolParamWidget(ui->tabParams, type);
+        auto boolParamWidget = new BoolParamWidget(ui->tabParams, type); // TODO: smart pointers
         ui->boolAreaWidgetContents->layout()->addWidget(boolParamWidget);
 
         boolParams.insert(type, boolParamWidget);
@@ -44,9 +45,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->numAreaWidgetContents->layout()->setAlignment(Qt::AlignTop);
 
     for (int i = 0; i < NumParamWidget::NumParamE::NUM_PARAM_COUNT; i++) {
-        NumParamWidget::NumParamE type = static_cast<NumParamWidget::NumParamE>(i);
+        auto type = static_cast<NumParamWidget::NumParamE>(i);
 
-        NumParamWidget *numParamWidget = new NumParamWidget(ui->tabParams, type);
+        auto numParamWidget = new NumParamWidget(ui->tabParams, type);
         ui->numAreaWidgetContents->layout()->addWidget(numParamWidget);
 
         numParams.insert(type, numParamWidget);
@@ -193,7 +194,7 @@ void MainWindow::on_updateGUI(Chat::chatStateE state)
     }
 }
 
-void MainWindow::on_exceptionOccured(QString errorMsg)
+void MainWindow::on_exceptionOccured(const QString &errorMsg)
 {
     QMessageBox::warning(nullptr, ERR_HEADER, "Exception occured:\n" + errorMsg);
 }
@@ -236,8 +237,8 @@ void MainWindow::refreshModels()
     QList fileList = modelDir.entryList(QDir::Files, QDir::Name);
 
     ui->modelBox->clear();
-    for (int i = 0; i < fileList.size(); i++) {
-        ui->modelBox->addItem(fileList[i]);
+    for (auto &filePath : fileList) {
+        ui->modelBox->addItem(filePath);
     }
 
     if (fileList.contains(lastUsedModel)) {

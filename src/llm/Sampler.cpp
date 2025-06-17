@@ -85,14 +85,12 @@ float Sampler::getValueFloat() const
 int Sampler::getDefaultValueInt() const
 {
     switch (this->type) {
-    case SAMPLER_TEMP:
-        return getDefaultValueFloat() * floatMultiplier;
     case SAMPLER_TOP_K:
         return 0;
+    case SAMPLER_TEMP:
     case SAMPLER_TOP_P:
-        return getDefaultValueFloat() * floatMultiplier;
     case SAMPLER_MIN_P:
-        return getDefaultValueFloat() * floatMultiplier;
+        throw std::invalid_argument("Invalid Value type");
     default:
         throw std::invalid_argument("Invalid Sampler type");
     }
@@ -104,13 +102,13 @@ float Sampler::getDefaultValueFloat() const
     case SAMPLER_TEMP:
         return 1.0f;
     case SAMPLER_TOP_K:
-        return getDefaultValueInt();
+        throw std::invalid_argument("Invalid Value type");
     case SAMPLER_TOP_P:
         return 1.0f;
     case SAMPLER_MIN_P:
         return 0.0f;
     default:
-        throw std::invalid_argument("Invalid Sampler type");
+        throw std::invalid_argument("Invalid Sampler type"); // TODO: use custom exception types
     }
 }
 

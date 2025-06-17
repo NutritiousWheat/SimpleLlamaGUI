@@ -61,7 +61,7 @@ void ConfigApp::writeFile()
 // TODO: implement a delay which is reset afeter every write operation AND ALSO IMPLEMENT MUTEXES
 }
 
-void ConfigApp::initDir(QString path)
+void ConfigApp::initDir(const QString &path)
 {
     bool result = true;
     if (!QDir(path).exists()) {
@@ -141,7 +141,7 @@ void ConfigApp::setValue(KeyDoubleE key, double value)
     writeFile();
 }
 
-float ConfigApp::getValue(KeyDoubleE key)
+double ConfigApp::getValue(KeyDoubleE key)
 {
     readFile();
     return configObject[keyToString(key)].toDouble();

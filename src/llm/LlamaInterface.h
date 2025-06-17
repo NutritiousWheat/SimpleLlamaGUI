@@ -1,15 +1,16 @@
 #ifndef LLAMAINTERFACE_H
 #define LLAMAINTERFACE_H
 
-#include <llama.h>
+#include <llama-cpp.h>
 #include <QObject>
 
-#include "RNG.h"
 #include "Sampler.h"
 #include "SamplerArray.h"
 
+typedef std::unique_ptr<const llama_vocab> llama_vocab_ptr;
+
 QT_BEGIN_NAMESPACE
-namespace LLM {
+namespace LLM { // TODO: make namespaces consistent
 class LlamaInterface;
 }
 QT_END_NAMESPACE
@@ -23,14 +24,13 @@ signals:
     void tokenGenerated(QString token);
 
 private:
-    RNG rng;
+    llama_model_params modelParams{};
+    llama_context_params ctxParams{};
 
-    llama_model_params params{};
-    llama_model *model;
-    const llama_vocab *vocab;
-    llama_context_params ctx_params{};
-    llama_context *ctx;
-    llama_sampler *sampler;
+    llama_model_ptr model;
+    llama_vocab_ptr vocab;
+    llama_context_ptr ctx;
+    llama_sampler_ptr sampler;
 
     bool forceStop = false;
     bool generating = false;
@@ -50,7 +50,7 @@ public:
     void startGenerating(const QString &prompt, const SamplerArray &samplers);
     void interruptGeneration();
 
-    bool isGenerating();
+    bool isGenerating() const;
     QString getName();
     QString getTemplate();
     QString getEOT();

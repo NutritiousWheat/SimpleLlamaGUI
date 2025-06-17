@@ -11,7 +11,7 @@ SamplerWidget::SamplerWidget(QWidget *parent, Sampler::SamplerTypeE type)
     : QWidget(parent)
     , ui(new Ui::SamplerWidget)
 {
-    Sampler::SamplerRangeIntT sliderRange;
+    Sampler::SamplerRangeIntT sliderRange{};
     ui->setupUi(this);
 
     sampler = Sampler(type);

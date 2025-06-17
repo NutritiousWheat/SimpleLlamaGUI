@@ -15,55 +15,55 @@ LlamaInterface::LlamaInterface(const QString &modelPath, llama_model_params mode
     llama_backend_init();
     llama_numa_init(GGML_NUMA_STRATEGY_DISABLED);
 
-    params.n_gpu_layers = modelParams.n_gpu_layers; // TODO: set parameters outside
-    params.split_mode = LLAMA_SPLIT_MODE_LAYER;
-    params.main_gpu = 0;
-    params.tensor_split = nullptr;
-    params.progress_callback = nullptr;
-    params.progress_callback_user_data = nullptr;
-    params.kv_overrides = nullptr;
-    params.vocab_only = false;
-    params.use_mmap = false;
-    params.use_mlock = false;
-    params.check_tensors = false;
+    this->modelParams.n_gpu_layers = modelParams.n_gpu_layers; // TODO: set parameters outside
+    this->modelParams.split_mode = LLAMA_SPLIT_MODE_LAYER;
+    this->modelParams.main_gpu = 0;
+    this->modelParams.tensor_split = nullptr;
+    this->modelParams.progress_callback = nullptr;
+    this->modelParams.progress_callback_user_data = nullptr;
+    this->modelParams.kv_overrides = nullptr;
+    this->modelParams.vocab_only = false;
+    this->modelParams.use_mmap = false;
+    this->modelParams.use_mlock = false;
+    this->modelParams.check_tensors = false;
 
-    model = llama_model_load_from_file(modelPath.toUtf8(), params);
+    model = llama_model_ptr(llama_model_load_from_file(modelPath.toUtf8(), modelParams));
 
     if (model == nullptr) {
         throw std::runtime_error("unable to load model"); // TODO: do proper exceptions
     }
 
-    ctx_params.n_ctx = ctxParams.n_ctx;     // text context, 0 = from model // TODO: separate context settings
-    ctx_params.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
-    ctx_params.n_ubatch = N_UBATCH; // physical maximum batch size
+    this->ctxParams.n_ctx = ctxParams.n_ctx;     // text context, 0 = from model // TODO: separate context settings
+    this->ctxParams.n_batch = N_BATCH; // logical maximum batch size that can be submitted to llama_decode
+    this->ctxParams.n_ubatch = N_UBATCH; // physical maximum batch size
 
-    ctx_params.n_seq_max = 1; // max number of sequences (i.e. distinct states for recurrent models)
-    ctx_params.n_threads = params.n_gpu_layers ? 1: ctxParams.n_threads;       // number of threads to use for generation
-    ctx_params.n_threads_batch = params.n_gpu_layers ? 1 : ctxParams.n_threads_batch; // number of threads to use for batch processing
-    ctx_params.rope_scaling_type
+    this->ctxParams.n_seq_max = 1; // max number of sequences (i.e. distinct states for recurrent models)
+    this->ctxParams.n_threads = modelParams.n_gpu_layers ? 1: ctxParams.n_threads;       // number of threads to use for generation
+    this->ctxParams.n_threads_batch = modelParams.n_gpu_layers ? 1 : ctxParams.n_threads_batch; // number of threads to use for batch processing
+    this->ctxParams.rope_scaling_type
         = LLAMA_ROPE_SCALING_TYPE_UNSPECIFIED; // RoPE scaling type, from `enum llama_rope_scaling_type`
-    ctx_params.pooling_type
+    this->ctxParams.pooling_type
         = LLAMA_POOLING_TYPE_UNSPECIFIED; // whether to pool (sum) embedding results by sequence id
-    ctx_params.attention_type
+    this->ctxParams.attention_type
         = LLAMA_ATTENTION_TYPE_UNSPECIFIED; // attention type to use for embeddings
-    ctx_params.rope_freq_base = 0;          // RoPE base frequency, 0 = from model
-    ctx_params.rope_freq_scale = 0;         // RoPE frequency scaling factor, 0 = from model
-    ctx_params.yarn_ext_factor = -1;        // YaRN extrapolation mix factor, negative = from model
-    ctx_params.yarn_attn_factor = -1;       // YaRN magnitude scaling factor
-    ctx_params.yarn_beta_fast = -1;         // YaRN low correction dim
-    ctx_params.yarn_beta_slow = -1;         // YaRN high correction dim
-    ctx_params.yarn_orig_ctx = -1;          // YaRN original context size
-    ctx_params.defrag_thold
+    this->ctxParams.rope_freq_base = 0;          // RoPE base frequency, 0 = from model
+    this->ctxParams.rope_freq_scale = 0;         // RoPE frequency scaling factor, 0 = from model
+    this->ctxParams.yarn_ext_factor = -1;        // YaRN extrapolation mix factor, negative = from model
+    this->ctxParams.yarn_attn_factor = -1;       // YaRN magnitude scaling factor
+    this->ctxParams.yarn_beta_fast = -1;         // YaRN low correction dim
+    this->ctxParams.yarn_beta_slow = -1;         // YaRN high correction dim
+    this->ctxParams.yarn_orig_ctx = -1;          // YaRN original context size
+    this->ctxParams.defrag_thold
         = -1; // defragment the KV cache if holes/size > thold, < 0 disabled (default)
-    ctx_params.cb_eval = nullptr;
-    ctx_params.cb_eval_user_data = nullptr;
-    ctx_params.type_k = GGML_TYPE_F16; // data type for K cache [EXPERIMENTAL]
-    ctx_params.type_v = GGML_TYPE_F16; // data type for V cache [EXPERIMENTAL]
-    ctx_params.embeddings = false;  // if true, extract embeddings (together with logits)
-    ctx_params.offload_kqv = false; // whether to offload the KQV ops (including the KV cache) to GPU
-    ctx_params.flash_attn = ctxParams.flash_attn;  // whether to use flash attention [EXPERIMENTAL]
-    ctx_params.abort_callback = nullptr;
-    ctx_params.abort_callback_data = nullptr;
+    this->ctxParams.cb_eval = nullptr;
+    this->ctxParams.cb_eval_user_data = nullptr;
+    this->ctxParams.type_k = GGML_TYPE_F16; // data type for K cache [EXPERIMENTAL]
+    this->ctxParams.type_v = GGML_TYPE_F16; // data type for V cache [EXPERIMENTAL]
+    this->ctxParams.embeddings = false;  // if true, extract embeddings (together with logits)
+    this->ctxParams.offload_kqv = false; // whether to offload the KQV ops (including the KV cache) to GPU
+    this->ctxParams.flash_attn = ctxParams.flash_attn;  // whether to use flash attention [EXPERIMENTAL]
+    this->ctxParams.abort_callback = nullptr;
+    this->ctxParams.abort_callback_data = nullptr;
 
     // ctx = llama_init_from_model(model, ctx_params); // TODO: this only needed if i don't reset context
     //
@@ -71,25 +71,16 @@ LlamaInterface::LlamaInterface(const QString &modelPath, llama_model_params mode
     //     throw std::runtime_error("unable to create context");
     // }
 
-    vocab = llama_model_get_vocab(model);
+    vocab = llama_vocab_ptr(llama_model_get_vocab(model.get()));
 
-    sampler = NULL;
-    ctx = NULL;
+    sampler = nullptr;
+    ctx = nullptr;
 
     this->name = QString::fromStdString(model->name);
 }
 
 LlamaInterface::~LlamaInterface()
 {
-    if (sampler)
-        llama_sampler_free(sampler);
-
-    if (ctx)
-        llama_free(ctx);
-
-    if (model)
-        llama_model_free(model);
-
     llama_backend_free();
 }
 
@@ -103,14 +94,14 @@ QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
 
     strncpy(promptCStr, prompt.toLocal8Bit().data(), sizeof(promptCStr)); // TODO: figure out how to feed wide chars to llama_tokenize
 
-    tokenCount = llama_tokenize(vocab, promptCStr, strlen(promptCStr), tokensCArr, strlen(promptCStr), true, true);
+    tokenCount = llama_tokenize(vocab.get(), promptCStr, strlen(promptCStr), tokensCArr, strlen(promptCStr), true, true);
 
     for (int i = 0; i < tokenCount; i++) {
         tokens.append(tokensCArr[i]);
     }
 
     char test[8192];
-    llama_detokenize(vocab, tokens.data(), tokens.size(), test, 8192, false, true);
+    llama_detokenize(vocab.get(), tokens.data(), tokens.size(), test, 8192, false, true);
 
     return tokens;
 }
@@ -141,10 +132,10 @@ void LlamaInterface::generate(QVector<llama_token> &tokens)
 
     start = high_resolution_clock::now();
     for (int i = 0; i < tokens.size();) {
-        tokensPerBatch = std::min((int) llama_n_ubatch(ctx), tokens.size() - i);
+        tokensPerBatch = std::min((int) llama_n_ubatch(ctx.get()), tokens.size() - i);
         batch = llama_batch_get_one(&tokens[i], tokensPerBatch);;
 
-        if (llama_decode(ctx, batch) != 0) {
+        if (llama_decode(ctx.get(), batch) != 0) {
             throw std::runtime_error("first decode failed");
         }
 
@@ -171,22 +162,22 @@ void LlamaInterface::generate(QVector<llama_token> &tokens)
         else {
             batch = llama_batch_get_one(&newTokenId, 1);
 
-            if (llama_decode(ctx, batch)) {
+            if (llama_decode(ctx.get(), batch)) {
                 throw std::runtime_error("decode failed");
             }
         }
 
-        newTokenId = llama_sampler_sample(sampler, ctx, -1);
+        newTokenId = llama_sampler_sample(sampler.get(), ctx.get(), -1);
 
         // is it the end?
-        if (llama_vocab_is_eog(vocab, newTokenId) || this->forceStop) {
+        if (llama_vocab_is_eog(vocab.get(), newTokenId) || this->forceStop) {
             this->forceStop = false;
             break;
         }
 
         tokensGenerated += 1;
 
-        pieceSize = llama_token_to_piece(vocab, newTokenId, pieceBuffer, sizeof(pieceBuffer), 0, false);
+        pieceSize = llama_token_to_piece(vocab.get(), newTokenId, pieceBuffer, sizeof(pieceBuffer), 0, false);
         pieceBuffer[pieceSize] = '\0'; // llama_token_to_piece does not null-terminate
 
         emit tokenGenerated(QString(pieceBuffer));
@@ -237,7 +228,7 @@ void LlamaInterface::interruptGeneration()
     forceStop = true;
 }
 
-bool LlamaInterface::isGenerating()
+bool LlamaInterface::isGenerating() const
 {
     return generating;
 }
@@ -245,9 +236,9 @@ bool LlamaInterface::isGenerating()
 void LlamaInterface::setSamplers(SamplerArray samplers)
 {
     if (sampler)
-        llama_sampler_free(sampler);
+        llama_sampler_free(sampler.get());
 
-    sampler = llama_sampler_chain_init({true}); // no_perf = true
+    sampler = llama_sampler_ptr(llama_sampler_chain_init({true})); // no_perf = true
 
     samplers[Sampler::SAMPLER_TEMP];
 
@@ -262,20 +253,17 @@ void LlamaInterface::setSamplers(SamplerArray samplers)
         samplers[Sampler::SAMPLER_MIN_P].getValueFloat(),
         samplers[Sampler::SAMPLER_TOP_K].getValueInt());
 
-    llama_sampler_chain_add(sampler, llama_sampler_init_temp(samplers[Sampler::SAMPLER_TEMP].getValueFloat()));
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_p(samplers[Sampler::SAMPLER_TOP_P].getValueFloat(), 1));
-    llama_sampler_chain_add(sampler, llama_sampler_init_min_p(samplers[Sampler::SAMPLER_MIN_P].getValueFloat(), 1));
-    llama_sampler_chain_add(sampler, llama_sampler_init_top_k(samplers[Sampler::SAMPLER_TOP_K].getValueInt()));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_temp(samplers[Sampler::SAMPLER_TEMP].getValueFloat()));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_p(samplers[Sampler::SAMPLER_TOP_P].getValueFloat(), 1));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_min_p(samplers[Sampler::SAMPLER_MIN_P].getValueFloat(), 1));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_k(samplers[Sampler::SAMPLER_TOP_K].getValueInt()));
 
-    llama_sampler_chain_add(sampler, llama_sampler_init_dist(rng.getRand()));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_dist(LLAMA_DEFAULT_SEED)); // TODO: allow setting seed
 }
 
 void LlamaInterface::resetContext()
 {
-    if (ctx)
-        llama_free(ctx);
-
-    ctx = llama_init_from_model(model, ctx_params);
+    ctx = llama_context_ptr(llama_init_from_model(model.get(), ctxParams));
 
     if (ctx == nullptr) {
         throw std::runtime_error("unable to create context");
@@ -289,7 +277,7 @@ QString LlamaInterface::getName()
 
 QString LlamaInterface::getTemplate()
 {
-    const char *templateCStr = llama_model_chat_template(model, NULL);
+    const char *templateCStr = llama_model_chat_template(model.get(), nullptr);
 
     return {templateCStr};
 }

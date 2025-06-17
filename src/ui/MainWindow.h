@@ -33,7 +33,7 @@ private slots:
     void on_appendText(QString &text);
     void on_appendMessage(const QString &text, Chat::messageRoleE role);
     void on_updateGUI(Chat::chatStateE state);
-    void on_exceptionOccured(QString errorMsg);
+    void on_exceptionOccured(const QString &errorMsg);
 
     void on_submitButton_clicked();
 

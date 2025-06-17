@@ -23,15 +23,16 @@ set(PROJECT_SOURCES
         src/llm/LlamaInterface.h src/llm/LlamaInterface.cpp
         src/chat/Chat.h src/chat/Chat.cpp
         src/llm/LlamaThread.h src/llm/LlamaThread.cpp
-        src/llm/RNG.h src/llm/RNG.cpp
         src/config/ConfigApp.cpp
         src/config/ConfigApp.h
         src/llm/Sampler.h
         src/llm/Sampler.cpp
         src/llm/SamplerArray.cpp
         src/llm/SamplerArray.h
-        src/ui/SamplerWidget.cpp
-        src/ui/SamplerWidget.h
+        src/ui/SamplerWidget.h src/ui/SamplerWidget.cpp src/ui/SamplerWidget.ui
+        src/ui/MessageWidget.h src/ui/MessageWidget.cpp src/ui/MessageWidget.ui
+        src/ui/BoolParamWidget.h src/ui/BoolParamWidget.cpp src/ui/BoolParamWidget.ui
+        src/ui/NumParamWidget.h src/ui/NumParamWidget.cpp src/ui/NumParamWidget.ui
 )
 include_directories(${PROJECT_SOURCE_DIR}/src/ui) # hack for custom widgets
 
@@ -51,10 +52,7 @@ else()
     add_executable(qtllama
         ${PROJECT_SOURCES}
         ${LLAMA_CPP_HEADERS}
-        src/ui/SamplerWidget.h src/ui/SamplerWidget.cpp src/ui/SamplerWidget.ui
-        src/ui/MessageWidget.h src/ui/MessageWidget.cpp src/ui/MessageWidget.ui
-        src/ui/BoolParamWidget.h src/ui/BoolParamWidget.cpp src/ui/BoolParamWidget.ui
-        src/ui/NumParamWidget.h src/ui/NumParamWidget.cpp src/ui/NumParamWidget.ui
+
     )
 endif()
 
@@ -73,7 +71,10 @@ set_target_properties(qtllama PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
+    CXX_CLANG_TIDY clang-tidy
 )
+
+set_property(TARGET qtllama PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
 include(GNUInstallDirs)
 install(TARGETS qtllama
