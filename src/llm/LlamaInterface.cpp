@@ -87,9 +87,9 @@ LlamaInterface::~LlamaInterface()
 QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
 {
     int tokenCount;
-    char promptCStr[prompt.toLocal8Bit().length() + 1];{};
+    char promptCStr[8192];{};
 
-    llama_token tokensCArr[prompt.toLocal8Bit().length() + 1]{};
+    llama_token tokensCArr[8192]{};
     QVector<llama_token> tokens;
 
     strncpy(promptCStr, prompt.toLocal8Bit().data(), sizeof(promptCStr)); // TODO: figure out how to feed wide chars to llama_tokenize

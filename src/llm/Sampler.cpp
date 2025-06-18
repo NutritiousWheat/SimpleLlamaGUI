@@ -20,7 +20,10 @@ Sampler::Sampler()
 Sampler::Sampler(const SamplerTypeE type)
 {
     this->type = type;
-    this->setValueInt(getDefaultValueInt());
+    if (type == SAMPLER_TOP_K) // TODO: store type in sampler
+        this->setValueInt(getDefaultValueInt());
+    else
+        this->setValueFloat(getDefaultValueFloat());
 }
 
 Sampler::Sampler(const Sampler &new_sampler)
