@@ -248,15 +248,15 @@ void LlamaInterface::setSamplers(SamplerArray samplers)
 
     qDebug(
         "Set samplers: temp: %f, top p: %f, min p: %f, top k: %u",
-        static_cast<float>(samplers[Sampler::SAMPLER_TEMP].getValue()),
-        static_cast<float>(samplers[Sampler::SAMPLER_TOP_P].getValue()),
-        static_cast<float>(samplers[Sampler::SAMPLER_MIN_P].getValue()),
-        static_cast<int>(samplers[Sampler::SAMPLER_TOP_K].getValue()));
+        samplers[Sampler::SAMPLER_TEMP].getValue().toFloat(),
+        samplers[Sampler::SAMPLER_TOP_P].getValue().toFloat(),
+        samplers[Sampler::SAMPLER_MIN_P].getValue().toFloat(),
+        samplers[Sampler::SAMPLER_TOP_K].getValue().toInt());
 
-    llama_sampler_chain_add(sampler.get(), llama_sampler_init_temp(static_cast<float>(samplers[Sampler::SAMPLER_TEMP].getValue())));
-    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_p(static_cast<float>(samplers[Sampler::SAMPLER_TOP_P].getValue()), 1));
-    llama_sampler_chain_add(sampler.get(), llama_sampler_init_min_p(static_cast<float>(samplers[Sampler::SAMPLER_MIN_P].getValue()), 1));
-    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_k(static_cast<int>(samplers[Sampler::SAMPLER_TOP_K].getValue())));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_temp(samplers[Sampler::SAMPLER_TEMP].getValue().toFloat()));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_p(samplers[Sampler::SAMPLER_TOP_P].getValue().toFloat(), 1));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_min_p(samplers[Sampler::SAMPLER_MIN_P].getValue().toFloat(), 1));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_k(samplers[Sampler::SAMPLER_TOP_K].getValue().toInt()));
 
     llama_sampler_chain_add(sampler.get(), llama_sampler_init_dist(LLAMA_DEFAULT_SEED)); // TODO: allow setting seed
 }

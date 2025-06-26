@@ -21,8 +21,8 @@ public:
     SamplerValue &operator=(float value);
     SamplerValue &operator=(const SamplerValue &value) = default;
 
-    explicit operator int() const;
-    explicit operator float() const;
+    int toInt() const;
+    float toFloat() const;
 
     [[nodiscard]] bool isInt() const;
 };

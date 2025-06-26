@@ -23,16 +23,16 @@ SamplerWidget::SamplerWidget(QWidget *parent, Sampler::Type type)
     samplerRange = sampler.getRange();
 
     if (sampler.isInt()) {
-        min = static_cast<int>(samplerRange.min);
-        max = static_cast<int>(samplerRange.max);
-        value = static_cast<int>(sampler.getValue());
-        valueText = QString::number(static_cast<int>(sampler.getValue()));
+        min = samplerRange.min.toInt();
+        max = samplerRange.max.toInt();
+        value = sampler.getValue().toInt();
+        valueText = QString::number(sampler.getValue().toInt());
     }
     else {
-        min = scaleToSlider(static_cast<float>(samplerRange.min));
-        max = scaleToSlider(static_cast<float>(samplerRange.max));
-        value = scaleToSlider(static_cast<float>(sampler.getValue()));
-        valueText = QString::number(static_cast<float>(sampler.getValue()));
+        min = scaleToSlider(samplerRange.min.toFloat());
+        max = scaleToSlider(samplerRange.max.toFloat());
+        value = scaleToSlider(sampler.getValue().toFloat());
+        valueText = QString::number(sampler.getValue().toFloat());
     }
 
     ui->samplerSlider->setRange(min, max);

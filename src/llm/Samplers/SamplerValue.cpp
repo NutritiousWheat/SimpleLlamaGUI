@@ -42,14 +42,14 @@ SamplerValue &SamplerValue::operator=(float value)
     return *this;
 }
 
-SamplerValue::operator int() const
+int SamplerValue::toInt() const
 {
     if (!this->isIntValue)
         throw std::runtime_error("value is not an integer");
     return value.intValue;
 }
 
-SamplerValue::operator float() const
+float SamplerValue::toFloat() const
 {
     if (this->isIntValue)
         throw std::runtime_error("value is not a float");
