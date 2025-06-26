@@ -1,10 +1,7 @@
-#include "SamplerWidget.h"
-
 #include "MainWindow.h"
+
+#include "SamplerWidget.h"
 #include "ui_SamplerWidget.h"
-
-
-// TODO: make it more in line with ParamWidgets
 
 float SamplerWidget::scaleMultiplier = 100.0f; // TODO: will break for != 2 decimal points
 
@@ -16,6 +13,7 @@ SamplerWidget::SamplerWidget(QWidget *parent, Sampler::Type type)
     int min;
     int max;
     int value;
+    QString valueText;
 
     ui->setupUi(this);
 
@@ -28,15 +26,18 @@ SamplerWidget::SamplerWidget(QWidget *parent, Sampler::Type type)
         min = static_cast<int>(samplerRange.min);
         max = static_cast<int>(samplerRange.max);
         value = static_cast<int>(sampler.getValue());
+        valueText = QString::number(static_cast<int>(sampler.getValue()));
     }
     else {
         min = scaleToSlider(static_cast<float>(samplerRange.min));
         max = scaleToSlider(static_cast<float>(samplerRange.max));
         value = scaleToSlider(static_cast<float>(sampler.getValue()));
+        valueText = QString::number(static_cast<float>(sampler.getValue()));
     }
 
     ui->samplerSlider->setRange(min, max);
     ui->samplerSlider->setValue(value);
+    ui->samplerLine->setText(valueText);
 }
 
 SamplerWidget::~SamplerWidget()
