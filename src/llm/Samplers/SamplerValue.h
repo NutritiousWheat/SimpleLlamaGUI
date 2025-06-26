@@ -1,8 +1,6 @@
 #ifndef SAMPLERVALUE_H
 #define SAMPLERVALUE_H
 
-
-
 class SamplerValue {
     union ValueType
     {
@@ -28,7 +26,5 @@ public:
 
     [[nodiscard]] bool isInt() const;
 };
-
-
 
 #endif //SAMPLERVALUE_H

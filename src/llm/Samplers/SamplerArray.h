@@ -14,6 +14,4 @@ class SamplerArray {
     Sampler &operator=(Sampler &new_sampler);
 };
 
-
-
 #endif //SAMPLERARRAY_H

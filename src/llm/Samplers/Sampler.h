@@ -6,8 +6,6 @@
 
 #include "SamplerValue.h"
 
-// TODO: rewrite this garbage
-
 class Sampler : public QObject
 {
     Q_OBJECT
