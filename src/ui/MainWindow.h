@@ -6,7 +6,7 @@
 
 #include "../chat/Chat.h"
 #include "../config/ConfigApp.h"
-#include "../llm/LlamaThread.h"
+#include "../llm/Interface/LlamaThread.h"
 #include "MessageWidget.h"
 #include "SamplerWidget.h"
 #include "NumParamWidget.h"

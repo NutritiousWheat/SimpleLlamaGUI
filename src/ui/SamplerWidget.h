@@ -2,7 +2,7 @@
 #define SAMPLERWIDGET_H
 
 #include <QWidget>
-#include "../llm/Sampler.h"
+#include "../llm/Samplers/Sampler.h"
 
 namespace Ui {
 class SamplerWidget;

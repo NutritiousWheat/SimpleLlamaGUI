@@ -7,7 +7,7 @@
 #include <QException>
 
 #include "LlamaInterface.h"
-#include "SamplerArray.h"
+#include "../Samplers/SamplerArray.h"
 
 QT_BEGIN_NAMESPACE
 namespace LLM {

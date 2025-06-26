@@ -1,7 +1,7 @@
 #ifndef CHAT_H
 #define CHAT_H
 
-#include "../llm/LlamaThread.h"
+#include "../llm/Interface/LlamaThread.h"
 
 class Chat : public QObject
 {

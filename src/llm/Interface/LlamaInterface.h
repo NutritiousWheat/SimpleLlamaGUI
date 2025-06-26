@@ -4,8 +4,8 @@
 #include <llama-cpp.h>
 #include <QObject>
 
-#include "Sampler.h"
-#include "SamplerArray.h"
+#include "../Samplers/Sampler.h"
+#include "../Samplers/SamplerArray.h"
 
 typedef std::unique_ptr<const llama_vocab> llama_vocab_ptr;
 

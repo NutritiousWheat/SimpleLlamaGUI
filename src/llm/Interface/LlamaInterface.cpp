@@ -1,7 +1,7 @@
 #include "LlamaInterface.h"
 
 #include "../../submodules/llama.cpp/src/llama-model.h" // TODO: why?
-#include "SamplerArray.h"
+#include "../Samplers/SamplerArray.h"
 #include <stdexcept>
 
 #define N_PREDICT 250

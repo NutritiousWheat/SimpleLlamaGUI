@@ -20,15 +20,15 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
         src/main.cpp
         src/ui/MainWindow.h src/ui/MainWindow.cpp src/ui/MainWindow.ui
-        src/llm/LlamaInterface.h src/llm/LlamaInterface.cpp
+        src/llm/Interface/LlamaInterface.h src/llm/Interface/LlamaInterface.cpp
         src/chat/Chat.h src/chat/Chat.cpp
-        src/llm/LlamaThread.h src/llm/LlamaThread.cpp
+        src/llm/Interface/LlamaThread.h src/llm/Interface/LlamaThread.cpp
         src/config/ConfigApp.cpp
         src/config/ConfigApp.h
-        src/llm/Sampler.h
-        src/llm/Sampler.cpp
-        src/llm/SamplerArray.cpp
-        src/llm/SamplerArray.h
+        src/llm/Samplers/Sampler.h
+        src/llm/Samplers/Sampler.cpp
+        src/llm/Samplers/SamplerArray.cpp
+        src/llm/Samplers/SamplerArray.h
         src/ui/SamplerWidget.h src/ui/SamplerWidget.cpp src/ui/SamplerWidget.ui
         src/ui/MessageWidget.h src/ui/MessageWidget.cpp src/ui/MessageWidget.ui
         src/ui/BoolParamWidget.h src/ui/BoolParamWidget.cpp src/ui/BoolParamWidget.ui
