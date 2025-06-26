@@ -238,7 +238,7 @@ void LlamaInterface::setSamplers(SamplerArray samplers)
     if (sampler)
         llama_sampler_free(sampler.get());
 
-    sampler = llama_sampler_ptr(llama_sampler_chain_init({true})); // no_perf = true
+    sampler = llama_sampler_ptr(llama_sampler_chain_init({true}));
 
     samplers[Sampler::SAMPLER_TEMP];
 
@@ -248,15 +248,15 @@ void LlamaInterface::setSamplers(SamplerArray samplers)
 
     qDebug(
         "Set samplers: temp: %f, top p: %f, min p: %f, top k: %u",
-        samplers[Sampler::SAMPLER_TEMP].getValueFloat(),
-        samplers[Sampler::SAMPLER_TOP_P].getValueFloat(),
-        samplers[Sampler::SAMPLER_MIN_P].getValueFloat(),
-        samplers[Sampler::SAMPLER_TOP_K].getValueInt());
+        static_cast<float>(samplers[Sampler::SAMPLER_TEMP].getValue()),
+        static_cast<float>(samplers[Sampler::SAMPLER_TOP_P].getValue()),
+        static_cast<float>(samplers[Sampler::SAMPLER_MIN_P].getValue()),
+        static_cast<int>(samplers[Sampler::SAMPLER_TOP_K].getValue()));
 
-    llama_sampler_chain_add(sampler.get(), llama_sampler_init_temp(samplers[Sampler::SAMPLER_TEMP].getValueFloat()));
-    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_p(samplers[Sampler::SAMPLER_TOP_P].getValueFloat(), 1));
-    llama_sampler_chain_add(sampler.get(), llama_sampler_init_min_p(samplers[Sampler::SAMPLER_MIN_P].getValueFloat(), 1));
-    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_k(samplers[Sampler::SAMPLER_TOP_K].getValueInt()));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_temp(static_cast<float>(samplers[Sampler::SAMPLER_TEMP].getValue())));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_p(static_cast<float>(samplers[Sampler::SAMPLER_TOP_P].getValue()), 1));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_min_p(static_cast<float>(samplers[Sampler::SAMPLER_MIN_P].getValue()), 1));
+    llama_sampler_chain_add(sampler.get(), llama_sampler_init_top_k(static_cast<int>(samplers[Sampler::SAMPLER_TOP_K].getValue())));
 
     llama_sampler_chain_add(sampler.get(), llama_sampler_init_dist(LLAMA_DEFAULT_SEED)); // TODO: allow setting seed
 }

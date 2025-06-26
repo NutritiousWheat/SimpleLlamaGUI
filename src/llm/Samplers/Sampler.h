@@ -1,8 +1,10 @@
 #ifndef SAMPLERS_H
 #define SAMPLERS_H
 
-#include <QObject>
 #include <QMap>
+#include <QObject>
+
+#include "SamplerValue.h"
 
 // TODO: rewrite this garbage
 
@@ -10,7 +12,7 @@ class Sampler : public QObject
 {
     Q_OBJECT
 public:
-    enum SamplerTypeE {
+    enum Type {
         SAMPLER_TEMP = 0,
         SAMPLER_TOP_K,
         SAMPLER_TOP_P,
@@ -19,52 +21,39 @@ public:
         SAMPLERS_COUNT
     };
 
-    struct SamplerRangeIntT
+    struct Range
     {
-        int min;
-        int max;
-    };
-
-    struct SamplerRangeFloatT
-    {
-        float min;
-        float max;
+        SamplerValue min;
+        SamplerValue max;
     };
 
 private:
-    SamplerTypeE type;
-    int value = 0;
+    Type type;
+    SamplerValue value = SamplerValue(0.0f);
 
-    static QMap<QString, SamplerTypeE> nameMap;
-    static float floatMultiplier;
+    static QMap<Type, QString> nameMap;
 
 public:
     Sampler();
-    explicit Sampler(SamplerTypeE type);
-    explicit Sampler(const QString& type);
-    Sampler(const Sampler &new_sampler);
+    explicit Sampler(Type type);
+    Sampler(const Sampler &newSampler);
     ~Sampler() = default;
 
-    Sampler &operator=(const Sampler &new_sampler);
+    Sampler &operator=(const Sampler &newSampler);
 
     [[nodiscard]] bool isInt() const;
 
-    SamplerTypeE getType() const;
+    Type getType() const;
 
-    void setValueInt(int value);
-    void setValueFloat(float value);
+    void setValue(int value);
+    void setValue(float value);
 
-    int getValueInt() const;
-    float getValueFloat() const;
 
-    int getDefaultValueInt() const;
-    float getDefaultValueFloat() const;
+    SamplerValue getValue() const;
+    SamplerValue getDefaultValue() const;
+    Range getRange() const;
 
-    SamplerRangeIntT getRangeInt() const;
-    SamplerRangeFloatT getRangeFloat() const;
-
-    static SamplerTypeE stringToSamplerType(const QString& type);
-    static QString samplerTypeToString(SamplerTypeE type);
+    QString getName();
 
 };
 

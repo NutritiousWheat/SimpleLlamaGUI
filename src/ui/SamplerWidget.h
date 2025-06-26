@@ -14,7 +14,7 @@ class SamplerWidget : public QWidget
     Sampler sampler;
 
 public:
-    explicit SamplerWidget(QWidget *parent, Sampler::SamplerTypeE type);
+    explicit SamplerWidget(QWidget *parent, Sampler::Type type);
     ~SamplerWidget();
 
     Sampler getValue();
@@ -26,6 +26,11 @@ private slots:
 
 private:
     Ui::SamplerWidget *ui;
+    static float scaleMultiplier;
+
+    static float scaleToSampler(int value);
+    static int scaleToSlider(float value);
+
 };
 
 #endif // SAMPLERWIDGET_H

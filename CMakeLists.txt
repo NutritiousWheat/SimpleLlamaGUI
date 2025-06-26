@@ -33,6 +33,8 @@ set(PROJECT_SOURCES
         src/ui/MessageWidget.h src/ui/MessageWidget.cpp src/ui/MessageWidget.ui
         src/ui/BoolParamWidget.h src/ui/BoolParamWidget.cpp src/ui/BoolParamWidget.ui
         src/ui/NumParamWidget.h src/ui/NumParamWidget.cpp src/ui/NumParamWidget.ui
+        src/llm/Samplers/SamplerValue.cpp
+        src/llm/Samplers/SamplerValue.h
 )
 include_directories(${PROJECT_SOURCE_DIR}/src/ui) # hack for custom widgets
 

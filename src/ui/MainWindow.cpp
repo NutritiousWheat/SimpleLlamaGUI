@@ -18,10 +18,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    int samplersColumns = sqrt(Sampler::SamplerTypeE::SAMPLERS_COUNT);
+    int samplersColumns = sqrt(Sampler::Type::SAMPLERS_COUNT);
 
-    for (int i = 0; i < Sampler::SamplerTypeE::SAMPLERS_COUNT; i++) {
-        auto type = static_cast<Sampler::SamplerTypeE>(i);
+    for (int i = 0; i < Sampler::Type::SAMPLERS_COUNT; i++) {
+        auto type = static_cast<Sampler::Type>(i);
 
         auto samplerLayout = dynamic_cast<QGridLayout *>(ui->tabParams->layout());
         auto samplerWidget = new SamplerWidget(ui->tabParams, type);
@@ -249,10 +249,10 @@ void MainWindow::refreshModels()
 SamplerArray MainWindow::getSamplerArray()
 {
     SamplerArray samplerArray;
-    Sampler::SamplerTypeE type;
+    Sampler::Type type;
 
     for (int i = 0; i < samplers.count(); i++) {
-        type = static_cast<Sampler::SamplerTypeE>(i);
+        type = static_cast<Sampler::Type>(i);
         samplerArray[type] = samplers[type]->getValue();
     }
 

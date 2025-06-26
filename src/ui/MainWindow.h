@@ -58,7 +58,7 @@ private:
 
     Chat chat;
 
-    QMap<Sampler::SamplerTypeE, SamplerWidget *> samplers;
+    QMap<Sampler::Type, SamplerWidget *> samplers;
     QMap<BoolParamWidget::BoolParamE, BoolParamWidget *> boolParams;
     QMap<NumParamWidget::NumParamE, NumParamWidget *> numParams;
 

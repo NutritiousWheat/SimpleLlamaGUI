@@ -6,28 +6,37 @@
 
 // TODO: make it more in line with ParamWidgets
 
+float SamplerWidget::scaleMultiplier = 100.0f; // TODO: will break for != 2 decimal points
 
-SamplerWidget::SamplerWidget(QWidget *parent, Sampler::SamplerTypeE type)
+SamplerWidget::SamplerWidget(QWidget *parent, Sampler::Type type)
     : QWidget(parent)
     , ui(new Ui::SamplerWidget)
 {
-    Sampler::SamplerRangeIntT sliderRange{};
+    Sampler::Range samplerRange{};
+    int min;
+    int max;
+    int value;
+
     ui->setupUi(this);
 
     sampler = Sampler(type);
 
-    ui->samplerLabel->setText(Sampler::samplerTypeToString(sampler.getType()));
-
-    sliderRange = sampler.getRangeInt();
-    ui->samplerSlider->setRange(sliderRange.min, sliderRange.max);
-    ui->samplerSlider->setValue(sampler.getValueInt());
+    ui->samplerLabel->setText(sampler.getName());
+    samplerRange = sampler.getRange();
 
     if (sampler.isInt()) {
-        ui->samplerLine->setText(QString::number(sampler.getValueInt()));
+        min = static_cast<int>(samplerRange.min);
+        max = static_cast<int>(samplerRange.max);
+        value = static_cast<int>(sampler.getValue());
     }
     else {
-        ui->samplerLine->setText(QString::number(sampler.getValueFloat()));
+        min = scaleToSlider(static_cast<float>(samplerRange.min));
+        max = scaleToSlider(static_cast<float>(samplerRange.max));
+        value = scaleToSlider(static_cast<float>(sampler.getValue()));
     }
+
+    ui->samplerSlider->setRange(min, max);
+    ui->samplerSlider->setValue(value);
 }
 
 SamplerWidget::~SamplerWidget()
@@ -43,12 +52,12 @@ Sampler SamplerWidget::getValue()
 void SamplerWidget::on_samplerSlider_valueChanged(int value)
 {
     if (sampler.isInt()) {
-        sampler.setValueInt(value);
+        sampler.setValue(value);
         ui->samplerLine->setText(QString::number(value));
     }
     else {
-        sampler.setValueInt(value);
-        ui->samplerLine->setText(QString::number(sampler.getValueFloat()));
+        sampler.setValue(scaleToSampler(value));
+        ui->samplerLine->setText(QString::number(scaleToSampler(value)));
     }
 }
 
@@ -56,11 +65,21 @@ void SamplerWidget::on_samplerLine_textChanged(const QString &text)
 {
     if (sampler.isInt()) {
         int value = text.toInt();
-        sampler.setValueInt(value);
+        sampler.setValue(value);
         ui->samplerSlider->setValue(value);
     } else {
         float value = text.toFloat();
-        sampler.setValueFloat(value);
-        ui->samplerSlider->setValue(sampler.getValueInt());
+        sampler.setValue(value);
+        ui->samplerSlider->setValue(scaleToSlider(value));
     }
+}
+
+float SamplerWidget::scaleToSampler(int value)
+{
+    return static_cast<float>(value) / scaleMultiplier;
+}
+
+int SamplerWidget::scaleToSlider(float value)
+{
+    return static_cast<int>(value * scaleMultiplier);
 }
