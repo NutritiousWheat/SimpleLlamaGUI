@@ -35,6 +35,10 @@ set(PROJECT_SOURCES
         src/ui/NumParamWidget.h src/ui/NumParamWidget.cpp src/ui/NumParamWidget.ui
         src/llm/Samplers/SamplerValue.cpp
         src/llm/Samplers/SamplerValue.h
+        src/chat/ChatMessage.cpp
+        src/chat/ChatMessage.h
+        src/chat/LlamaChatMessage.cpp
+        src/chat/LlamaChatMessage.h
 )
 include_directories(${PROJECT_SOURCE_DIR}/src/ui) # hack for custom widgets
 

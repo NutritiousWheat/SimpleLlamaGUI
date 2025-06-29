@@ -167,14 +167,14 @@ void MainWindow::on_appendText(QString &text)
     this->messages.last()->appendText(text);
 }
 
-void MainWindow::on_appendMessage(const QString &text, Chat::messageRoleE role)
+void MainWindow::on_appendMessage(const QString &text, ChatMessage::MessageRole role)
 {
     this->messages.append(new MessageWidget(this->ui->chatArea, role));
     this->chatLayout.addWidget(this->messages.last());
     this->messages.last()->appendText(text);
 }
 
-void MainWindow::on_updateGUI(Chat::chatStateE state)
+void MainWindow::on_updateGUI(Chat::ChatState state)
 {
     switch (state) {
     case Chat::CHAT_STATE_NOT_LOADED:

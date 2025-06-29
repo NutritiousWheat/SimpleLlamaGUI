@@ -14,10 +14,10 @@ class MessageWidget : public QWidget
     Q_OBJECT
 
 private:
-    Chat::messageRoleE role;
+    ChatMessage::MessageRole role;
 
 public:
-    explicit MessageWidget(QWidget *parent, Chat::messageRoleE role);
+    explicit MessageWidget(QWidget *parent, ChatMessage::MessageRole role);
     ~MessageWidget();
 
     void appendText(const QString &text);

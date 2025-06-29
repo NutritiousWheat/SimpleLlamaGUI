@@ -2,36 +2,20 @@
 #define CHAT_H
 
 #include "../llm/Interface/LlamaThread.h"
+#include "ChatMessage.h"
 
 class Chat : public QObject
 {
     Q_OBJECT
 
 public:
-    enum chatStateE {
+    enum ChatState {
         CHAT_STATE_NOT_LOADED,
         CHAT_STATE_LOADING,
         CHAT_STATE_IDLE,
         CHAT_STATE_GENERATING,
 
         CHAT_STATE_COUNT
-    };
-
-    enum messageRoleE {
-        MESSAGE_ROLE_USER,
-        MESSAGE_ROLE_LLM,
-        MESSAGE_ROLE_SYSTEM,
-
-        MESSAGE_ROLE_COUNT
-    };
-
-private:
-
-    struct messageT
-    {
-        // TODO: try figuring out a better way to store llama messages
-        std::string content; // needs to be std::string to have easy access to it as a C-string
-        messageRoleE role;
     };
 
 public slots:
@@ -44,27 +28,24 @@ public slots:
 
 signals:
     void appendText(QString &text); // sent to MainWindow
-    void newMessage(const QString &text, messageRoleE role); // sent to MainWindow
-    void updateGUI(chatStateE state); // sent to MainWindow
+    void newMessage(const QString &text, ChatMessage::MessageRole role); // sent to MainWindow
+    void updateGUI(ChatState state); // sent to MainWindow
     void exceptionOccured(QString e); // sent to MainWindow
 
 private:
-    LlamaThread *llamaThread = nullptr;
+    std::unique_ptr<LlamaThread> llamaThread;
 
     QString systemPrompt;
-    QVector<messageT> chat_messages;
+    QVector<ChatMessage> chatMessages;
     QMutex mutex;
 
-    void appendMessage(const QString &message, messageRoleE role);
+    void appendMessage(const QString &message, ChatMessage::MessageRole role);
     QString promptify(bool newMessage);
 
 public:
     Chat();
     explicit Chat(const QString &systemPrompt);
     ~Chat() = default;
-
-    static const char *getRoleStringUI(messageRoleE role);
-    static const char *getRoleStringPrompt(messageRoleE role);
 
     void loadModel(const QString &modelPath, llama_model_params modelParams, llama_context_params ctxParams);
     void unloadModel();
@@ -77,10 +58,9 @@ public:
     void continueLastMessage(const SamplerArray &samplers);
     void interruptGeneration();
 
-    QString getString();
     [[nodiscard]] size_t size() const;
     void clear();
-    QString getModelName() const;
+    [[nodiscard]] QString getModelName() const;
 };
 
 #endif // CHAT_H

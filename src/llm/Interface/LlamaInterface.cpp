@@ -235,9 +235,6 @@ bool LlamaInterface::isGenerating() const
 
 void LlamaInterface::setSamplers(SamplerArray samplers)
 {
-    if (sampler)
-        llama_sampler_free(sampler.get());
-
     sampler = llama_sampler_ptr(llama_sampler_chain_init({true}));
 
     samplers[Sampler::SAMPLER_TEMP];

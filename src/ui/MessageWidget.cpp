@@ -3,7 +3,7 @@
 #include "MessageWidget.h"
 #include "ui_MessageWidget.h"
 
-MessageWidget::MessageWidget(QWidget *parent, const Chat::messageRoleE role)
+MessageWidget::MessageWidget(QWidget *parent, const ChatMessage::MessageRole role)
     : QWidget(parent)
     , ui(new Ui::MessageWidget)
 {
@@ -11,11 +11,11 @@ MessageWidget::MessageWidget(QWidget *parent, const Chat::messageRoleE role)
 
     this->role = role;
 
-    ui->roleLabel->setText(Chat::getRoleStringUI(role));
-    if (role == Chat::MESSAGE_ROLE_USER) { // TODO: make it less ugly
+    ui->roleLabel->setText(ChatMessage::getRoleStringUI(role));
+    if (role == ChatMessage::MESSAGE_ROLE_USER) { // TODO: make it less ugly
         ui->roleLabel->setStyleSheet("QLabel { background-color : rgba(0, 255, 0, 80); color : black; }");
     }
-    else if (role == Chat::MESSAGE_ROLE_LLM) {
+    else if (role == ChatMessage::MESSAGE_ROLE_LLM) {
         ui->roleLabel->setStyleSheet("QLabel { background-color : rgba(255, 0, 0, 80); color : black; }");
     }
 }

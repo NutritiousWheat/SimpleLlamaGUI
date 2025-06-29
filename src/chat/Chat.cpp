@@ -1,12 +1,15 @@
 #include "Chat.h"
 
+#include "LlamaChatMessage.h"
+#include <memory>
+
 #include "../ui/MainWindow.h"
 
 Chat::Chat()
 {
     // TODO: it is not always needed
-    this->systemPrompt = QString("You are a helpful assistant. Assist with whatever user requires.");
-    this->appendSystemMessage(this->systemPrompt);
+    // this->systemPrompt = QString("You are a helpful assistant. Assist with whatever user requires.");
+    // this->appendSystemMessage(this->systemPrompt);
 }
 
 Chat::Chat(const QString &systemPrompt)
@@ -17,7 +20,7 @@ Chat::Chat(const QString &systemPrompt)
 
 void Chat::on_tokenGenerated(QString token)
 {
-    this->chat_messages.last().content += token.toStdString();
+    this->chatMessages.last().appendText(token);
     emit appendText(token);
 }
 
@@ -46,81 +49,40 @@ void Chat::on_modelUnloaded()
     emit updateGUI(CHAT_STATE_NOT_LOADED);
 }
 
-void Chat::appendMessage(const QString &message, const messageRoleE role)
+void Chat::appendMessage(const QString &message, const ChatMessage::MessageRole role)
 {
-    std::string test = message.toStdString();
-    messageT chat_message;
-
     const std::lock_guard lock(this->mutex);
 
-    chat_message.content = message.toStdString();
-    chat_message.role = role;
-    chat_messages.append(chat_message);
+    chatMessages.append(ChatMessage(role, message));
 
     emit newMessage(message, role);
 }
-
-const char *Chat::getRoleStringUI(const messageRoleE role)
-{
-    switch (role) {
-    case MESSAGE_ROLE_USER:
-        return "User";
-    case MESSAGE_ROLE_LLM:
-        return "LLM";
-    case MESSAGE_ROLE_SYSTEM:
-        return "System";
-    default:
-        return "Unknown";
-    }
-}
-
-const char *Chat::getRoleStringPrompt(const messageRoleE role)
-{
-    switch (role) {
-    case MESSAGE_ROLE_USER:
-        return "user";
-    case MESSAGE_ROLE_LLM:
-        return "assistant";
-    case MESSAGE_ROLE_SYSTEM:
-        return "system";
-    default:
-        return "unknown";
-    }
-}
-
 
 QString Chat::promptify(bool newMessage)
 {
 // TODO: bandaid solution with magic number
 // TODO: russian seems to break token generation
     QString prompt;
-    llama_chat_message *llama_messages;
+    QVector<LlamaChatMessage> llamaChatMessages(this->size());
+    QVector<llama_chat_message> llamaChatMessagesRaw(this->size());
+    QByteArray templateCStr = llamaThread->getTemplate().toUtf8();
     char buf[8192];
-    std::string templateStr;
-    const char *templateCStr;
 
     this->mutex.lock();
 
-    llama_messages = new llama_chat_message[this->size()];
-
     for (int i = 0; i < this->size(); i++) {
-        llama_messages[i].content = this->chat_messages[i].content.c_str();
-        llama_messages[i].role = getRoleStringPrompt(this->chat_messages[i].role);
+        llamaChatMessages[i] = chatMessages[i].getLlamaChatMessage();
+        llamaChatMessagesRaw[i] = llamaChatMessages[i].getRaw(); // TODO: this is ugly, figure out a better solution
     }
 
     this->mutex.unlock();
 
-    templateStr = llamaThread->getTemplate().toStdString();
-    templateCStr = templateStr.c_str();
-
-    llama_chat_apply_template(templateCStr, llama_messages, this->size(), newMessage, buf, 8192);
-
-    delete[] llama_messages;
+    llama_chat_apply_template(templateCStr, llamaChatMessagesRaw.constData(), this->size(), newMessage, buf, 8192);
 
     prompt = QString::fromUtf8(buf);
 
     if (!newMessage) {
-        prompt.remove(llamaThread->getEOT()); // TODO: there may be better ways to create a prompt without the EOT token
+        prompt.remove(llamaThread->getEOT());
     }
 
     return prompt;
@@ -131,15 +93,15 @@ void Chat::loadModel(const QString &modelPath, llama_model_params modelParams, l
     unloadModel();
     emit updateGUI(CHAT_STATE_LOADING);
     try {
-        llamaThread = new LlamaThread(modelPath, modelParams, ctxParams);
+        llamaThread = std::make_unique<LlamaThread>(modelPath, modelParams, ctxParams);
         llamaThread->start();
 
-        connect(llamaThread, &LlamaThread::tokenGenerated, this, &Chat::on_tokenGenerated);
-        connect(llamaThread, &LlamaThread::generationEnd, this, &Chat::on_generationEnd);
-        connect(llamaThread, &LlamaThread::exceptionOccured, this, &Chat::on_exceptionOccured);
-        connect(llamaThread, &LlamaThread::modelLoading, this, &Chat::on_modelLoading);
-        connect(llamaThread, &LlamaThread::modelLoaded, this, &Chat::on_modelLoaded);
-        connect(llamaThread, &LlamaThread::modelUnloaded, this, &Chat::on_modelUnloaded);
+        connect(llamaThread.get(), &LlamaThread::tokenGenerated, this, &Chat::on_tokenGenerated);
+        connect(llamaThread.get(), &LlamaThread::generationEnd, this, &Chat::on_generationEnd);
+        connect(llamaThread.get(), &LlamaThread::exceptionOccured, this, &Chat::on_exceptionOccured);
+        connect(llamaThread.get(), &LlamaThread::modelLoading, this, &Chat::on_modelLoading);
+        connect(llamaThread.get(), &LlamaThread::modelLoaded, this, &Chat::on_modelLoaded);
+        connect(llamaThread.get(), &LlamaThread::modelUnloaded, this, &Chat::on_modelUnloaded);
 
     }
     catch (std::exception &e) {
@@ -151,8 +113,7 @@ void Chat::loadModel(const QString &modelPath, llama_model_params modelParams, l
 void Chat::unloadModel()
 {
     if (llamaThread) {
-        llamaThread->quit();
-        delete llamaThread;
+        llamaThread.release();
         llamaThread = nullptr;
     }
     emit updateGUI(CHAT_STATE_NOT_LOADED);
@@ -160,17 +121,17 @@ void Chat::unloadModel()
 
 void Chat::appendUserMessage(const QString &message)
 {
-    appendMessage(message, MESSAGE_ROLE_USER);
+    appendMessage(message, ChatMessage::MESSAGE_ROLE_USER);
 }
 
 void Chat::appendLLMMessage(const QString &message)
 {
-    appendMessage(message, MESSAGE_ROLE_LLM);
+    appendMessage(message, ChatMessage::MESSAGE_ROLE_LLM);
 }
 
 void Chat::appendSystemMessage(const QString &message)
 {
-    appendMessage(message, MESSAGE_ROLE_SYSTEM);
+    appendMessage(message, ChatMessage::MESSAGE_ROLE_SYSTEM);
 }
 
 void Chat::reply(const QString &userMessage, const SamplerArray &samplers)
@@ -202,30 +163,15 @@ void Chat::continueLastMessage(const SamplerArray &samplers)
     llamaThread->startGenerating(prompt, samplers);
 }
 
-QString Chat::getString()
-{
-    QString output;
-
-    for (messageT &message : this->chat_messages) {
-        if (message.role != MESSAGE_ROLE_SYSTEM) {
-            output += getRoleStringUI(message.role);
-            output += QString::fromStdString(": " + message.content + "\n");
-        }
-
-    }
-
-    return output;
-}
-
 size_t Chat::size() const
 {
-    return chat_messages.size();
+    return chatMessages.size();
 }
 
 void Chat::clear()
 {
     this->mutex.lock();
-    this->chat_messages.clear();
+    this->chatMessages.clear();
     this->mutex.unlock();
 
     this->appendSystemMessage(this->systemPrompt);
