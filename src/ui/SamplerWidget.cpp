@@ -5,11 +5,11 @@
 
 float SamplerWidget::scaleMultiplier = 100.0f; // TODO: will break for != 2 decimal points
 
-SamplerWidget::SamplerWidget(QWidget *parent, Sampler::Type type)
+SamplerWidget::SamplerWidget(QWidget *parent, Sampler::SamplerType type)
     : QWidget(parent)
     , ui(new Ui::SamplerWidget)
 {
-    Sampler::Range samplerRange{};
+    Sampler::SamplerRange samplerRange{};
     int min;
     int max;
     int value;

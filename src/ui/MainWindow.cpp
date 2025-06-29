@@ -18,10 +18,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    int samplersColumns = sqrt(Sampler::Type::SAMPLERS_COUNT);
+    int samplersColumns = sqrt(Sampler::SamplerType::SAMPLERS_COUNT);
 
-    for (int i = 0; i < Sampler::Type::SAMPLERS_COUNT; i++) {
-        auto type = static_cast<Sampler::Type>(i);
+    for (int i = 0; i < Sampler::SamplerType::SAMPLERS_COUNT; i++) {
+        auto type = static_cast<Sampler::SamplerType>(i);
 
         auto samplerLayout = dynamic_cast<QGridLayout *>(ui->tabParams->layout());
         auto samplerWidget = new SamplerWidget(ui->tabParams, type);
@@ -33,8 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->boolAreaWidgetContents->layout()->setAlignment(Qt::AlignTop);
 
-    for (int i = 0; i < BoolParamWidget::BoolParamE::BOOL_PARAM_COUNT; i++) {
-        auto type = static_cast<BoolParamWidget::BoolParamE>(i);
+    for (int i = 0; i < BoolParamWidget::BoolParamType::BOOL_PARAM_COUNT; i++) {
+        auto type = static_cast<BoolParamWidget::BoolParamType>(i);
 
         auto boolParamWidget = new BoolParamWidget(ui->tabParams, type); // TODO: smart pointers
         ui->boolAreaWidgetContents->layout()->addWidget(boolParamWidget);
@@ -44,8 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->numAreaWidgetContents->layout()->setAlignment(Qt::AlignTop);
 
-    for (int i = 0; i < NumParamWidget::NumParamE::NUM_PARAM_COUNT; i++) {
-        auto type = static_cast<NumParamWidget::NumParamE>(i);
+    for (int i = 0; i < NumParamWidget::NumParamType::NUM_PARAM_COUNT; i++) {
+        auto type = static_cast<NumParamWidget::NumParamType>(i);
 
         auto numParamWidget = new NumParamWidget(ui->tabParams, type);
         ui->numAreaWidgetContents->layout()->addWidget(numParamWidget);
@@ -249,10 +249,10 @@ void MainWindow::refreshModels()
 SamplerArray MainWindow::getSamplerArray()
 {
     SamplerArray samplerArray;
-    Sampler::Type type;
+    Sampler::SamplerType type;
 
     for (int i = 0; i < samplers.count(); i++) {
-        type = static_cast<Sampler::Type>(i);
+        type = static_cast<Sampler::SamplerType>(i);
         samplerArray[type] = samplers[type]->getValue();
     }
 
@@ -263,7 +263,7 @@ llama_model_params MainWindow::getModelParams()
 {
     llama_model_params params{};
 
-    params.n_gpu_layers = numParams[NumParamWidget::NumParamE::N_GPU_LAYERS]->getValue();
+    params.n_gpu_layers = numParams[NumParamWidget::NumParamType::N_GPU_LAYERS]->getValue();
 
     return params;
 }
@@ -272,10 +272,10 @@ llama_context_params MainWindow::getCtxParams()
 {
     llama_context_params params{};
 
-    params.n_ctx = numParams[NumParamWidget::NumParamE::N_CONTEXT_TOKENS]->getValue();
-    params.n_threads = numParams[NumParamWidget::NumParamE::N_THREADS]->getValue();
-    params.n_threads_batch = numParams[NumParamWidget::NumParamE::N_THREADS]->getValue(); // TODO: separate threads and batch threads
-    params.flash_attn = boolParams[BoolParamWidget::BoolParamE::USE_FLASH_ATTENTION]->getValue();
+    params.n_ctx = numParams[NumParamWidget::NumParamType::N_CONTEXT_TOKENS]->getValue();
+    params.n_threads = numParams[NumParamWidget::NumParamType::N_THREADS]->getValue();
+    params.n_threads_batch = numParams[NumParamWidget::NumParamType::N_THREADS]->getValue(); // TODO: separate threads and batch threads
+    params.flash_attn = boolParams[BoolParamWidget::BoolParamType::USE_FLASH_ATTENTION]->getValue();
 
     return params;
 }

@@ -10,7 +10,7 @@ class Sampler : public QObject
 {
     Q_OBJECT
 public:
-    enum Type {
+    enum SamplerType {
         SAMPLER_TEMP = 0,
         SAMPLER_TOP_K,
         SAMPLER_TOP_P,
@@ -19,38 +19,39 @@ public:
         SAMPLERS_COUNT
     };
 
-    struct Range
+    struct SamplerRange
     {
         SamplerValue min;
         SamplerValue max;
     };
 
 private:
-    Type type;
-    SamplerValue value = SamplerValue(0.0f);
+    static QMap<SamplerType, QString> names;
+    static QMap<SamplerType, SamplerValue> defaultValues;
+    static QMap<SamplerType, SamplerRange> ranges;
+    static QMap<SamplerType, bool> intSampler;
 
-    static QMap<Type, QString> nameMap;
+    SamplerType type;
+    SamplerRange range;
+    SamplerValue value = SamplerValue(0.0f);
 
 public:
     Sampler();
-    explicit Sampler(Type type);
+    explicit Sampler(SamplerType type);
     Sampler(const Sampler &newSampler);
     ~Sampler() = default;
+
+    static bool isInt(SamplerType type);
 
     Sampler &operator=(const Sampler &newSampler);
 
     [[nodiscard]] bool isInt() const;
-
-    Type getType() const;
-
     void setValue(int value);
     void setValue(float value);
 
-
-    SamplerValue getValue() const;
-    SamplerValue getDefaultValue() const;
-    Range getRange() const;
-
+    [[nodiscard]] SamplerValue getValue() const;
+    [[nodiscard]] SamplerType getType() const;
+    [[nodiscard]] SamplerRange getRange() const;
     QString getName();
 
 };

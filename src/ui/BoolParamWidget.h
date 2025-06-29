@@ -12,24 +12,24 @@ class BoolParamWidget : public QWidget
     Q_OBJECT
 
 public:
-    enum BoolParamE
+    enum BoolParamType
     {
         USE_FLASH_ATTENTION,
 
         BOOL_PARAM_COUNT
     };
-    explicit BoolParamWidget(QWidget *parent, BoolParamE type);
+    explicit BoolParamWidget(QWidget *parent, BoolParamType type);
     ~BoolParamWidget();
 
-    BoolParamE getType();
+    BoolParamType getType();
     bool getValue();
 
 private:
+    static QMap<BoolParamType, QString> names;
+    static QMap<BoolParamType, bool> defaultValues;
     Ui::BoolParamWidget *ui;
 
-    BoolParamE type;
-
-    void init(const QString &label, bool defaultValue);
+    BoolParamType type;
 };
 
 #endif // BOOLPARAMWIDGET_H

@@ -10,7 +10,7 @@ class SamplerArray {
     SamplerArray();
     ~SamplerArray() = default;
 
-    Sampler &operator[](Sampler::Type type);
+    Sampler &operator[](Sampler::SamplerType type);
     Sampler &operator=(Sampler &new_sampler);
 };
 

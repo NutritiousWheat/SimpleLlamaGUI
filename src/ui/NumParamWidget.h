@@ -12,7 +12,7 @@ class NumParamWidget : public QWidget
     Q_OBJECT
 
 public:
-    enum NumParamE
+    enum NumParamType
     {
         N_GPU_LAYERS,
         N_CONTEXT_TOKENS,
@@ -21,7 +21,13 @@ public:
         NUM_PARAM_COUNT
     };
 
-    explicit NumParamWidget(QWidget *parent, NumParamE type);
+    struct NumParamRange
+    {
+        int min;
+        int max;
+    };
+
+    explicit NumParamWidget(QWidget *parent, NumParamType type);
     ~NumParamWidget();
 
     int getValue();
@@ -32,10 +38,16 @@ private slots:
     void on_horizontalSlider_valueChanged(int value);
 
 private:
-    Ui::NumParamWidget *ui;
-    NumParamE type;
+    static QMap<NumParamType, QString> names;
+    static QMap<NumParamType, int> defaultValues;
+    static QMap<NumParamType, NumParamRange> ranges;
+    static QMap<NumParamType, int> steps;
 
-    void init(const QString &label, int defaultValue, int min, int max, int step = 1);
+
+
+
+    Ui::NumParamWidget *ui;
+    NumParamType type;
 
 };
 

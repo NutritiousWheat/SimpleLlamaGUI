@@ -14,7 +14,7 @@ class SamplerWidget : public QWidget
     Sampler sampler;
 
 public:
-    explicit SamplerWidget(QWidget *parent, Sampler::Type type);
+    explicit SamplerWidget(QWidget *parent, Sampler::SamplerType type);
     ~SamplerWidget();
 
     Sampler getValue();
