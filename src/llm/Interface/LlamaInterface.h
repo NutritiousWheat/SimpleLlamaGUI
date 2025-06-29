@@ -7,8 +7,6 @@
 #include "../Samplers/Sampler.h"
 #include "../Samplers/SamplerArray.h"
 
-typedef std::unique_ptr<const llama_vocab> llama_vocab_ptr;
-
 QT_BEGIN_NAMESPACE
 namespace LLM { // TODO: make namespaces consistent
 class LlamaInterface;
@@ -28,9 +26,9 @@ private:
     llama_context_params ctxParams{};
 
     llama_model_ptr model;
-    llama_vocab_ptr vocab;
     llama_context_ptr ctx;
     llama_sampler_ptr sampler;
+    const struct llama_vocab *vocab; // points to model->vocab, it does not need freeing
 
     bool forceStop = false;
     bool generating = false;

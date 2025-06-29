@@ -65,6 +65,11 @@ endif()
 target_link_libraries(qtllama PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(qtllama PRIVATE llama)
 
+#if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+#target_compile_options(qtllama PRIVATE -fsanitize=address)
+#target_link_options(qtllama PRIVATE -fsanitize=address)
+#endif (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.

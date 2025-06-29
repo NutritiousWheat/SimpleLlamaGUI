@@ -27,7 +27,7 @@ LlamaInterface::LlamaInterface(const QString &modelPath, llama_model_params mode
     this->modelParams.use_mlock = false;
     this->modelParams.check_tensors = false;
 
-    model = llama_model_ptr(llama_model_load_from_file(modelPath.toUtf8(), modelParams));
+    model = llama_model_ptr(llama_model_load_from_file(modelPath.toUtf8(), this->modelParams));
 
     if (model == nullptr) {
         throw std::runtime_error("unable to load model"); // TODO: do proper exceptions
@@ -71,7 +71,7 @@ LlamaInterface::LlamaInterface(const QString &modelPath, llama_model_params mode
     //     throw std::runtime_error("unable to create context");
     // }
 
-    vocab = llama_vocab_ptr(llama_model_get_vocab(model.get()));
+    vocab = llama_model_get_vocab(model.get());
 
     sampler = nullptr;
     ctx = nullptr;
@@ -94,14 +94,14 @@ QVector<llama_token> LlamaInterface::tokenize(const QString &prompt)
 
     strncpy(promptCStr, prompt.toLocal8Bit().data(), sizeof(promptCStr)); // TODO: figure out how to feed wide chars to llama_tokenize
 
-    tokenCount = llama_tokenize(vocab.get(), promptCStr, strlen(promptCStr), tokensCArr, strlen(promptCStr), true, true);
+    tokenCount = llama_tokenize(vocab, promptCStr, strlen(promptCStr), tokensCArr, strlen(promptCStr), true, true);
 
     for (int i = 0; i < tokenCount; i++) {
         tokens.append(tokensCArr[i]);
     }
 
     char test[8192];
-    llama_detokenize(vocab.get(), tokens.data(), tokens.size(), test, 8192, false, true);
+    llama_detokenize(vocab, tokens.data(), tokens.size(), test, 8192, false, true);
 
     return tokens;
 }
@@ -170,14 +170,14 @@ void LlamaInterface::generate(QVector<llama_token> &tokens)
         newTokenId = llama_sampler_sample(sampler.get(), ctx.get(), -1);
 
         // is it the end?
-        if (llama_vocab_is_eog(vocab.get(), newTokenId) || this->forceStop) {
+        if (llama_vocab_is_eog(vocab, newTokenId) || this->forceStop) {
             this->forceStop = false;
             break;
         }
 
         tokensGenerated += 1;
 
-        pieceSize = llama_token_to_piece(vocab.get(), newTokenId, pieceBuffer, sizeof(pieceBuffer), 0, false);
+        pieceSize = llama_token_to_piece(vocab, newTokenId, pieceBuffer, sizeof(pieceBuffer), 0, false);
         pieceBuffer[pieceSize] = '\0'; // llama_token_to_piece does not null-terminate
 
         emit tokenGenerated(QString(pieceBuffer));
