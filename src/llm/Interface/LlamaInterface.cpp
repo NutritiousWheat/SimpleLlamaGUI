@@ -132,7 +132,7 @@ void LlamaInterface::generate(QVector<llama_token> &tokens)
 
     start = high_resolution_clock::now();
     for (int i = 0; i < tokens.size();) {
-        tokensPerBatch = std::min((int) llama_n_ubatch(ctx.get()), tokens.size() - i);
+        tokensPerBatch = qMin(static_cast<int>(llama_n_ubatch(ctx.get())), tokens.size() - i);
         batch = llama_batch_get_one(&tokens[i], tokensPerBatch);;
 
         if (llama_decode(ctx.get(), batch) != 0) {
@@ -145,7 +145,7 @@ void LlamaInterface::generate(QVector<llama_token> &tokens)
 
     timeMs = duration_cast<milliseconds>(end - start).count();
 
-    qDebug("prompt: %d tokens", tokens.size());
+    qDebug("prompt: %lld tokens", tokens.size());
     qDebug("prompt processing time: %lu ms, (%f t/s)",
         timeMs,
         (static_cast<double>(tokens.size()) / static_cast<double>(timeMs)) * 1000.0

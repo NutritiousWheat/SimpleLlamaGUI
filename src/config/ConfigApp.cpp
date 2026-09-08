@@ -18,7 +18,9 @@ void ConfigApp::initFile()
     // bool
     object[keyToString(AutoLoadLastOnStart)] = defaulAutoLoadLastOnStart;
 
-    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        throw std::runtime_error("config::initFile: Failed to open config file");
+    }
     file.write(QJsonDocument(object).toJson());
     file.close();
 }
@@ -33,7 +35,9 @@ void ConfigApp::readFile()
     if (!file.exists()) {
         initFile();
     }
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        throw std::runtime_error("config::readFile: Failed to open config file");
+    }
     jsonString = file.readAll();
     file.close();
     document = QJsonDocument::fromJson(jsonString.toUtf8());
@@ -54,11 +58,13 @@ void ConfigApp::writeFile()
     QString jsonString;
 
     jsonString = document.toJson();
-    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        throw std::runtime_error("config::writeFile: Failed to open config file");
+    }
     file.write(jsonString.toUtf8());
     file.close();
 
-// TODO: implement a delay which is reset afeter every write operation AND ALSO IMPLEMENT MUTEXES
+// TODO: implement a delay which is reset after every write operation AND ALSO IMPLEMENT MUTEXES
 }
 
 void ConfigApp::initDir(const QString &path)
